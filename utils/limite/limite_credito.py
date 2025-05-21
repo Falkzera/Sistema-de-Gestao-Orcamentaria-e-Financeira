@@ -1,12 +1,13 @@
 import pandas as pd
 import streamlit as st
+from src.base import func_load_base_credito_sop_geo
 
 ORÇAMENTO_APROVADO_2025 = 18544820466.00
 VALOR_DO_LIMITE = ORÇAMENTO_APROVADO_2025 * 0.1
 
 def calcular_limite_credito_atual():
 
-    df = pd.DataFrame(st.session_state.base_creditos_sop_geo)
+    df = func_load_base_credito_sop_geo()
     df['Valor'] = df['Valor'].astype(float)
   
     df = df[df['Contabilizar no Limite?'] == 'SIM']

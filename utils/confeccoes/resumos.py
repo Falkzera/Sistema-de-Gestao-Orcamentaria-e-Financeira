@@ -10,7 +10,6 @@ from utils.confeccoes.confeccao_ata import montar_ata
 
 from datetime import datetime, time
 
-
 def resumo_cpof(df):
     with st.expander("📋 **Gerador Automático de Resumos** 📋", expanded=False):
         df['Valor'] = df['Valor'].apply(formatar_valor)
@@ -313,29 +312,6 @@ inscrita no CPF sob o nº {presidente_cpf}. Estiveram presentes os seguintes mem
                             tipo_arquivo="pdf",
                             ata=True
                         )
-
-
-# def mostrar_resumos_por_permissao(df, nome_base):
-#     """
-#     Exibe os resumos disponíveis ao usuário conforme a base selecionada.
-#     - Para bases CPOF: mostra resumo_cpof e funcao_forms_ata.
-#     - Para bases GEO: mostra resumo_publicados_geo e resumo_geral_geo.
-#     """
-#     # Normaliza o nome da base para facilitar a verificação
-#     nome_base_lower = nome_base.lower()
-#     if "cpof" in nome_base_lower:
-#         st.header("Resumos disponíveis para CPOF")
-#         resumo_cpof(df)
-#         funcao_forms_ata(df)
-#     elif "geo" in nome_base_lower or "crédito" in nome_base_lower or "credito" in nome_base_lower:
-#         st.header("Resumos disponíveis para GEO")
-#         resumo_publicados_geo()
-#         resumo_geral_geo(df)
-#     else:
-#         st.info("Nenhum resumo disponível para esta base.")
-
-
-# resumos = [resumo_cpof, resumo_publicados_geo, resumo_geral_geo, funcao_forms_ata]
 
 def mostrar_resumos_por_permissao(df, nome_base):
     if nome_base == "Base Crédito SOP/GEO":

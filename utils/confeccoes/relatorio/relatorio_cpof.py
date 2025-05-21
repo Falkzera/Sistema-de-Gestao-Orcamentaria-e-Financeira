@@ -1,26 +1,33 @@
 import streamlit as st
 import pandas as pd
 
-from datetime import datetime
-from src.base import load_base_data
-from utils.digitacao.digitacao import (
+from src.google_drive_utils import read_parquet_file_from_drive
+from utils.confeccoes.formatar import (
     digitacao,
     titulo_dinamico,
+    gerar_grafico_barra,
+    gerar_grafico_linha,
+    gerar_grafico_pizza,
+    mostrar_tabela_pdf,
+    formatar_valor_arredondado_sem_cifrao,
+    maior_pico_producao,
+    media_producao,
+    menor_pico_producao,
+    ranking_producao,
+    recorte_temporal_ano_passado,
+    formatar_valor,
+    formatar_valor2,
+    mes_por_extenso,
     por_extenso,
     por_extenso_reais,
-    mes_por_extenso,
-    gerar_relatorio_origem_recurso_com_graficos,
+    gerar_relatorio_origem_recurso_com_graficos
 )
+from utils.limite.limite_credito import calcular_limite_credito_atual
+from datetime import datetime
 
-from utils.formatar.formatar_valor import formatar_valor, formatar_valor2
-from utils.digitacao.digitacao import mostrar_tabela_pdf
-from utils.calculo_limite.limite import calcular_limite_atual
-from utils.digitacao.digitacao import gerar_grafico_pizza
-
-load_base_data()
 
 with st.container(): # CÁLCULO DO LIMITE (retirado de utils/calculo_limite/limite.py)
-    limite = calcular_limite_atual()
+    limite = calcular_limite_credito_atual()
     VALOR_UTILIZADO_LIMITE = limite["valor_utilizado"]
     VALOR_DO_LIMITE = limite["valor_limite"]
     ORÇAMENTO_APROVADO_2025 = limite["orcamento_aprovado"]
@@ -37,7 +44,8 @@ with st.container():  # LIMPAR A SESSÃO PARA OS GRÁFICOS E TABELS
         st.session_state["contador_grafico"] = 1
 
 with st.container():  # ALOCAÇÃO DO DATAFRAME
-    df = pd.DataFrame(st.session_state.base)
+     from src.base import func_load_base_credito_sop_geo
+     df = func_load_base_credito_sop_geo()
 
 # 1️⃣ Filtro reutilizável de ano e mês
 def filtro_ano_mes(df: pd.DataFrame, exibir_na_tela=True, key_prefix="filtro"):

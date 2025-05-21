@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
@@ -7,9 +8,27 @@ def salvar_base(df, nome_base):
     if not isinstance(nome_base, str):
         st.error("Nome da base inválido ao salvar. Informe o nome do worksheet como string.")
         return
-    conn.update(worksheet=nome_base, data=df)
+
+    base = conn.read(worksheet=nome_base, ttl=0)
+    base = pd.DataFrame(base)  
+
+    # Atualiza ou substitui a linha com o mesmo 'Nº do Processo'
+    if 'Nº do Processo' in base.columns and 'Nº do Processo' in df.columns:
+        for _, row in df.iterrows():
+            processo_id = row['Nº do Processo']
+            idx = base[base['Nº do Processo'] == processo_id].index
+            if not idx.empty:
+                base.loc[idx[0]] = row  # Atualiza a linha existente
+            else:
+                base = pd.concat([base, pd.DataFrame([row])], ignore_index=True)  # Adiciona nova linha se não existir
+    else:
+        base = pd.concat([base, df], ignore_index=True)
+
+    conn.update(worksheet=nome_base, data=base)
+    
     st.success(f"Salvo com Sucesso! ✅")
     st.write(f"Base salva: {nome_base}")
+
 
 def inicializar_e_gerenciar_modificacoes(selected_row):
     """
@@ -136,3 +155,38 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
     st.session_state.modificacoes = []
     st.session_state.selected_row_fixo = None
     st.rerun()
+
+def formulario_edicao_comentario_cpof(numero_processo, membro_cpof, resposta_cpof):
+    base = st.session_state.base
+    resposta_cpof = resposta_cpof.strip()
+    agora = datetime.now()
+
+    if isinstance(numero_processo, str):
+        numero_processo = [numero_processo]
+
+    processos_modificados = []
+    indices_modificados = []
+
+    # Busca e atualiza apenas os índices necessários, evitando múltiplas buscas e operações desnecessárias
+    for num_proc in numero_processo:
+        idx = base.index[base["Nº do Processo"] == num_proc]
+        if not idx.empty:
+            idx = idx[0]
+            resposta_anterior = base.at[idx, membro_cpof]
+            if isinstance(resposta_anterior, str) and resposta_anterior.strip() == resposta_cpof:
+                continue
+            base.at[idx, membro_cpof] = resposta_cpof
+            base.at[idx, "Última Edição"] = f"{st.session_state.username.title()} - {agora.strftime('%d/%m/%Y %H:%M:%S')}"
+            from src.salvar_historico import salvar_modificacao
+            salvar_modificacao(num_proc, f"[CPOF] Resposta de {membro_cpof}: {resposta_cpof}", st.session_state.username.title())
+            processos_modificados.append(num_proc)
+            indices_modificados.append(idx)
+
+    if processos_modificados:
+        try:
+            salvar_base(base, nome_base="Base CPOF")
+
+        except Exception as e:
+            st.error(f"❌ Erro ao salvar na planilha: {e}")
+    else:
+        st.info("ℹ️ Nenhuma modificação foi necessária.")

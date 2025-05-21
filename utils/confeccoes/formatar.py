@@ -644,3 +644,18 @@ def gerar_relatorio_origem_recurso_com_graficos(df_filtrado, origem_recurso, n=3
 
     elif tipo_grafico == 'nenhum':
         print("Nenhum gráfico foi gerado.")
+
+def formatar_valor_br(valor_str: str) -> str:
+    """
+    Formata para padrão brasileiro:
+    - Insere ponto como separador de milhar
+    - Usa vírgula como separador decimal
+    Ex: '1234567.89' → '1.234.567,89'
+    """
+    try:
+        # Remove tudo que não for número ou vírgula
+        valor_normalizado = valor_str.replace('.', '').replace(',', '.')
+        valor_float = float(valor_normalizado)
+        return f"{valor_float:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+    except:
+        return valor_str  # Retorna original se erro

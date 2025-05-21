@@ -53,5 +53,5 @@ opcoes_grupo_despesa = [
     "5",
     "5 e 6",
     "6",
-    "N/A"
+    "Outros"
 ]

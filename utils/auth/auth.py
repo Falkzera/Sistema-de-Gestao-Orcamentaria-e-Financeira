@@ -57,7 +57,8 @@ def verificar_permissao():
 def carregar_base_por_usuario(
     titulo_selectbox="Selecione a base de dados:",
     chave_selectbox="base_selectbox",
-    forcar_recarregar=False
+    forcar_recarregar=False,
+    apenas_historico=False,
 ):
     """
     Carrega a base de dados apropriada com base no usuário logado e nas permissões definidas em secrets.toml.
@@ -121,6 +122,9 @@ def carregar_base_por_usuario(
     if base_dados is None:
         st.error(f"Erro ao carregar a base '{nome_base_selecionada}'.")
         return None, nome_base_selecionada, None
+    
+    if apenas_historico: # ADICIONAR AQUI LÓGICA DE ESCOLHER QUAL BASE HISTÓRICO CARREGAR, IMPEDINDO QUE SEJA SELECIONADO ATRAVÉS DO SELECTBOX AS BASES QUE NÃO SEJAM HISTÓRICAS
+        return base_dados, nome_base_selecionada, None
 
     nome_base_historica = historico_map.get(nome_base_selecionada, None)
     return base_dados, nome_base_selecionada, nome_base_historica

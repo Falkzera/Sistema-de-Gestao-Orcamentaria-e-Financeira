@@ -18,7 +18,7 @@ def resumo_cpof(df):
         
         def formatar_linha(numero):
             linha = df[df["Nº do Processo"] == numero].iloc[0]
-            return f"{linha['Nº do Processo']} | {linha['Interessado']} | {linha['Valor']} | {linha['Tipo de Despesa']}"
+            return f"{linha['Nº do Processo']} | {linha['Órgão (UO)']} | {linha['Valor']} | {linha['Tipo de Despesa']}"
 
         opcoes_processo = ["TODOS"] + df["Nº do Processo"].tolist()
         numero_processo = st.multiselect(
@@ -44,8 +44,8 @@ def resumo_cpof(df):
             descricao_texto = f""
 
             for i, (_, row) in enumerate(processo_selecionado.iterrows(), start=1):
-                descricao = f"{i}. {row['Nº do Processo']} - {row['Interessado']}\n"
-                descricao += f"Objeto: {row['Detalhamento']}\n"
+                descricao = f"{i}. {row['Nº do Processo']} - {row['Órgão (UO)']}\n"
+                descricao += f"Objeto: {row['Objetivo']}\n"
                 descricao += f"Fonte: {row['Fonte de Recursos']}\n"
                 descricao += f"Valor: {row['Valor']}\n"
                 descricao += f"Sugestão SEC.EXEC, SEPLAG e SEFAZ: \n"
@@ -288,12 +288,12 @@ inscrita no CPF sob o nº {presidente_cpf}. Estiveram presentes os seguintes mem
                 corpo_ata += f" O Comitê deu início à sessão com a leitura da pauta, que tratou da execução orçamentária, financeira, patrimonial e contábil do Estado de Alagoas para o exercício financeiro de {ano_exercicio}."
 
                 df_ata = df.copy()
-                df_ata = df_ata[['Nº do Processo', 'Interessado', 'Detalhamento', 'Valor', 'Deliberação']]
+                df_ata = df_ata[['Nº do Processo', 'Órgão (UO)', 'Objetivo', 'Valor', 'Deliberação']]
                 df_ata['Deliberação'] = df_ata['Deliberação'].str.upper()
                 df_ata.columns = df_ata.columns.str.upper()
 
                 st.write('---')
-                lista_interessados = df_ata['INTERESSADO'].unique().tolist()
+                lista_interessados = df_ata['ÓRGÃO (UO)'].unique().tolist()
 
                 if len(lista_interessados) > 1:
                     lista_formatada = ', '.join(lista_interessados[:-1]) + ' e ' + lista_interessados[-1]
@@ -303,7 +303,7 @@ inscrita no CPF sob o nº {presidente_cpf}. Estiveram presentes os seguintes mem
                     lista_formatada = ''
 
                 st.write(f"**Lista de Interessados:** {lista_formatada}.")
-                df_ata = df_ata.sort_values(by='INTERESSADO')
+                df_ata = df_ata.sort_values(by='ÓRGÃO (UO)')
               
                 botao_gerar_e_baixar_arquivo(
                             nome_botao="Confecção da ATA",

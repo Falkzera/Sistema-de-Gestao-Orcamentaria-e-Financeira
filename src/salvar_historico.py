@@ -3,6 +3,27 @@ import pandas as pd
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
+
+def salvar_modificacao(processo_id, modificacao, usuario):
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    agora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    nova_modificacao = {
+        "Processo ID": processo_id,
+        "Data e Hora": agora,
+        "Modificação": modificacao,
+        "Usuário": usuario
+    }
+    try:
+        # Lê os dados atuais
+        df = conn.read(worksheet="Histórico de Modificações", ttl=0)
+        df = pd.DataFrame(df)  
+        df = pd.concat([df, pd.DataFrame([nova_modificacao])], ignore_index=True)
+        conn.update(worksheet="Histórico de Modificações", data=df)
+    except Exception as e:
+        st.error(f"Erro ao salvar a modificação: {e}")
+        st.stop()
+
+
 def salvar_modificacoes_em_lote(modificacoes, usuario, base_historico): # quando chamado a partir de um for
     conn = st.connection("gsheets", type=GSheetsConnection)
     agora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')

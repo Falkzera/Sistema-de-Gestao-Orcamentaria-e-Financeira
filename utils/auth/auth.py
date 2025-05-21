@@ -62,6 +62,7 @@ def carregar_base_por_usuario(
     """
     Carrega a base de dados apropriada com base no usuário logado e nas permissões definidas em secrets.toml.
     Permite forçar recarregamento do Google Sheets.
+    Retorna o DataFrame já armazenado em session_state pelo base.py.
     """
     from src.base import (
         func_load_base_cpof,
@@ -70,11 +71,12 @@ def carregar_base_por_usuario(
         func_load_historico_credito_sop_geo
     )
 
+    # Mapeamento do nome da base para a função de carregamento e chave do session_state
     bases = {
-        "Base CPOF": func_load_base_cpof,
-        "Histórico CPOF": func_load_historico_cpof,
-        "Base Crédito SOP/GEO": func_load_base_credito_sop_geo,
-        "Histórico Crédito SOP/GEO": func_load_historico_credito_sop_geo
+        "Base CPOF": {"func": func_load_base_cpof, "session_key": "base_cpof"},
+        "Histórico CPOF": {"func": func_load_historico_cpof, "session_key": "historico_cpof"},
+        "Base Crédito SOP/GEO": {"func": func_load_base_credito_sop_geo, "session_key": "base_creditos_sop_geo"},
+        "Histórico Crédito SOP/GEO": {"func": func_load_historico_credito_sop_geo, "session_key": "historico_credito_sop_geo"}
     }
     historico_map = {
         "Base CPOF": "Histórico CPOF",
@@ -104,17 +106,17 @@ def carregar_base_por_usuario(
     else:
         nome_base_selecionada = bases_permitidas[0]
 
-    # --- CACHE CENTRALIZADO ---
-    cache_key = f"df_{nome_base_selecionada.replace(' ', '_').replace('/', '_').lower()}"
-    if forcar_recarregar or cache_key not in st.session_state:
-        func_carregar = bases.get(nome_base_selecionada)
-        if func_carregar is None:
-            st.error(f"Função de carregamento não encontrada para a base '{nome_base_selecionada}'.")
-            return None, nome_base_selecionada, None
-        base_dados = func_carregar(forcar_recarregar=True)
-        st.session_state[cache_key] = base_dados
-    else:
-        base_dados = st.session_state[cache_key]
+    # Busca a função e a chave do session_state correspondente
+    base_info = bases.get(nome_base_selecionada)
+    if base_info is None:
+        st.error(f"Função de carregamento não encontrada para a base '{nome_base_selecionada}'.")
+        return None, nome_base_selecionada, None
+
+    # Chama a função de carregamento (ela já gerencia o session_state internamente)
+    base_info["func"](forcar_recarregar=forcar_recarregar)
+
+    # Retorna o DataFrame diretamente do session_state, conforme definido em base.py
+    base_dados = st.session_state.get(base_info["session_key"], None).copy()
 
     if base_dados is None:
         st.error(f"Erro ao carregar a base '{nome_base_selecionada}'.")

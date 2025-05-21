@@ -4,28 +4,16 @@ from utils.ui.display import padrao_importacao_pagina
 from utils.auth.auth import carregar_base_por_usuario
 from utils.ui.dataframe import mostrar_tabela
 from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes
+from utils.filtros.filtro import filtros_de_busca
+import streamlit_nested_layout # NÃO PODE SER EXCLUÍDO, CASO CONTRÁRIO OCORRE ERRO DE IMPORTAÇÃO
+
 
 padrao_importacao_pagina()
 
-# Controle do recarregamento forçado via session_state
-if "forcar_recarregar" not in st.session_state:
-    st.session_state["forcar_recarregar"] = True  # Primeira vez: força recarregar
-
-def carregar_base_cache(titulo_selectbox, chave_selectbox):
-    # Usa o valor atual do session_state para forcar_recarregar
-    df, nome_base, nome_base_historica = carregar_base_por_usuario(
-        titulo_selectbox=titulo_selectbox,
-        chave_selectbox=chave_selectbox,
-        forcar_recarregar=st.session_state["forcar_recarregar"]
-    )
-    # Após recarregar, sempre seta para False para evitar recarregamento contínuo
-    st.session_state["forcar_recarregar"] = False
-    return df, nome_base, nome_base_historica
-
-df, nome_base, nome_base_historica = carregar_base_cache(
-    titulo_selectbox="Selecione a base para análise:",
-    chave_selectbox="base_analise"
-)
+with st.container(): # Carregamento da base PRECISA VER UMA FORMA DE EVITAR O RECARREGAMENTO DA BASE CONSTANTEMENTE!
+    df, nome_base, nome_base_historica = carregar_base_por_usuario()
+    df_filtrado = df.copy()
+    df = filtros_de_busca(df_filtrado)
 
 with st.container(): # Exibição da Tabela
     df, selected_row = mostrar_tabela(
@@ -45,6 +33,8 @@ with st.container(): # Exibição da Tabela
             del st.session_state["forcar_recarregar"]
             st.rerun()
 
-
+with st.container():
+    from utils.confeccoes.resumos import mostrar_resumos_por_permissao
+    mostrar_resumos_por_permissao(df, nome_base)
 # NÃO ESTÁ ATUALIZANDO O DATAFRAE APÓS O SAVE! 
 # ESTÁ SALVANDO DE BOAS!

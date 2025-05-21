@@ -480,6 +480,97 @@ def gerar_grafico_pizza(labels, values, titulo_pdf="Gráfico: Pizza", cores=None
     inserir_grafico_pdf(fig, titulo=titulo_pdf)
 
 
+
+def gerar_grafico_linha(x, y, titulo_pdf="Gráfico: Linha", nomes_series=None, cores=None, texto_formatado=None, mostrar_na_tela=False, empilhar=False, fonte="Arial, sans-serif"):
+    """
+    Aceita tanto uma série única quanto múltiplas séries de linhas.
+    - x: lista ou lista de listas (para múltiplas séries)
+    - y: lista ou lista de listas
+    - nomes_series: lista com o nome de cada série (para múltiplas séries)
+    - texto_formatado: lista ou lista de listas (opcional)
+    """
+
+    fig = go.Figure()
+
+    # Se for uma única série (x e y como listas), transforma tudo em listas de uma série só
+    if not isinstance(x[0], (list, pd.Series)):
+        x = [x]
+        y = [y]
+        texto_formatado = [texto_formatado] if texto_formatado else [None]
+        nomes_series = nomes_series if nomes_series else ["Série 1"]
+    else:
+        # Se múltiplas séries, verifica consistência de nomes
+        texto_formatado = texto_formatado if texto_formatado else [None] * len(x)
+        if not nomes_series:
+            nomes_series = [f"Série {i+1}" for i in range(len(x))]
+
+    # Define cores padrão se não forem passadas
+    cores_padrao = [
+        "#095AA2", "#0A6BB5", "#0B7CC8", "#0C8DDB", "#0D9EEE",
+        "#E0E0E0", "#D0D0D0", "#C0C0C0", "#B0B0B0", "#A0A0A0"
+    ]
+    if not cores:
+        cores = cores_padrao[:len(x)]
+
+    # Adiciona as séries ao gráfico
+    for i in range(len(x)):
+        trace_args = dict(
+            x=x[i],
+            y=y[i],
+            mode='lines',
+            name=nomes_series[i],
+            line=dict(width=3, color=cores[i % len(cores)]),
+            marker=dict(size=6),
+            text=texto_formatado[i],
+            textposition='bottom center',
+        )
+
+        if empilhar:
+            trace_args["stackgroup"] = 'one'
+
+        fig.add_trace(go.Scatter(**trace_args))
+
+    # Layout padrão
+    fig.update_layout(
+        title=None,
+        font=dict(family=fonte, size=16, color="black"),
+        margin=dict(t=60, b=80, l=60, r=40),  # aumente l (left) e b (bottom) se quiser mais espaço
+        height=500,
+        xaxis=dict(
+            title=None,
+            tickfont=dict(family=fonte, size=20),
+            showgrid=False,
+            showticklabels=True,
+            dtick="M6",  # mostra ticks a cada 3 meses
+            tickformat="%m/%y",  # formata como mes/ano
+            ticklabelmode="period",
+            title_standoff=30,  # aumenta o afastamento do título do eixo x
+        ),
+        yaxis=dict(
+            title=None,
+            tickfont=dict(family=fonte, size=20),
+            showgrid=True,
+            showticklabels=True,
+            automargin=True,
+            title_standoff=30,  # aumenta o afastamento do título do eixo y
+            tickformat=".0f",  # mostra apenas números inteiros, sem casas decimais
+        ),
+        legend=dict(
+            font=dict(size=20),
+            orientation='h',  # legenda na horizontal
+            x=0.5,
+            xanchor='center',
+            y=-0.1
+        )
+    )
+
+    if mostrar_na_tela:
+        st.plotly_chart(fig, use_container_width=True)
+
+    inserir_grafico_pdf(fig, titulo=titulo_pdf)
+
+
+
 def gerar_grafico_barra(x, y, titulo_pdf="Gráfico: Barras", cores=None, texto_formatado=None, mostrar_na_tela=False):
 
     df = pd.DataFrame({'x': x, 'y': y})
@@ -498,7 +589,7 @@ def gerar_grafico_barra(x, y, titulo_pdf="Gráfico: Barras", cores=None, texto_f
 
     x = df['x']
     y = df['y']
-    texto_formatado = texto_formatado if texto_formatado else y
+    # texto_formatado = texto_formatado if texto_formatado else y
 
     if cores is None:
         cores_padrao = [
@@ -659,3 +750,134 @@ def formatar_valor_br(valor_str: str) -> str:
         return f"{valor_float:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
     except:
         return valor_str  # Retorna original se erro
+
+
+
+def maior_pico_producao(df):
+    """
+    Retorna uma string com o valor, ano e mês da maior produção de um DataFrame.
+
+    Parâmetros:
+        df (pd.DataFrame): DataFrame contendo as colunas 'DATA' (datetime) e 'producao'.
+        nome_df (str): Nome do DataFrame para identificação.
+
+    Retorna:
+        str: String formatada com os resultados.
+    """
+    max_row = df.loc[df['PRODUÇÃO'].idxmax()]  # Encontra a linha de maior produção
+    ano = max_row['DATA'].year
+    mes = max_row['DATA'].month
+    return f"{mes_por_extenso(mes)} de {ano}, chegando a um montante de {formatar_valor_sem_cifrao(max_row['PRODUÇÃO'])} ({por_extenso(max_row['PRODUÇÃO'])})"
+
+def media_producao(df):
+    """
+    Retorna a média de produção de um DataFrame.
+
+    Parâmetros:
+        df (pd.DataFrame): DataFrame contendo as colunas 'DATA' (datetime) e 'producao'.
+        nome_df (str): Nome do DataFrame para identificação.
+
+    Retorna:
+        str: String formatada com o resultado.
+    """
+    media = int(df['PRODUÇÃO'].mean())
+    return f"{formatar_valor_sem_cifrao(media)} ({por_extenso(media)})"
+
+def menor_pico_producao(df):
+    """
+    Retorna uma string com o valor, ano e mês da menor produção de um DataFrame.
+
+    Parâmetros:
+        df (pd.DataFrame): DataFrame contendo as colunas 'DATA' (datetime) e 'producao'.
+        nome_df (str): Nome do DataFrame para identificação.
+
+    Retorna:
+        str: String formatada com os resultados.
+    """
+    min_row = df.loc[df['PRODUÇÃO'].idxmin()]
+    ano = min_row['DATA'].year
+    mes = min_row['DATA'].month
+
+    return f"{mes_por_extenso(mes)} de {ano}, chegando a um montante de {formatar_valor_sem_cifrao(min_row['PRODUÇÃO'])} ({por_extenso(min_row['PRODUÇÃO'])})"
+
+def ranking_producao(df):
+    """
+    Gera um ranking de produção, agrupando por DATA e somando a produção.
+
+    Parâmetros:
+        df (pd.DataFrame): DataFrame contendo as colunas 'DATA' (datetime) e 'producao'.
+        nome_df (str): Nome do DataFrame para identificação.
+
+    Retorna:
+        pd.DataFrame: DataFrame ordenado do maior para o menor valor de produção.
+    """
+    if 'UNIDADE DA FEDERAÇÃO' in df.columns:
+
+        df_ranking = df.groupby("UNIDADE DA FEDERAÇÃO")["PRODUÇÃO"].sum().reset_index()
+        df_ranking = df_ranking.sort_values(by="PRODUÇÃO", ascending=False).reset_index(drop=True)
+        df_ranking['PRODUÇÃO'] = df_ranking['PRODUÇÃO'].apply(lambda x: formatar_valor_sem_cifrao(x))
+    
+    elif 'GRANDE REGIÃO' in df.columns:
+        df_ranking = df.groupby("GRANDE REGIÃO")["PRODUÇÃO"].sum().reset_index()
+        df_ranking = df_ranking.sort_values(by="PRODUÇÃO", ascending=False).reset_index(drop=True)
+        df_ranking['PRODUÇÃO'] = df_ranking['PRODUÇÃO'].apply(lambda x: formatar_valor_sem_cifrao(x))
+        
+    return df_ranking
+
+def recorte_temporal_ano_passado(df): # MUDEI PARA ANO PRESENTE
+    ano_max = df['DATA'].max().year
+    df_ano_passado = df[(df['DATA'].dt.year == ano_max)].copy()
+    return df_ano_passado
+
+
+
+def formatar_valor_usd(valor, casas_decimais=2):
+    negativo = valor < 0  
+    valor = abs(valor)  
+    
+    if valor >= 1_000_000_000 and valor < 1_000_000_000_000:
+        valor_formatado = valor / 1_000_000_000
+        sufixo = "bilhões"
+    elif valor >= 1_000_000 and valor < 1_000_000_000:
+        valor_formatado = valor / 1_000_000
+        sufixo = "milhões"
+    elif valor >= 1_000 and valor < 1_000_000:
+        valor_formatado = valor / 1_000
+        sufixo = "mil"
+    else:
+        valor_formatado = valor
+        sufixo = ""
+
+    numero_formatado = f"{valor_formatado:.{casas_decimais}f}"
+    parte_inteira, parte_decimal = numero_formatado.split(".")
+    
+    parte_inteira_formatada = ".".join([parte_inteira[max(i - 3, 0):i] for i in range(len(parte_inteira) % 3, len(parte_inteira) + 1, 3) if i])
+
+    resultado = f"US$ {'-' if negativo else ''}{parte_inteira_formatada},{parte_decimal} {sufixo}".strip()
+
+    return resultado
+
+def formatar_valor_arredondado_sem_cifrao(valor, casas_decimais=2):
+    negativo = valor < 0  
+    valor = abs(valor)  
+    
+    if valor >= 1_000_000_000 and valor < 1_000_000_000_000:
+        valor_formatado = valor / 1_000_000_000
+        sufixo = "Bi"
+    elif valor >= 1_000_000 and valor < 1_000_000_000:
+        valor_formatado = valor / 1_000_000
+        sufixo = "Mi"
+    elif valor >= 1_000 and valor < 1_000_000:
+        valor_formatado = valor / 1_000
+        sufixo = "mil"
+    else:
+        valor_formatado = valor
+        sufixo = ""
+
+    numero_formatado = f"{valor_formatado:.{casas_decimais}f}"
+    parte_inteira, parte_decimal = numero_formatado.split(".")
+    parte_inteira_formatada = ".".join([parte_inteira[max(i - 3, 0):i] for i in range(len(parte_inteira) % 3, len(parte_inteira) + 1, 3) if i])
+
+    resultado = f"{'-' if negativo else ''}{parte_inteira_formatada},{parte_decimal} {sufixo}".strip()
+
+    return resultado

@@ -310,7 +310,8 @@ inscrita no CPF sob o nº {presidente_cpf}. Estiveram presentes os seguintes mem
                             montar_conteudo_funcao=montar_ata,
                             parametros_funcao={"df": df_ata, "lista_interessados": lista_interessados, "corpo_ata": corpo_ata, "numero_reuniao": numero_da_reuniao},
                             nome_arquivo=f"ATA.pdf",
-                            tipo_arquivo="pdf"
+                            tipo_arquivo="pdf",
+                            ata=True
                         )
 
 

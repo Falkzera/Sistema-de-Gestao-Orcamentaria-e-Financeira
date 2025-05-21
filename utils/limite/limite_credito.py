@@ -13,6 +13,7 @@ def calcular_limite_credito_atual():
     df = df[df['Situação'] == 'Publicado']
 
     valor_utilizado = df['Valor'].sum()
+    
     return {
         "valor_utilizado": valor_utilizado,
         "valor_limite": VALOR_DO_LIMITE,

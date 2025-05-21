@@ -1,5 +1,48 @@
 import streamlit as st
+import pandas as pd
+from datetime import datetime
+
+from utils.confeccoes.formatar import mes_por_extenso
 from streamlit_tags import st_tags
+
+def filtro_ano_mes(df: pd.DataFrame, exibir_na_tela=True, key_prefix="filtro"):
+    hoje = datetime.today()
+    mes_padrao = hoje.month - 1 if hoje.month > 1 else 12
+    ano_padrao = hoje.year if hoje.month > 1 else hoje.year - 1
+
+    df['Data de Recebimento'] = pd.to_datetime(df['Data de Recebimento'], format='%d/%m/%Y')
+    df['Ano'] = df['Data de Recebimento'].dt.year
+    df['Mês'] = df['Data de Recebimento'].dt.month
+
+    anos_disponiveis = sorted(df['Ano'].unique())
+    meses_disponiveis = sorted(df['Mês'].unique())
+
+    if exibir_na_tela:
+        col1, col2 = st.columns(2)
+        ano = col1.selectbox(
+            "Selecione o Ano",
+            anos_disponiveis,
+            index=anos_disponiveis.index(ano_padrao),
+            key=f"{key_prefix}_ano"
+        )
+        mes = col2.selectbox(
+            "Selecione o Mês",
+            meses_disponiveis,
+            index=meses_disponiveis.index(mes_padrao),
+            key=f"{key_prefix}_mes",
+            format_func=mes_por_extenso
+        )
+    else:
+        ano = st.session_state.get(f"{key_prefix}_ano", ano_padrao)
+        mes = st.session_state.get(f"{key_prefix}_mes", mes_padrao)
+
+    df_filtrado = df[(df['Ano'] == ano) & (df['Mês'] == mes)].copy()
+    df_mes_anterior = df[
+        (df['Ano'] == (ano if mes > 1 else ano - 1)) &
+        (df['Mês'] == (mes - 1 if mes > 1 else 12))
+    ].copy()
+
+    return ano, mes, df_filtrado, df_mes_anterior
 
 def filtros_de_busca(df_filtrado):
 

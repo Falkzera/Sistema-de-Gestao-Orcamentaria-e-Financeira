@@ -3,8 +3,10 @@ import streamlit as st
 from utils.ui.display import padrao_importacao_pagina
 from utils.ui.dataframe import mostrar_tabela
 from src.salvar_alteracoes import formulario_edicao_comentario_cpof
-
+from utils.ui.display import titulos_pagina
 padrao_importacao_pagina()
+
+titulos_pagina("Canal de Manifestação Técnica", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-edit"></i>')
 
 st.markdown("""
     <style>
@@ -62,9 +64,9 @@ st.markdown("""
 
 
 from src.base import func_load_base_cpof
-func_load_base_cpof(forcar_recarregar=True)
 
-base = st.session_state.base_cpof
+
+st.session_state.base_cpof = func_load_base_cpof(forcar_recarregar=True)
 
 membros_cpof = ['SECRETÁRIA EXECUTIVA', 'SEPLAG', 'SEFAZ', 'GABINETE CIVIL', 'SEGOV']
 
@@ -82,7 +84,7 @@ else:
     )
     colunas_mostrar = ['Nº do Processo', 'Órgão (UO)', 'Valor', 'Fonte de Recursos', 'Tipo de Despesa', 'Objetivo'] + membros_cpof + ['Observação']
 
-base_mostrar = base[base['Deliberação'] == 'Disponível aos Membros CPOF']  # Core de toda lógica!
+base_mostrar = st.session_state.base_cpof[st.session_state.base_cpof['Deliberação'] == 'Disponível aos Membros CPOF']  # Core de toda lógica!
 base_mostrar = base_mostrar[colunas_mostrar]
 
 if "filtro_status" not in st.session_state:
@@ -173,14 +175,15 @@ if st.session_state.filtro_status in ["Processos Aguardando Resposta", "Processo
                             from datetime import datetime
                             from streamlit_gsheets import GSheetsConnection
                             for numero_processo, resposta in processos_a_atualizar:
-                                row_index = base[base["Nº do Processo"] == numero_processo].index[0]
-                                base.at[row_index, membro_atual] = resposta
-                                base.at[row_index, "Última Edição"] = f"{st.session_state.username.title()} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+                                row_index = st.session_state.base_cpof[st.session_state.base_cpof["Nº do Processo"] == numero_processo].index[0]
+                                st.session_state.base_cpof.at[row_index, membro_atual] = resposta
+                                st.session_state.base_cpof.at[row_index, "Última Edição"] = f"{st.session_state.username.title()} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
                                 
                             conn = st.connection("gsheets", type=GSheetsConnection)
-                            conn.update(worksheet="Base CPOF", data=base)
-
+                            conn.update(worksheet="Base CPOF", data=st.session_state.base_cpof)
                             st.success(f"✅ Respostas enviadas com sucesso para {len(processos_a_atualizar)} processo(s)!")
+                            st.session_state["forcar_recarregar"] = True
+                            del st.session_state["forcar_recarregar"]
                             st.rerun()
 
                         except Exception as e:

@@ -7,13 +7,18 @@ from utils.confeccoes.formatar import formatar_valor
 from utils.confeccoes.formatar import por_extenso
 from utils.confeccoes.gerar_baixar_confeccao import botao_gerar_e_baixar_arquivo
 from utils.confeccoes.confeccao_ata import montar_ata
-
+from utils.ui.display import titulos_pagina
 from datetime import datetime, time
+
+st.markdown(
+'<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />',
+unsafe_allow_html=True
+)
 
 def resumo_cpof(df):
     with st.expander("📋 **Gerador Automático de Resumos** 📋", expanded=False):
         df['Valor'] = df['Valor'].apply(formatar_valor)
-        st.subheader("Gerador de Resumos 📄")
+        titulos_pagina("Gerador de Resumos", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-clipboard-list"></i>')
         
         def formatar_linha(numero):
             linha = df[df["Nº do Processo"] == numero].iloc[0]
@@ -90,7 +95,7 @@ def resumo_publicados_geo(df):
 
         st.session_state.data_atual = hoje.strftime("%d/%m/%Y")
 
-        st.subheader(f"Resumos de Créditos Publicados - ({st.session_state.data_atual}) 📅")
+        titulos_pagina(f"Resumos de Créditos Publicados - ({st.session_state.data_atual})", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-calendar"></i>')
 
         df_resumo_publicado = df[df['Data de Publicação'] == st.session_state.data_atual]
 
@@ -134,7 +139,7 @@ def resumo_publicados_geo(df):
 def resumo_geral_geo(df):
     with st.expander("📋 **Gerador Automático de Resumos** 📋", expanded=False):
         df['Valor'] = df['Valor'].apply(formatar_valor)
-        st.subheader("Gerador de Resumos 📄")
+        titulos_pagina("Gerador de Resumos", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-clipboard-list"></i>')
         # st.caption("Os resumos aparecem conforme os filtros aplicados na tabela.")
 
         def formatar_linha(numero):
@@ -236,7 +241,7 @@ def funcao_forms_ata(df):
 
         with st.expander("📋 **Gerador Automático de ATA** 📋", expanded=False):
             with st.form("formulario_ata"):
-                st.subheader("📝 Configurações da ATA")
+                titulos_pagina("Configuração da ATA", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-cog"></i>')
                 st.write("---")
                 st.write("**Observação:** A ata é gerada com base nos membros padrão. Você pode adicionar ou remover membros, e a ata será atualizada automaticamente.")
                 st.write("---")

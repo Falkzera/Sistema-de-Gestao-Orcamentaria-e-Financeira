@@ -1,38 +1,77 @@
 import streamlit as st
 import pandas as pd
 
-from utils.ui.display import padrao_importacao_pagina
-from utils.auth.auth import carregar_base_por_usuario
+st.set_page_config(page_title="Histórico de Modificações", page_icon="📜", layout="wide")
+
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina
 from src.salvar_historico import exibir_historico
+from src.base import func_load_base_cpof, func_load_base_credito_sop_geo
 
 padrao_importacao_pagina()
+titulos_pagina("Histórico Processual", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-history"></i>' )
 
-df, nome_base, nome_base_historica = carregar_base_por_usuario() # Tempo de execução está obivamente atrlado a essa função aqui, depurar ela mais tarde
+# Bases disponíveis para histórico
+base_opcoes = ["Histórico CPOF", "Histórico Crédito SOP/GEO"]
 
+# Mapeamento para garantir o nome correto do histórico
+historico_map = {
+    "Base CPOF": "Histórico CPOF",
+    "Base Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
+    "Histórico CPOF": "Histórico CPOF",
+    "Histórico Crédito SOP/GEO": "Histórico Crédito SOP/GEO"
+}
 
-# Verificar se há processos filtrados na sessão
+# Verifica o acesso do usuário logado
+usuario = st.session_state.get("username", None)
+bases_disponiveis = []
+if usuario and "base_access" in st.secrets and usuario in st.secrets["base_access"]:
+    for base in base_opcoes:
+        if base in st.secrets["base_access"][usuario]:
+            bases_disponiveis.append(base)
+
+if not bases_disponiveis:
+    st.warning("Você não tem acesso a nenhum histórico de processos.")
+    st.stop()
+
+if len(bases_disponiveis) == 1:
+    base_escolhida = bases_disponiveis[0]
+else:
+    base_escolhida = st.selectbox("Escolha o tipo de histórico:", bases_disponiveis)
+
+# Associa o nome escolhido ao nome raiz da base via historico_map
+nome_base = historico_map.get(base_escolhida, base_escolhida)
+
+# Carrega o DataFrame da base escolhida usando as funções corretas
+if nome_base == "Histórico CPOF":
+    df = func_load_base_cpof()
+elif nome_base == "Histórico Crédito SOP/GEO":
+    df = func_load_base_credito_sop_geo()
+else:
+    st.error("Base de histórico não reconhecida.")
+    st.stop()
+
+# Coleta os Processos ID da base escolhida
 if "processos_filtrados" in st.session_state and not st.session_state.processos_filtrados.empty:
     processos_disponiveis = st.session_state.processos_filtrados["Processo ID"].tolist()
 else:
-    processos_disponiveis = df["Processo ID"].tolist()
+    processos_disponiveis = df["Nº do Processo"].tolist() if "Nº do Processo" in df.columns else df["Processo ID"].tolist()
 
-processos_unicos = list(dict.fromkeys(processos_disponiveis))  # Remove duplicatas mantendo a ordem
+processos_unicos = list(dict.fromkeys(processos_disponiveis))
 processo_edit = st.selectbox(
     "Selecione um processo para editar", 
     [""] + processos_unicos
 )
 
 if processo_edit:
-    row_index = df[df["Processo ID"] == processo_edit].index[0]
-    processo = df.loc[row_index]     
+    if "Nº do Processo" in df.columns:
+        row_index = df[df["Nº do Processo"] == processo_edit].index[0]
+    else:
+        row_index = df[df["Processo ID"] == processo_edit].index[0]
+    processo = df.loc[row_index]
 
 with st.container(border=True): 
-    st.subheader("Histórico de Modificações")
     if not processo_edit:
         st.info("⚠️ Selecione um processo para visualizar o histórico de modificações.")
 
     if processo_edit:
-
-        # if pd.notna(processo["Cadastrado Por"]):
-            # st.markdown(f"```plaintext\nProcesso cadastrado por: {processo['Cadastrado Por']}\n```")
-        exibir_historico(processo_edit, nome_base) # Exibe o histórico de modificações do processo editado
+        exibir_historico(processo_edit, nome_base)

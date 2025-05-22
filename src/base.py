@@ -15,7 +15,7 @@ def func_load_base_cpof(forcar_recarregar=False):
     if "base" not in st.session_state or forcar_recarregar:
         # with st.spinner("🔄 Carregando base de dados..."):
             conn = st.connection("gsheets", type=GSheetsConnection)
-            base = conn.read(worksheet="Base CPOF", ttl=0)
+            base = conn.read(worksheet="Base CPOF", ttl=300)
             base["Fonte de Recursos"] = base["Fonte de Recursos"].astype(str)
             base["Grupo de Despesas"] = base["Grupo de Despesas"].astype(str)
             base["Nº ATA"] = base["Nº ATA"].astype(str)
@@ -32,7 +32,7 @@ def func_load_historico_cpof(forcar_recarregar=False):
     if "historico" not in st.session_state or forcar_recarregar:
         # with st.spinner("🔄 Carregando histórico..."):
             conn = st.connection("gsheets", type=GSheetsConnection)
-            base = conn.read(worksheet="Histórico CPOF", ttl=0)
+            base = conn.read(worksheet="Histórico CPOF", ttl=300)
             st.session_state.historico_cpof = base
     
     return st.session_state.historico_cpof
@@ -41,7 +41,7 @@ def func_load_base_credito_sop_geo(forcar_recarregar=False):
     if "base" not in st.session_state or forcar_recarregar:
         # with st.spinner("🔄 Carregando base de dados..."):
             conn = st.connection("gsheets", type=GSheetsConnection)
-            base = conn.read(worksheet="Base Crédito SOP/GEO", ttl=0)
+            base = conn.read(worksheet="Base Crédito SOP/GEO", ttl=300)
             base["Fonte de Recursos"] = base["Fonte de Recursos"].astype(str)
             base["Grupo de Despesas"] = base["Grupo de Despesas"].astype(str)
             base["Nº do Processo"] = base["Nº do Processo"].astype(str).str.strip()
@@ -55,7 +55,7 @@ def func_load_historico_credito_sop_geo(forcar_recarregar=False):
     if "historico" not in st.session_state or forcar_recarregar:
         # with st.spinner("🔄 Carregando histórico..."):
             conn = st.connection("gsheets", type=GSheetsConnection)
-            base = conn.read(worksheet="Histórico Crédito SOP/GEO", ttl=0)
+            base = conn.read(worksheet="Histórico Crédito SOP/GEO", ttl=300)
             st.session_state.historico_credito_sop_geo = base
 
     return st.session_state.historico_credito_sop_geo

@@ -3,10 +3,12 @@ import streamlit as st
 from utils.ui.display import padrao_importacao_pagina
 from utils.auth.auth import carregar_base_por_usuario
 from utils.cadastrar_processos.cadastro import cadastrar_processos_credito_geo, cadastrar_processos_cpof, mostrar_cadastro_por_permissao
+from utils.ui.display import titulos_pagina
+
+st.set_page_config(page_title="Cadastrar Processos", page_icon="📂", layout="wide")
 
 padrao_importacao_pagina()
-
-st.header("Cadastro de Processos de Execução Orçamentária 📁")
+titulos_pagina("Cadastro de Processos", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder"></i>' )
 st.write("######")
 
 with st.container(): # Carregamento da base PRECISA VER UMA FORMA DE EVITAR O RECARREGAMENTO DA BASE CONSTANTEMENTE!

@@ -1,11 +1,9 @@
 import streamlit as st
-import pandas as pd
 
+st.set_page_config(page_title="Relatório", page_icon="📄", layout="wide")
 from utils.ui.display import padrao_importacao_pagina
-from src.base import func_load_base_credito_sop_geo
-
 padrao_importacao_pagina()
-
+from src.base import func_load_base_credito_sop_geo
 # Função para atualizar os dados e as tabelasque ficam no drive
 from src.coleta_de_dados.ibge_abate_animais import funcao_ibge_abate_animais
 from src.coleta_de_dados.ibge_leite_industrializado import funcao_ibge_leite_industrializado
@@ -16,10 +14,8 @@ from src.coleta_de_dados.anp_producao_combustivel import funcao_anp_producao_com
 from src.coleta_de_dados.sefaz_despesa_completo import funcao_sefaz_despesa_completo
 from src.coleta_de_dados.sefaz_despesa_ano_corrente import funcao_sefaz_despesa_ano_corrente
 from src.coleta_de_dados.sefaz_dotacao_ano_corrente import funcao_sefaz_dotacao_ano_corrente
-
 # Botão de Gerar Relatório
 from utils.confeccoes.gerar_baixar_confeccao import botao_gerar_e_baixar_arquivo
-
 # Relatórios
 from utils.confeccoes.relatorio.relatorio_cpof import montar_relatorio_cpof, filtro_ano_mes
 from utils.confeccoes.relatorio.relatorio_ibge_abate_animais import montar_relatorio_ibge_abate_animais
@@ -31,36 +27,49 @@ from utils.confeccoes.relatorio.relatorio_anp_gn import montar_relatorio_anp_gn
 from utils.confeccoes.relatorio.relatorio_anp_petroleo import montar_relatorio_anp_petroleo
 from utils.confeccoes.relatorio.relatorio_anp_lgn import montar_relatorio_anp_lgn
 from utils.confeccoes.relatorio.relatorio_sefaz_despesa import montar_relatorio_sefaz_despesa
-
 from utils.confeccoes.formatar import mes_por_extenso
+from utils.ui.display import titulos_pagina
+
 
 # Buffer para arquivos gerados
+
+titulos_pagina("Relatórios", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-file-invoice"></i>' )
+
 st.session_state.setdefault("buffer_download", {})
+# Verifica se o usuário tem acesso a mais de 7 páginas antes de exibir os botões de atualização
+if (
+    "username" in st.session_state
+    and "page_access" in st.secrets
+    and st.session_state.username in st.secrets["page_access"]
+    and len(st.secrets["page_access"][st.session_state.username]) >= 7
+):
 
-with st.container(): # Atualização das Bases -> Será permitido apenas para o admin
+    with st.container():  # Atualização das Bases -> Será permitido apenas para o admin
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col1:
+            if st.button("Atualizar Dados do Boletim", use_container_width=True, type="primary"):
+                with st.spinner("Atualizando dados gerais..."):
+                    funcao_ibge_abate_animais()
+                    funcao_ibge_leite_industrializado()
+                    funcao_mdic_comercio_exterior()
+                    funcao_anp_preco_combustivel()
+                    funcao_anp_producao_combustivel()
+                    st.success("Dados atualizados com sucesso!")
+        with col2:
+            if st.button("Atualizar Dados do Relatório de Despesas", use_container_width=True, type="primary"):
+                with st.spinner("Atualizando dados do relatório de desepsa..."):
+                    funcao_sefaz_despesa_completo()
+                    st.success("Dados atualizados com sucesso!")
+        with col3:
+            if st.button("Atualizar Dados Sefaz", use_container_width=True, type="primary"):
+                with st.spinner("Atualizando dados do relatório de desepsa..."):
+                    funcao_sefaz_despesa_ano_corrente()
+                    # funcao_sefaz_dotacao_ano_corrente()
+                    st.success("Dados atualizados com sucesso!")
+else:
+    pass
 
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col1:
-        if st.button("Atualizar Dados do Boletim", use_container_width=True, type="secondary"):
-            with st.spinner("Atualizando dados gerais..."):
-                funcao_ibge_abate_animais()
-                funcao_ibge_leite_industrializado()
-                funcao_mdic_comercio_exterior()
-                funcao_anp_preco_combustivel()
-                funcao_anp_producao_combustivel()
-                st.success("Dados atualizados com sucesso!")
-    with col2:
-        if st.button("Atualizar Dados do Relatório de Despesas", use_container_width=True, type="secondary"):
-            with st.spinner("Atualizando dados do relatório de desepsa..."):
-                funcao_sefaz_despesa_completo()
-                st.success("Dados atualizados com sucesso!")
-    
-    with col3:
-        if st.button("Atualizar Dados da sefaz apenas para o corrente ano", use_container_width=True, type="secondary"):
-            with st.spinner("Atualizando dados do relatório de desepsa..."):
-                funcao_sefaz_despesa_ano_corrente()
-                # funcao_sefaz_dotacao_ano_corrente()
-                st.success("Dados atualizados com sucesso!")
+
 
 relatorio_opcoes = [
     "Relatório CPOF",

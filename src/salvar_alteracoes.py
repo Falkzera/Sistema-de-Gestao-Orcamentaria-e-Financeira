@@ -27,6 +27,9 @@ def salvar_base(df, nome_base):
     conn.update(worksheet=nome_base, data=base)
     
     st.success(f"Salvo com Sucesso! ✅")
+    st.session_state["forcar_recarregar"] = True
+    del st.session_state["forcar_recarregar"]
+    st.rerun()
     st.write(f"Base salva: {nome_base}")
 
 
@@ -144,6 +147,13 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
         if not idx_base.empty:
             df_base.at[idx_base[0], coluna_status] = status_depois
             df_base.at[idx_base[0], 'Última Edição'] = f"{st.session_state.username.title()} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+    
+    # Atualiza a base no session_state para refletir as alterações na interface
+    if nome_base_principal == "Base CPOF":
+        st.session_state.base_cpof = df_base
+    elif nome_base_principal == "Base Crédito SOP/GEO":
+        st.session_state.base_creditos_sop_geo = df_base
+    # ...adicione outros nomes de base se necessário...
 
     # Salva as modificações em lote no histórico correto
     usuario = st.session_state.username.title()
@@ -157,7 +167,7 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
     st.rerun()
 
 def formulario_edicao_comentario_cpof(numero_processo, membro_cpof, resposta_cpof):
-    base = st.session_state.base
+    base = st.session_state.base_cpof
     resposta_cpof = resposta_cpof.strip()
     agora = datetime.now()
 

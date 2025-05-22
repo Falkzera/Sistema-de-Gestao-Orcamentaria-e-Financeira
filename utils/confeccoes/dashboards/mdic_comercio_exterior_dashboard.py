@@ -4,8 +4,9 @@ import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 import pydeck as pdk
-
+from utils.ui.display import titulos_pagina
 from utils.confeccoes.formatar import formatar_valor_usd
+
 
 def azul_gradient(valor):
     limites = [
@@ -189,7 +190,7 @@ def render_mdic_comercio_exterior_dashboard():
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        st.markdown("### Mapa Interativo de Exportação/Importação - Alagoas")
+        titulos_pagina(" Mapa Interativo - Alagoas ", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-map"></i>' )
         layers = [geojson_layer]
         if estados_layer is not None:
             layers.append(estados_layer)
@@ -226,7 +227,7 @@ def render_mdic_comercio_exterior_dashboard():
             top_paises_import = df_mun[df_mun['CATEGORIA'] == 'IMPORTACAO'].groupby('NO_PAIS')['VL_FOB'].sum().nlargest(3)
 
             saldo_font_color = "#00b894" if saldo_geral >= 0 else "#e17055"
-            st.write("##")  
+            titulos_pagina("Indicadores", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-chart-bar"></i>')
             st.markdown(f"""
             <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px;">
                 <div style="background: #3064AD; border-radius: 12px; padding: 18px 26px; min-width: 200px; text-align: center;">
@@ -407,6 +408,20 @@ def render_mdic_comercio_exterior_dashboard():
     superavit_anos = df_saldo[df_saldo['SALDO'] > 0]['DATA'].tolist()
     deficit_anos = df_saldo[df_saldo['SALDO'] < 0]['DATA'].tolist()
 
+    titulos_pagina(f"Série Histórica da Balança Comercial de {st.session_state['mun_selecionado']}", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-chart-line"></i>')
+    
+    # Reduzir a distância do título ao topo usando CSS
+    st.markdown(
+        """
+        <style>
+        .element-container:has(.fa-chart-line) {
+            margin-top: -22px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
     with st.container():
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -447,7 +462,6 @@ def render_mdic_comercio_exterior_dashboard():
             )
 
         fig.update_layout(
-            title=f"Evolução Histórica - {st.session_state['mun_selecionado'].title()}",
             xaxis_title="",  # Remover label do eixo x
             yaxis_title="",
             legend=dict(
@@ -462,5 +476,16 @@ def render_mdic_comercio_exterior_dashboard():
             xaxis=dict(showgrid=False, zeroline=False),
             yaxis=dict(showgrid=False, zeroline=False),
             margin=dict(l=20, r=20, t=60, b=20)
+        )
+
+        st.markdown(
+            """
+            <style>
+            .element-container:has(.js-plotly-plot) {
+            margin-top: -72px !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
         )
         st.plotly_chart(fig, use_container_width=True)

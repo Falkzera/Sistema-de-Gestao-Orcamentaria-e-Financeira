@@ -33,13 +33,13 @@ def exibir_menu_navegacao():
     """
     # Mapeamento de páginas com nomes padronizados (iguais ao secrets.toml)
     paginas = {
-        "home": {"nome_exibicao": "Home", "caminho": "Home.py", "icone": "🏠"},
-        "cadastrar_processo": {"nome_exibicao": "Cadastrar Processo", "caminho": "pages/cadastro.py", "icone": "📂"},
-        "canal_resposta_cpof": {"nome_exibicao": "Canal de Resposta CPOF", "caminho": "pages/canal_resposta_cpof.py", "icone": "📨"},
-        "dashboards": {"nome_exibicao": "Dashboards", "caminho": "pages/dashboards.py", "icone": "📊"},
-        "relatorio": {"nome_exibicao": "Relatório", "caminho": "pages/relatorio.py", "icone": "📝"},
-        "visualizar_processos": {"nome_exibicao": "Visualizar Processos", "caminho": "pages/visualizar.py", "icone": "🔍"},
-        "historico": {"nome_exibicao": "Histórico", "caminho": "pages/historico.py", "icone": "📜"},
+        "canal_resposta_cpof": {"nome_exibicao": "Manifestação Técnica", "caminho": "pages/canal_resposta_cpof.py", "icone": ""},
+        "dashboards": {"nome_exibicao": "Dashboards", "caminho": "pages/dashboards.py", "icone": ""},
+        "relatorio": {"nome_exibicao": "Relatório", "caminho": "pages/relatorio.py", "icone": ""},
+        "historico": {"nome_exibicao": "Histórico", "caminho": "pages/historico.py", "icone": ""},
+        "visualizar_processos": {"nome_exibicao": "Visualizar Processos", "caminho": "pages/visualizar.py", "icone": ""},
+        "cadastrar_processo": {"nome_exibicao": "Cadastrar Processo", "caminho": "pages/cadastro.py", "icone": ""},
+        "home": {"nome_exibicao": "Home", "caminho": "Home.py", "icone": ""},
     }
 
     st.sidebar.markdown("---")
@@ -89,10 +89,83 @@ def configurar_cabecalho_principal():
     """
     Exibe o título principal e o logo da SEPLAG na área principal.
     """
-    col1, col2 = st.columns([2, 1.2])
-    col1.title("Sistema de Gestão Orçamentária")
-    col2.image("image/SEPLAG.png")
-    st.write('---')
+    # col1, col2 = st.columns([2, 1.2])
+
+    st.markdown(
+        """
+        <div style='
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 0 !important; 
+            padding-top: 0 !important; 
+            margin-bottom: 0 !important; 
+            padding-bottom: 0 !important;
+        '>
+            <div style='
+                border: 4px solid #EAEDF1;
+                border-radius: 40px;
+                padding: 24px 32px;
+                background: #F0F2F9;  /* Cinza mais forte */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                width: 100%;
+                max-width: 10000px;
+            '>
+                <h1 style='
+                    text-align: center; 
+                    color: #3064AD; 
+                    font-weight: bold; 
+                    margin: 0; 
+                    padding: 0;
+                    font-size: 3.1em;
+                '>
+                    <b>Sistema de Gestão Orçamentária e Financeira</b>
+                </h1>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# st.markdown('<hr style="margin:0; padding:0;">', unsafe_allow_html=True)
+def titulos_pagina(
+    text,
+    font_size="3.1em",
+    text_color="#3064AD",
+    icon=None
+):
+    """
+    Cria um cabeçalho estilizado com texto, tamanho de fonte e ícone HTML personalizáveis.
+
+    Parâmetros:
+    - text (str): O texto a ser exibido no cabeçalho
+    - font_size (str): Tamanho da fonte (padrão: "3.1em")
+    - text_color (str): Cor do texto (padrão: "#3064AD")
+    - bg_color (str): Cor de fundo (padrão: "#F0F2F9")
+    - border_color (str): Cor da borda (padrão: "#EAEDF1")
+    - icon_html (str): HTML do ícone (ex: '<i class="fas fa-balance-scale"></i>') a ser exibido antes do texto
+    """
+    icon_part = f"{icon} " if icon else ""
+    st.markdown(
+        f"""
+        <h1 style='
+            text-align: center;
+            color: {text_color};
+            font-weight: bold;
+            margin: 0;
+            padding: 0;
+            font-size: {font_size};
+            white-space: pre-line;
+        '>
+            {icon_part}<b>{text}</b>
+        </h1>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 def exibir_info_usuario_sidebar():
     """
@@ -189,3 +262,7 @@ def padrao_importacao_pagina():
     verificar_permissao()
     exibir_menu_navegacao()
     desenvolvido()
+    st.markdown(
+    '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />',
+    unsafe_allow_html=True
+)

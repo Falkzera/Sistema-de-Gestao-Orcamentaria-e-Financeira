@@ -4,7 +4,7 @@ from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
 
-def salvar_modificacao(processo_id, modificacao, usuario):
+def salvar_modificacao(processo_id, modificacao, usuario, nome_base_historica):
     conn = st.connection("gsheets", type=GSheetsConnection)
     agora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     nova_modificacao = {
@@ -15,10 +15,10 @@ def salvar_modificacao(processo_id, modificacao, usuario):
     }
     try:
         # Lê os dados atuais
-        df = conn.read(worksheet="Histórico de Modificações", ttl=0)
+        df = conn.read(worksheet=nome_base_historica, ttl=0)
         df = pd.DataFrame(df)  
         df = pd.concat([df, pd.DataFrame([nova_modificacao])], ignore_index=True)
-        conn.update(worksheet="Histórico de Modificações", data=df)
+        conn.update(worksheet=nome_base_historica, data=df)
     except Exception as e:
         st.error(f"Erro ao salvar a modificação: {e}")
         st.stop()

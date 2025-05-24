@@ -14,6 +14,7 @@ from src.coleta_de_dados.anp_producao_combustivel import funcao_anp_producao_com
 from src.coleta_de_dados.sefaz_despesa_completo import funcao_sefaz_despesa_completo
 from src.coleta_de_dados.sefaz_despesa_ano_corrente import funcao_sefaz_despesa_ano_corrente
 from src.coleta_de_dados.sefaz_dotacao_ano_corrente import funcao_sefaz_dotacao_ano_corrente
+from src.coleta_de_dados.rgf import funcao_rgf
 # Botão de Gerar Relatório
 from utils.confeccoes.gerar_baixar_confeccao import botao_gerar_e_baixar_arquivo
 # Relatórios
@@ -45,7 +46,7 @@ if (
 ):
 
     with st.container():  # Atualização das Bases -> Será permitido apenas para o admin
-        col1, col2, col3 = st.columns([1, 1, 1])
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             if st.button("Atualizar Dados do Boletim", use_container_width=True, type="primary"):
                 with st.spinner("Atualizando dados gerais..."):
@@ -66,10 +67,14 @@ if (
                     funcao_sefaz_despesa_ano_corrente()
                     # funcao_sefaz_dotacao_ano_corrente()
                     st.success("Dados atualizados com sucesso!")
+        
+        with col4:
+            if st.button("Atualizar Dados RGF", use_container_width=True, type="primary"):
+                with st.spinner("Atualizando dados do RGF..."):
+                    funcao_rgf()
+                    st.success("Dados atualizados com sucesso!")
 else:
     pass
-
-
 
 relatorio_opcoes = [
     "Relatório CPOF",

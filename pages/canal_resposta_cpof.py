@@ -70,7 +70,7 @@ st.session_state.base_cpof = func_load_base_cpof(forcar_recarregar=True)
 
 membros_cpof = ['SECRETÁRIA EXECUTIVA', 'SEPLAG', 'SEFAZ', 'GABINETE CIVIL', 'SEGOV']
 
-usuario_logado = st.session_state.username.upper()  # Assume que isso já está definido após login
+usuario_logado = st.session_state.username.upper() 
 if usuario_logado in membros_cpof:
     membro_atual = usuario_logado
     st.markdown(f"🔒 **Membro atual:** {membro_atual}")

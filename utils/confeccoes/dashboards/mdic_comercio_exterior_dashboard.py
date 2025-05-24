@@ -6,6 +6,8 @@ import plotly.graph_objects as go
 import pydeck as pdk
 from utils.ui.display import titulos_pagina
 from utils.confeccoes.formatar import formatar_valor_usd
+from src.google_drive_utils import read_parquet_file_from_drive
+from utils.confeccoes.dashboards.mdic_bandeiras import get_flag_mapping as _get_flag_mapping
 
 
 def azul_gradient(valor):
@@ -32,7 +34,7 @@ def azul_gradient(valor):
     return [0, 20, 80, 255]
 
 def get_flag_mapping():
-    from utils.confeccoes.dashboards.mdic_bandeiras import get_flag_mapping as _get_flag_mapping
+    
     return _get_flag_mapping()
 
 def add_flag_column(df, pais_col):
@@ -70,7 +72,7 @@ def render_mdic_comercio_exterior_dashboard():
 
     @st.cache_data
     def load_data():
-        from src.google_drive_utils import read_parquet_file_from_drive
+        
         df = read_parquet_file_from_drive('mdic_comercio_exterior.parquet')
         return df
 

@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-def formulario_edicao_processo(nome_base, df):
+def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
     processo_edit = st.session_state["processo_edit"]
     row_index = df[df["Nº do Processo"] == processo_edit].index[0]
@@ -256,17 +256,6 @@ def formulario_edicao_processo(nome_base, df):
                     st.error(f"Erro ao atualizar a planilha: {e}")
                     st.stop()
 
-                if modificacoes:
-                    st.write("### Modificações realizadas:")
-                for mod in modificacoes:
-                    st.write(f"- {mod}")
-                for mod in modificacoes:
-                    from src.salvar_historico import salvar_modificacao
-                    salvar_modificacao(processo_edit, mod, st.session_state.username.title())
-
-                del st.session_state["processo_edit"]
-                st.rerun()
-
                 if modificacoes: # Mostrar a destrinchação do que foi modificado
                     st.write("### Modificações realizadas:")
                     for mod in modificacoes:
@@ -274,14 +263,14 @@ def formulario_edicao_processo(nome_base, df):
                     
                     for mod in modificacoes:
                         from src.salvar_historico import salvar_modificacao
-                        salvar_modificacao(processo_edit, mod, st.session_state.username.title())
+                        salvar_modificacao(processo_edit, mod, st.session_state.username.title(), nome_base_historica)
 
 
                 del st.session_state["processo_edit"]
                 st.rerun()
 
 
-def editar_unico_processo(selected_row, nome_base, df):
+def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
 
         if selected_row:
             numero_proc = selected_row["Nº do Processo"]
@@ -300,7 +289,7 @@ def editar_unico_processo(selected_row, nome_base, df):
                         st.rerun()
 
                 if "processo_edit" in st.session_state:
-                    formulario_edicao_processo(nome_base, df)
+                    formulario_edicao_processo(nome_base, df, nome_base_historica)
 
                     if expansor_editar is False:
                         del st.session_state["processo_edit"]

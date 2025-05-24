@@ -10,6 +10,8 @@ from utils.ui.dataframe import mostrar_tabela
 from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes
 from utils.filtros.filtro import filtros_de_busca
 from utils.ui.display import titulos_pagina
+from src.editar_processo_geral import editar_unico_processo
+from utils.confeccoes.resumos import mostrar_resumos_por_permissao
 import streamlit_nested_layout # NÃO PODE SER EXCLUÍDO, CASO CONTRÁRIO OCORRE ERRO DE IMPORTAÇÃO
 
 padrao_importacao_pagina()
@@ -40,11 +42,11 @@ with st.container(): # Exibição da Tabela
             st.rerun()
 
 with st.container():
-    from src.editar_processo_geral import editar_unico_processo
-    editar_unico_processo(selected_row, nome_base, df)
+
+    editar_unico_processo(selected_row, nome_base, df, nome_base_historica)
 
 with st.container():
-    from utils.confeccoes.resumos import mostrar_resumos_por_permissao
+    
     mostrar_resumos_por_permissao(df, nome_base)
 
 

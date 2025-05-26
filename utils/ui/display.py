@@ -59,11 +59,11 @@ def exibir_menu_navegacao():
             criar_botao_navegacao(info["nome_exibicao"], info["caminho"], info["icone"], "primary")
 
     st.sidebar.markdown("---")
-    if st.sidebar.button("🚪 Logout", use_container_width=True):
-        st.session_state.logged_in = False
-        st.session_state.username = ""
-        st.session_state.page_access = []
-        st.session_state.selected_page = "Login"
+    if st.sidebar.button("SAIR", use_container_width=True, type='secondary'):
+
+        for key in st.session_state.keys():
+            del st.session_state[key]
+
         st.switch_page("pages/login.py")
 
 def ocultar_barra_lateral_streamlit():

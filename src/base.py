@@ -45,7 +45,7 @@ def func_load_base_credito_sop_geo(forcar_recarregar=False):
             base["Fonte de Recursos"] = base["Fonte de Recursos"].astype(str)
             base["Grupo de Despesas"] = base["Grupo de Despesas"].astype(str)
             base["Nº do Processo"] = base["Nº do Processo"].astype(str).str.strip()
-            base = base[['Situação', 'Nº do Processo', 'Origem de Recursos', 'Órgão (UO)', 'Fonte de Recursos', 'Grupo de Despesas',  'Tipo de Crédito', 'Valor', 'Objetivo', 'Observação',	'Data de Recebimento',	'Data de Publicação', 'Nº do decreto', 'Nº ATA','Contabilizar no Limite?', 'Cadastrado Por',	'Última Edição']]
+            base = base[['Situação', 'Nº do Processo', 'Origem de Recursos', 'Órgão (UO)', 'Fonte de Recursos', 'Grupo de Despesas',  'Tipo de Crédito', 'Valor', 'Objetivo', 'Observação', 'Opnião SOP', 'Data de Recebimento',	'Data de Publicação', 'Nº do decreto', 'Nº ATA','Contabilizar no Limite?', 'Cadastrado Por',	'Última Edição']]
             st.session_state.base_creditos_sop_geo = base
 
     return st.session_state.base_creditos_sop_geo

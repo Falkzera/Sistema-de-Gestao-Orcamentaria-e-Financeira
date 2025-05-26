@@ -65,15 +65,18 @@ def filtros_de_busca(df_filtrado):
     col1, col2, col3 = st.columns([2, 3, 1])
 
     with col1:
-        opcoes_filtro = ["TODOS"] + sorted(list(df_filtrado[coluna_filtro].unique()))
-        novas_opcoes = st.multiselect(
-            f"Filtre por {coluna_filtro}",
-            opcoes_filtro,
-            default=st.session_state.deliberacao_selecionados,
-            key=coluna_filtro,
-            placeholder=f"Selecione a {coluna_filtro}",
-        )
-        if not novas_opcoes:
+        try:
+            opcoes_filtro = ["TODOS"] + sorted(list(df_filtrado[coluna_filtro].unique()))
+            novas_opcoes = st.multiselect(
+                f"Filtre por {coluna_filtro}",
+                opcoes_filtro,
+                default=st.session_state.deliberacao_selecionados,
+                key=coluna_filtro,
+                placeholder=f"Selecione a {coluna_filtro}",
+            )
+            if not novas_opcoes:
+                novas_opcoes = ["TODOS"]
+        except Exception as e:
             novas_opcoes = ["TODOS"]
 
     with col2:

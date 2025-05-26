@@ -35,18 +35,19 @@ with st.container(): # Exibição da Tabela
     tem_modificacoes = inicializar_e_gerenciar_modificacoes(selected_row)
 
     if tem_modificacoes:
-        if st.button("Salvar todas as alterações", type="primary"):
+        
+        if st.button("Salvar ✅", type="primary"):
             salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base, df)
             st.session_state["forcar_recarregar"] = True
             del st.session_state["forcar_recarregar"]
             st.rerun()
 
 with st.container():
-
-    editar_unico_processo(selected_row, nome_base, df, nome_base_historica)
+    if not tem_modificacoes:
+        if selected_row is not None:
+            with st.expander(f"📋 **Editar Processo Selecionado📋** -> *{selected_row['Nº do Processo']}* ", expanded=False):
+                editar_unico_processo(selected_row, nome_base, df, nome_base_historica)
 
 with st.container():
     
     mostrar_resumos_por_permissao(df, nome_base)
-
-

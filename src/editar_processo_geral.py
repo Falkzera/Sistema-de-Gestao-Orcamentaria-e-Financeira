@@ -1,11 +1,37 @@
 import streamlit as st
 import pandas as pd
 
+from utils.opcoes_coluna.deliberacao import opcoes_deliberacao
+from utils.opcoes_coluna.situacao import opcoes_situacao
+from utils.opcoes_coluna.tipo_despesa import opcoes_tipo_despesa
+from utils.opcoes_coluna.orgao_uo import opcoes_orgao_uo
+from utils.opcoes_coluna.fonte_recurso import opcoes_fonte_recurso
+from utils.opcoes_coluna.grupo_despesa import opcoes_grupo_despesa
+from utils.opcoes_coluna.tipo_credito import opcoes_tipo_credito
+from utils.opcoes_coluna.contabilizar_limite import opcoes_contabilizar_limite
+from utils.opcoes_coluna.origem_recurso import opcoes_origem_recursos
+from utils.confeccoes.formatar import formatar_valor_sem_cifrao
+
+from utils.opcoes_coluna.validadores.numero_decreto import validar_numero_decreto, formatar_numero_decreto
+from utils.opcoes_coluna.validadores.data import validar_data_recebimento, validar_data_publicacao
+from utils.opcoes_coluna.validadores.numero_processo import validar_numero_processo
+from utils.opcoes_coluna.validadores.valor import validar_valor
+from datetime import datetime
+from src.salvar_alteracoes import salvar_base
+from src.salvar_historico import salvar_modificacao
+
+
 def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
     processo_edit = st.session_state["processo_edit"]
-    row_index = df[df["Nº do Processo"] == processo_edit].index[0]
-    processo = df.loc[row_index]
+    try:
+        row_index = df[df["Nº do Processo"] == processo_edit].index[0]
+        processo = df.loc[row_index]
+    except IndexError:
+        del st.session_state["processo_edit"]
+        st.stop()
+        st.rerun()
+        return
     
     salvar_btn = False
 
@@ -26,41 +52,29 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
         def editar_select(label, opcoes, coluna): # Função para Construção dos Campos de selectbox.
             valor_atual = processo[coluna]
-            return st.selectbox(f"{label} (Editar)", opcoes, index=opcoes.index(valor_atual))
+            return st.selectbox(f"{label} **(Editar)**", opcoes, index=opcoes.index(valor_atual))
 
         def editar_texto(label, coluna, tipo="input"): # Função para Construção dos Campos de texto.
             if tipo == "area":
-                return st.text_area(f"{label} (Editar)", value=processo[coluna])
-            return st.text_input(f"{label} (Editar)", value=processo[coluna])
+                return st.text_area(f"{label} **(Editar)**", value=processo[coluna])
+            return st.text_input(f"{label} **(Editar)**", value=processo[coluna])
         
         # TODOS OS CAMPOS E OPÇÕES POSSÍVEIS!
-        from utils.opcoes_coluna.deliberacao import opcoes_deliberacao
-        from utils.opcoes_coluna.situacao import opcoes_situacao
-        from utils.opcoes_coluna.tipo_despesa import opcoes_tipo_despesa
-        from utils.opcoes_coluna.orgao_uo import opcoes_orgao_uo
-        from utils.opcoes_coluna.fonte_recurso import opcoes_fonte_recurso
-        from utils.opcoes_coluna.grupo_despesa import opcoes_grupo_despesa
-        from utils.opcoes_coluna.tipo_credito import opcoes_tipo_credito
-        from utils.opcoes_coluna.contabilizar_limite import opcoes_contabilizar_limite
-        from utils.opcoes_coluna.origem_recurso import opcoes_origem_recursos
-
-
-        from utils.confeccoes.formatar import formatar_valor_sem_cifrao
 
         # Lista de campos e suas configurações
         campos_config = [
-            {
-            "nome": "Deliberação",
-            "tipo": "select",
-            "opcoes": opcoes_deliberacao,
-            "label": "Deliberação"
-            },
-            {
-            "nome": "Situação",
-            "tipo": "select",
-            "opcoes": opcoes_situacao,
-            "label": "Situação"
-            },
+            # {
+            # "nome": "Deliberação",
+            # "tipo": "select",
+            # "opcoes": opcoes_deliberacao,
+            # "label": "Deliberação"
+            # },
+            # {
+            # "nome": "Situação",
+            # "tipo": "select",
+            # "opcoes": opcoes_situacao,
+            # "label": "Situação"
+            # },
             {
             "nome": "Tipo de Crédito",
             "tipo": "select",
@@ -123,6 +137,10 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             "tipo": "texto",
             "label": "Observação"
             },
+            {"nome": "Opnião SOP",
+            "tipo": "area",
+            "label": "Opinião SOP"
+            },          
             {
             "nome": "Data de Recebimento",
             "tipo": "texto",
@@ -149,7 +167,7 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
         valores_editados = {}
 
         # Importações específicas
-        from utils.opcoes_coluna.validadores.numero_decreto import validar_numero_decreto, formatar_numero_decreto
+        from utils.opcoes_coluna.validadores.validar_campos_livres import validar_sanitizar_campos_livres
 
         for campo in campos_config:
             nome = campo["nome"]
@@ -159,30 +177,56 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             if campo["tipo"] == "select":
                 valores_editados[nome] = editar_select(campo["label"], campo["opcoes"], nome)
             elif campo["tipo"] == "texto":
-                valores_editados[nome] = st.text_input(f"{campo['label']} (Editar)", value="" if pd.isna(processo[nome]) else str(processo[nome]))
+                valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="" if pd.isna(processo[nome]) else str(processo[nome]))
             elif campo["tipo"] == "area":
                 valores_editados[nome] = editar_texto(campo["label"], nome, tipo="area")
             elif campo["tipo"] == "valor":
-                valores_editados[nome] = st.text_input("Valor (Editar)", value=str(formatar_valor_sem_cifrao(processo[nome])))
+                valores_editados[nome] = st.text_input("Valor **(Editar)**", value=str(formatar_valor_sem_cifrao(processo[nome])))
             elif campo["tipo"] == "decreto":
                 if pd.notna(processo[nome]):
                     valores_editados[nome] = st.text_input(
-                    f"{campo['label']} (Editar)",
+                    f"{campo['label']} **(Editar)**",
                     value=str(formatar_numero_decreto(str(processo[nome])))
                     )
-                else:
-                    valores_editados[nome] = st.text_input(f"{campo['label']} (Editar)", value="")
+            else:
+                valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="")
 
-        st.write('---')
+        # Sanitização dos campos livres após coleta dos valores
+        erros = []
 
-        salvar_btn = st.form_submit_button("Salvar Edição", use_container_width=True, type="primary", help='Clique para salvar a edição do processo na base 📁')
+        # Sanitização e validação dos campos livres
+        if "Observação" in valores_editados:
+            valido, observacao_sanitizada = validar_sanitizar_campos_livres(valores_editados["Observação"])
+            if not valido:
+                erros.append("Observação inválida ou vazia.")
+            else:
+                valores_editados["Observação"] = observacao_sanitizada
+
+        if "Objetivo" in valores_editados:
+            valido, objetivo_sanitizada = validar_sanitizar_campos_livres(valores_editados["Objetivo"])
+            if not valido:
+                erros.append("Objetivo inválido ou vazia.")
+            else:
+                valores_editados["Objetivo"] = objetivo_sanitizada
+
+        if "Opnião SOP" in valores_editados:
+            valido, opniao_sop_sanitizada = validar_sanitizar_campos_livres(valores_editados["Opnião SOP"])
+            if not valido:
+                erros.append("Opnião SOP inválida ou vazia.")
+            else:
+                valores_editados["Opnião SOP"] = opniao_sop_sanitizada
+
+        salvar_btn = st.form_submit_button("Salvar Edição ✅", use_container_width=True, type="primary", help='Clique para salvar a edição do processo na base 📁')
+        cancelar_btn = st.form_submit_button("Cancelar Edição ❌", use_container_width=True, type="secondary", help='Clique para cancelar a edição ❌')
+        if cancelar_btn:
+            if "processo_edit" in st.session_state:
+                del st.session_state["processo_edit"]
+            st.rerun()
+            return
 
         # Validações
         if salvar_btn:
             erros = []
-            from utils.opcoes_coluna.validadores.data import validar_data_recebimento, validar_data_publicacao
-            from utils.opcoes_coluna.validadores.numero_processo import validar_numero_processo
-            from utils.opcoes_coluna.validadores.valor import validar_valor
 
             # Validações dinâmicas conforme os campos presentes
             if "Nº do Processo" in valores_editados:
@@ -200,74 +244,65 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             if "Nº do decreto" in valores_editados:
                 if not validar_numero_decreto(valores_editados["Nº do decreto"]):
                     erros.append("Número do decreto inválido.")
-
+            
             if erros:
                 for erro in erros:
                     st.error(f"❌ {erro}")
+                    if cancelar_btn:
+                        del st.session_state["processo_edit"]
+                        st.rerun()
 
-            if not erros:
-            # Verifica se houve modificação
-                houve_modificacao = False
-            for nome, novo_valor in valores_editados.items():
-                valor_antigo = processo[nome]
-                if nome == "Valor":
-                    try:
-                        novo_valor_float = float(novo_valor.replace(".", "").replace(",", "."))
-                        if novo_valor_float != valor_antigo:
-                            houve_modificacao = True
-                            break
-                    except Exception:
-                        houve_modificacao = True
-                        break
-                else:
-                    if str(novo_valor) != str(valor_antigo):
-                        houve_modificacao = True
-                        break
-
-            if not houve_modificacao:
-                st.info("ℹ️ Nenhuma modificação foi realizada no processo, o processo permanece inalterado.")
             else:
-                from datetime import datetime
+
                 agora = datetime.now()
                 base = df
                 modificacoes = []
 
-                def is_not_nan(value):
-                    return not pd.isna(value)
+                def is_empty_or_none(val):
+                    return val is None or (isinstance(val, float) and pd.isna(val)) or str(val).strip() == ""
 
                 for nome, novo_valor in valores_editados.items():
                     valor_antigo = processo[nome]
+
+                    if is_empty_or_none(valor_antigo) and is_empty_or_none(novo_valor):
+                        continue  # Não considerar como modificação
+
                     if nome == "Valor":
                         novo_valor_float = float(novo_valor.replace(".", "").replace(",", "."))
-                        if novo_valor_float != valor_antigo and is_not_nan(novo_valor) and is_not_nan(valor_antigo):
+                        if (is_empty_or_none(valor_antigo) and not is_empty_or_none(novo_valor_float)) or \
+                           (not is_empty_or_none(valor_antigo) and novo_valor_float != valor_antigo):
                             modificacoes.append(f"{nome}: {valor_antigo} -> {novo_valor}")
                             base.loc[row_index, nome] = novo_valor_float
+
                     else:
-                        if str(novo_valor) != str(valor_antigo) and is_not_nan(novo_valor) and is_not_nan(valor_antigo):
+                        if (is_empty_or_none(valor_antigo) and not is_empty_or_none(novo_valor)) or \
+                           (not is_empty_or_none(valor_antigo) and str(novo_valor) != str(valor_antigo)):
                             modificacoes.append(f"{nome}: {valor_antigo} -> {novo_valor}")
                             base.loc[row_index, nome] = novo_valor
 
                 base.loc[row_index, "Última Edição"] = st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S")
 
-                try:
-                    from src.salvar_alteracoes import salvar_base
-                    salvar_base(base, nome_base)
-                except Exception as e:
-                    st.error(f"Erro ao atualizar a planilha: {e}")
-                    st.stop()
 
-                if modificacoes: # Mostrar a destrinchação do que foi modificado
-                    st.write("### Modificações realizadas:")
-                    for mod in modificacoes:
-                        st.write(f"- {mod}")
-                    
-                    for mod in modificacoes:
-                        from src.salvar_historico import salvar_modificacao
-                        salvar_modificacao(processo_edit, mod, st.session_state.username.title(), nome_base_historica)
+                if modificacoes:
+                    try:
+                        salvar_base(base, nome_base)
+                    except Exception as e:
+                        st.error(f"Erro ao atualizar a planilha: {e}")
+                        st.stop()
 
+                    if modificacoes: # Mostrar a destrinchação do que foi modificado
+                        st.write("### Modificações realizadas:")
+                        for mod in modificacoes:
+                            st.write(f"- {mod}")
+                        
+                        for mod in modificacoes:
+                            salvar_modificacao(processo_edit, mod, st.session_state.username.title(), nome_base_historica)
 
-                del st.session_state["processo_edit"]
-                st.rerun()
+                    del st.session_state["processo_edit"]
+                    st.rerun()
+                
+                if not modificacoes:
+                    st.info("ℹ️ Nenhuma modificação foi realizada pois o mesmo permanece inalterado. ℹ️")
 
 
 def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
@@ -275,9 +310,10 @@ def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
         if selected_row:
             numero_proc = selected_row["Nº do Processo"]
 
-            with st.container(border=True): # VISUALIZAÇÃO DOS DETALHES
-                expansor_editar = st.toggle("✏️ Edição de Processos Únicos", help="Clique para editar um único processo.")
-                if expansor_editar:
+            with st.container(): # VISUALIZAÇÃO DOS DETALHES
+                # expansor_editar = st.toggle("✏️ Edição de Processos Únicos", help="Clique para editar um único processo.")
+
+                if st.button(f" ⚙️ Editar Processo: **{numero_proc}**", help="Clique para editar um único processo.", type="primary"):
                     st.write(f"🔍 Você selecionou o processo: **{numero_proc}**")
 
                     if "processo_edit" in st.session_state:
@@ -291,9 +327,4 @@ def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
                 if "processo_edit" in st.session_state:
                     formulario_edicao_processo(nome_base, df, nome_base_historica)
 
-                    if expansor_editar is False:
-                        del st.session_state["processo_edit"]
-                        st.rerun()
-                    if st.button("❌ Cancelar Edição", use_container_width=True):
-                        del st.session_state["processo_edit"]
-                        st.rerun()
+

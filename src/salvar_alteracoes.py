@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
+from src.salvar_historico import salvar_modificacoes_em_lote
+from src.salvar_historico import salvar_modificacao
 
 def salvar_base(df, nome_base):
     conn = st.connection("gsheets", type=GSheetsConnection)
@@ -29,8 +31,8 @@ def salvar_base(df, nome_base):
     st.success(f"Salvo com Sucesso! ✅")
     st.session_state["forcar_recarregar"] = True
     del st.session_state["forcar_recarregar"]
-    st.rerun()
-    st.write(f"Base salva: {nome_base}")
+    # st.rerun() # -> Retirado porque em cadastras.py, ao cadastrar o processo não aparece em mostrar_tabela
+    # st.write(f"Base salva: {nome_base}")
 
 
 def inicializar_e_gerenciar_modificacoes(selected_row):
@@ -51,7 +53,10 @@ def inicializar_e_gerenciar_modificacoes(selected_row):
     if "selected_row_fixo" not in st.session_state:
         st.session_state.selected_row_fixo = None
 
-    # Detecta qual coluna usar: Deliberação ou Situação
+    # Inicializa o status inicial de cada processo em um dicionário
+    if "status_inicial" not in st.session_state:
+        st.session_state.status_inicial = {}
+
     coluna_status = None
     if selected_row:
         if "Deliberação" in selected_row:
@@ -65,39 +70,39 @@ def inicializar_e_gerenciar_modificacoes(selected_row):
         processo_id = selected_row.get("Nº do Processo")
         status_atual = selected_row.get(coluna_status)
 
-        # Se selected_row_fixo ainda não foi definido, define-o
-        if st.session_state.selected_row_fixo is None:
+        # Guarda o status inicial do processo, se ainda não estiver salvo
+        if processo_id not in st.session_state.status_inicial:
+            st.session_state.status_inicial[processo_id] = status_atual
+
+        status_inicial = st.session_state.status_inicial[processo_id]
+
+        # Atualiza selected_row_fixo para o processo atual
+        if st.session_state.selected_row_fixo is None or st.session_state.selected_row_fixo.get("Processo") != processo_id:
             st.session_state.selected_row_fixo = {
                 "Processo": processo_id,
                 coluna_status: status_atual
             }
 
-        # Verifica se o processo selecionado é diferente do processo fixo
-        if st.session_state.selected_row_fixo["Processo"] != processo_id:
-            st.session_state.selected_row_fixo = {
-                "Processo": processo_id,
-                coluna_status: status_atual
-            }
-
-        # Verifica se o status foi modificado
-        if st.session_state.selected_row_fixo.get(coluna_status) != status_atual:
-            status_antes = st.session_state.selected_row_fixo.get(coluna_status)
-
-            # Adiciona a modificação à lista se ainda não existir
+        # Verifica se houve modificação em relação ao status inicial
+        if status_atual != status_inicial:
+            # Só adiciona à lista se não existir modificação igual
             if not any(
                 mod["Processo"] == processo_id and
-                mod[f"{coluna_status} Anterior"] == status_antes and
+                mod[f"{coluna_status} Anterior"] == status_inicial and
                 mod[f"{coluna_status} Atual"] == status_atual
                 for mod in st.session_state.modificacoes
             ):
                 st.session_state.modificacoes.append({
                     "Processo": processo_id,
-                    f"{coluna_status} Anterior": status_antes,
+                    f"{coluna_status} Anterior": status_inicial,
                     f"{coluna_status} Atual": status_atual
                 })
-
-            # Atualiza o status no selected_row_fixo
-            st.session_state.selected_row_fixo[coluna_status] = status_atual
+        else:
+            # Se voltou ao status inicial, remove qualquer modificação desse processo
+            st.session_state.modificacoes = [
+                mod for mod in st.session_state.modificacoes
+                if not (mod["Processo"] == processo_id)
+            ]
 
     # Exibe informações sobre processos pendentes
     if st.session_state.modificacoes:
@@ -107,6 +112,7 @@ def inicializar_e_gerenciar_modificacoes(selected_row):
                 processos_pendentes.append(mod["Processo"])
         processos_str = "; ".join(str(proc) for proc in processos_pendentes)
         st.caption(f"Processo(s) pendente(s): {processos_str}")
+        
         return True
 
     return False
@@ -118,7 +124,7 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
     nome_base_principal: string do worksheet da base principal (ex: 'Base CPOF')
     df_base: DataFrame da base principal (será atualizado e salvo)
     """
-    from src.salvar_historico import salvar_modificacoes_em_lote
+    
 
     if not st.session_state.modificacoes:
         st.warning("Nenhuma modificação pendente para salvar.")
@@ -142,6 +148,7 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
         modificacao_texto = f"{coluna_status} alterada de '{status_antes}' para '{status_depois}'"
         processos_modificados.append((processo_id, modificacao_texto))
 
+
         # Atualiza o dataframe base (df_base) em memória
         idx_base = df_base[df_base['Nº do Processo'] == processo_id].index
         if not idx_base.empty:
@@ -164,6 +171,7 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
     # Limpa a lista de modificações
     st.session_state.modificacoes = []
     st.session_state.selected_row_fixo = None
+    st.session_state.status_inicial = {}
     st.rerun()
 
 def formulario_edicao_comentario_cpof(numero_processo, membro_cpof, resposta_cpof):
@@ -187,7 +195,7 @@ def formulario_edicao_comentario_cpof(numero_processo, membro_cpof, resposta_cpo
                 continue
             base.at[idx, membro_cpof] = resposta_cpof
             base.at[idx, "Última Edição"] = f"{st.session_state.username.title()} - {agora.strftime('%d/%m/%Y %H:%M:%S')}"
-            from src.salvar_historico import salvar_modificacao
+            
             salvar_modificacao(num_proc, f"[CPOF] Resposta de {membro_cpof}: {resposta_cpof}", st.session_state.username.title())
             processos_modificados.append(num_proc)
             indices_modificados.append(idx)

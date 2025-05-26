@@ -122,7 +122,7 @@ def configurar_cabecalho_principal():
                     padding: 0;
                     font-size: 3.1em;
                 '>
-                    <b>Sistema de Gestão Orçamentária e Financeira</b>
+                    <b>Sistema de Gestão Orçamentário e Financeiro</b>
                 </h1>
             </div>
         </div>

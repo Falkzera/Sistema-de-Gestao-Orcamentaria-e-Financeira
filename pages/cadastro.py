@@ -15,8 +15,6 @@ with st.container(): # Carregamento da base PRECISA VER UMA FORMA DE EVITAR O RE
     df, nome_base, nome_base_historica = carregar_base_por_usuario() # Tempo de execução está obivamente atrlado a essa função aqui, depurar ela mais tarde
 
 
-# mostrar_cadastro_por_permissao(nome_base, df)
-
 if nome_base == "Base Crédito SOP/GEO":
     cadastrar_processos_credito_geo(nome_base, df)
 elif nome_base == "Base CPOF":

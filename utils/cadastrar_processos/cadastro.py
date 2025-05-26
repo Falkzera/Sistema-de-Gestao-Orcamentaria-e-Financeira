@@ -131,17 +131,10 @@ def cadastrar_processos_credito_geo(nome_base, df):
             
             nome_base = str(nome_base)
             salvar_base(novo, nome_base)
-            mostrar_tabela(df[df["Nº do Processo"] == numero_processo],altura_max_linhas=99, 
-                        nome_tabela="Processo Cadastrado!", mostrar_na_tela=True)
-            
-
-
-
 
 
 
 def cadastrar_processos_cpof(nome_base, df):
-
 
     col1, col2, col3 = st.columns(3)
 
@@ -239,9 +232,6 @@ def cadastrar_processos_cpof(nome_base, df):
 
             nome_base = str(nome_base)
             salvar_base(novo, nome_base)
-            mostrar_tabela(df[df["Nº do Processo"] == numero_processo],altura_max_linhas=99, 
-                        nome_tabela="Processo Cadastrado!", mostrar_na_tela=True)
-
 
 def mostrar_cadastro_por_permissao(df, nome_base):
     if nome_base == "Base Crédito SOP/GEO":

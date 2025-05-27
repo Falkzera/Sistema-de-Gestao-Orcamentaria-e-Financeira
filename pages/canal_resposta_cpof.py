@@ -57,11 +57,11 @@ with st.container(): # Botões principais RESPONDIDOS vs AGUARDANDO RESPOSTA - R
         
     col1, col2 = st.columns(2)
     with col1:
-        if st.button(f"Processos Aguardando Resposta ({indicadores_situacao['Processos Aguardando Resposta']})", key="btn_aguardando", use_container_width=True, type="primary"):
+        if st.button(f"Processos Aguardando Resposta ({indicadores_situacao['Processos Aguardando Resposta']})", key="btn_aguardando", use_container_width=True, type="primary", help="Clique para ver os processos que aguardam sua manifestação técnica."):
             st.session_state.filtro_status = "Processos Aguardando Resposta"
 
     with col2:
-        if st.button(f"Processos Respondidos ({indicadores_situacao['Processos Respondidos']})", key="btn_respondidos", use_container_width=True, type="primary"):
+        if st.button(f"Processos Respondidos ({indicadores_situacao['Processos Respondidos']})", key="btn_respondidos", use_container_width=True, type="primary", help="Clique para ver os processos que já foram respondidos."):
             st.session_state.filtro_status = "Processos Respondidos"
 
 # with st.container(): # APÓS A SELEÇÃO DOS BOTÕES ACIMA
@@ -70,35 +70,36 @@ resposta_em_bloco = False
 editar_processo = False
 
 if st.session_state.filtro_status in ["Processos Aguardando Resposta", "Processos Respondidos"]:
+    st.write('---')
 
-    opcao_selecionada = st.radio(
-        "Label_visibility false",
-        options=["**Habilitar Edição**", "**Parecer em Bloco**"],
-        captions=["*Insira o parecer técnico na tabela abaixo.*", "*Selecione um ou mais processos para informar o parecer em bloco.*"],
-        index=0,
-        key="opcao_radio",
-        horizontal=True,
-        label_visibility="collapsed",
-    )
+    # opcao_selecionada = st.radio(
+    #     "Label_visibility false",
+    #     options=["**Habilitar Edição**", "**Parecer em Bloco**"],
+    #     captions=["*Insira o parecer técnico na tabela abaixo.*", "*Selecione um ou mais processos para informar o parecer em bloco.*"],
+    #     index=0,
+    #     key="opcao_radio",
+    #     horizontal=True,
+    #     label_visibility="collapsed",
+    # )
 
-    if opcao_selecionada == "**Parecer em Bloco**":
-        resposta_em_bloco = True
-        editar_processo = True
-    elif opcao_selecionada == "**Habilitar Edição**":
-        editar_processo = True
+    # if opcao_selecionada == "**Parecer em Bloco**":
+    #     resposta_em_bloco = True
+    #     editar_processo = True
+    # elif opcao_selecionada == "**Habilitar Edição**":
+    #     editar_processo = True
 
     df = aguardando_resposta_df if st.session_state.filtro_status == "Processos Aguardando Resposta" else respondidos_df
 
-    if st.session_state.filtro_status == "Processos Aguardando Resposta" and resposta_em_bloco:
-        df.loc[:, membro_atual] = False  # Adiciona a coluna 'Selecionar' para permitir seleção em bloco
+    # if st.session_state.filtro_status == "Processos Aguardando Resposta" and resposta_em_bloco:
+    #     df.loc[:, membro_atual] = False  # Adiciona a coluna 'Selecionar' para permitir seleção em bloco
 
-        df = df[[membro_atual] + [col for col in df.columns if col != membro_atual]]
-        editable_columns = [membro_atual] 
+    #     df = df[[membro_atual] + [col for col in df.columns if col != membro_atual]]
+    #     editable_columns = [membro_atual] 
 
-    elif editar_processo:
-        editable_columns = [membro_atual]
+    # elif editar_processo:
+    #     editable_columns = [membro_atual]
 
-    base_mostrar, selected_row = mostrar_tabela(df, editable_columns=editable_columns, mostrar_na_tela=True, enable_click=True, nome_tabela=f"{st.session_state.filtro_status} ({len(df)}) - {membro_atual}")
+    base_mostrar, selected_row = mostrar_tabela(df, editable_columns=[membro_atual], mostrar_na_tela=True, enable_click=True, nome_tabela=f"{st.session_state.filtro_status} ({len(df)}) - {membro_atual}")
 
     tem_modificacoes = inicializar_e_gerenciar_modificacoes(selected_row, escolha_coluna=membro_atual)
 

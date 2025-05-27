@@ -7,6 +7,7 @@
 
 opcoes_orgao_uo = [
     "DIVERSOS ÓRGÃOS",
+    "GABCIVIL",
     "ALE",
     "TC",
     "AFUNCONTAS",

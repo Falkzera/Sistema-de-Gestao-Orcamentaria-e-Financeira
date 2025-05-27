@@ -35,7 +35,7 @@ def salvar_base(df, nome_base):
     # st.write(f"Base salva: {nome_base}")
 
 
-def inicializar_e_gerenciar_modificacoes(selected_row):
+def inicializar_e_gerenciar_modificacoes(selected_row, escolha_coluna=None):
     """
     Inicializa e gerencia modificações de deliberação ou situação para processos.
 
@@ -58,17 +58,37 @@ def inicializar_e_gerenciar_modificacoes(selected_row):
         st.session_state.status_inicial = {}
 
     coluna_status = None
-    if selected_row:
+
+    """
+    Primeiro se define se existe select_row, ou seja, se a linha foi clicada na tabela.
+    Após isso, verifica se a "escolha_coluna" foi definida, ou seja, se no chamemento da função, a mesma é definida, caso não seja, por padrão a mesma é None.
+    Isto serve para definir qual coluna de status será utilizada, se é a "Deliberação" ou "Situação", ou essa nova coluna escolhida pelo usuário. 
+    """
+    if selected_row and escolha_coluna is None:
+        print("Chegou aqui -> Selected_row é True e escolha_coluna é None")
         if "Deliberação" in selected_row:
             coluna_status = "Deliberação"
+            print("Coluna Deliberação encontrada na tabela.")
         elif "Situação" in selected_row:
             coluna_status = "Situação"
+            print("Coluna Situação encontrada na tabela.")
+        else:
+            st.warning("Não existe coluna 'Deliberação' nem 'Situação' na tabela. A ação não pode ser completada.")
+            return False
+        
+    elif selected_row and escolha_coluna is not None:
+        if escolha_coluna in selected_row:
+            coluna_status = escolha_coluna
         else:
             st.warning("Não existe coluna 'Deliberação' nem 'Situação' na tabela. A ação não pode ser completada.")
             return False
 
+    if coluna_status is not None:
+
         processo_id = selected_row.get("Nº do Processo")
         status_atual = selected_row.get(coluna_status)
+
+        print(f"Coluna atual selecionada: {coluna_status}")
 
         # Guarda o status inicial do processo, se ainda não estiver salvo
         if processo_id not in st.session_state.status_inicial:
@@ -117,7 +137,7 @@ def inicializar_e_gerenciar_modificacoes(selected_row):
 
     return False
 
-def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, df_base):
+def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, df_base, escolha_coluna=None):
     """
     Salva todas as modificações pendentes de deliberação ou situação.
     nome_base_historica: string do worksheet do histórico (ex: 'Histórico CPOF')
@@ -132,13 +152,22 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
 
     # Detecta qual coluna está sendo usada nas modificações
     exemplo_mod = st.session_state.modificacoes[0]
-    if "Deliberação Anterior" in exemplo_mod and "Deliberação Atual" in exemplo_mod:
-        coluna_status = "Deliberação"
-    elif "Situação Anterior" in exemplo_mod and "Situação Atual" in exemplo_mod:
-        coluna_status = "Situação"
-    else:
-        st.warning("Não foi possível identificar a coluna de status para salvar as modificações.")
-        return
+    print(f"Exemplo_mod: {exemplo_mod}")
+
+    if escolha_coluna is None:
+        if "Deliberação Anterior" in exemplo_mod and "Deliberação Atual" in exemplo_mod:
+            coluna_status = "Deliberação"
+        elif "Situação Anterior" in exemplo_mod and "Situação Atual" in exemplo_mod:
+            coluna_status = "Situação"
+        else:
+            st.warning("Não foi possível identificar a coluna de status para salvar as modificações.")
+        # return
+    elif escolha_coluna is not None:
+        if f"{escolha_coluna} Anterior" in exemplo_mod and f"{escolha_coluna} Atual" in exemplo_mod:
+            coluna_status = escolha_coluna
+        else:
+            st.warning("Não foi possível identificar a coluna de status para salvar as modificações.")
+            # return
 
     processos_modificados = []
     for modificacao in st.session_state.modificacoes:
@@ -154,6 +183,7 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
         if not idx_base.empty:
             df_base.at[idx_base[0], coluna_status] = status_depois
             df_base.at[idx_base[0], 'Última Edição'] = f"{st.session_state.username.title()} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+    
     
     # Atualiza a base no session_state para refletir as alterações na interface
     if nome_base_principal == "Base CPOF":
@@ -173,6 +203,19 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
     st.session_state.selected_row_fixo = None
     st.session_state.status_inicial = {}
     st.rerun()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def formulario_edicao_comentario_cpof(numero_processo, membro_cpof, resposta_cpof):
     base = st.session_state.base_cpof

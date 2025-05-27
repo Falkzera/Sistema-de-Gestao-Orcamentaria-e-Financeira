@@ -16,6 +16,7 @@ from utils.opcoes_coluna.validadores.numero_decreto import validar_numero_decret
 from utils.opcoes_coluna.validadores.data import validar_data_recebimento, validar_data_publicacao
 from utils.opcoes_coluna.validadores.numero_processo import validar_numero_processo
 from utils.opcoes_coluna.validadores.valor import validar_valor
+from utils.opcoes_coluna.validadores.numero_ata import validar_numero_ata
 from datetime import datetime
 from src.salvar_alteracoes import salvar_base
 from src.salvar_historico import salvar_modificacao
@@ -180,17 +181,18 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                 valores_editados[nome] = editar_texto(campo["label"], nome, tipo="area")
             elif campo["tipo"] == "valor":
                 valores_editados[nome] = st.text_input("Valor **(Editar)**", value=str(formatar_valor_sem_cifrao(processo[nome])))
+                
             elif campo["tipo"] == "decreto":
-                valor_atual = "" if pd.isna(processo[nome]) else str(processo[nome])
+                valor_atual = "" if pd.isna(processo[nome]) else str(processo[(nome)])
                 valores_editados[nome] = st.text_input(
                     f"{campo['label']} **(Editar)**",
-                    value=valor_atual
+                    value=formatar_numero_decreto(valor_atual)
                 )
             elif campo["tipo"] == "Nº ATA":
-                valor_atual = "" if pd.isna(processo[nome]) else str(processo[nome])
+                valor_atual = "" if pd.isna(processo[nome]) else str(processo[(nome)])
                 valores_editados[nome] = st.text_input(
                     f"{campo['label']} **(Editar)**",
-                    value=valor_atual
+                    value=(valor_atual)
                 )
             else:
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="")
@@ -248,6 +250,9 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             if "Nº do decreto" in valores_editados:
                 if not validar_numero_decreto(valores_editados["Nº do decreto"]):
                     erros.append("Número do decreto inválido, utilize o padrão: 123.456")
+            if "Nº ATA" in valores_editados:
+                if not validar_numero_ata(valores_editados["Nº ATA"]):
+                    erros.append("Preencha apenas com o número da ATA.")
             
             if erros:
                 for erro in erros:
@@ -317,16 +322,22 @@ def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
             with st.container(): # VISUALIZAÇÃO DOS DETALHES
                 # expansor_editar = st.toggle("✏️ Edição de Processos Únicos", help="Clique para editar um único processo.")
 
-                if st.button(f" ⚙️ Editar Processo: **{numero_proc}**", help="Clique para editar um único processo.", type="primary"):
-                    st.write(f"🔍 Você selecionou o processo: **{numero_proc}**")
+                # if st.button(f" ⚙️ Editar Processo: **{numero_proc}**", help="Clique para editar um único processo.", type="primary", key=f"editar_{numero_proc}"):
+                st.write(f"🔍 Você selecionou o processo: **{numero_proc}**")
+                st.session_state["editar_processo_btn_clicked"] = True
 
-                    if "processo_edit" in st.session_state:
-                        if st.session_state["processo_edit"] != numero_proc:
-                            del st.session_state["processo_edit"]
-                            st.rerun()
-                    else:
-                        st.session_state["processo_edit"] = numero_proc
+                if "processo_edit" in st.session_state:
+                    if st.session_state["processo_edit"] != numero_proc:
+                        del st.session_state["processo_edit"]
+                        st.session_state["editar_processo_btn_clicked"] = False
                         st.rerun()
+                else:
+                    st.session_state["processo_edit"] = numero_proc
+                    st.rerun()
+
+                # Resetar o clique do botão quando o processo for modificado ou edição finalizada
+                if "processo_edit" not in st.session_state and st.session_state.get("editar_processo_btn_clicked"):
+                    st.session_state["editar_processo_btn_clicked"] = False
 
                 if "processo_edit" in st.session_state:
                     formulario_edicao_processo(nome_base, df, nome_base_historica)

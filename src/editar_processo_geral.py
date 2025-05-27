@@ -186,6 +186,12 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                     f"{campo['label']} **(Editar)**",
                     value=valor_atual
                 )
+            elif campo["tipo"] == "Nº ATA":
+                valor_atual = "" if pd.isna(processo[nome]) else str(processo[nome])
+                valores_editados[nome] = st.text_input(
+                    f"{campo['label']} **(Editar)**",
+                    value=valor_atual
+                )
             else:
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="")
 

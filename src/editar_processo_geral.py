@@ -19,7 +19,7 @@ from utils.opcoes_coluna.validadores.valor import validar_valor
 from datetime import datetime
 from src.salvar_alteracoes import salvar_base
 from src.salvar_historico import salvar_modificacao
-
+from utils.opcoes_coluna.validadores.validar_campos_livres import validar_sanitizar_campos_livres
 
 def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
@@ -159,18 +159,16 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             {
             "nome": "Nº do decreto",
             "tipo": "decreto",
-            "label": "Nº do Decreto"
+            "label": "Nº do decreto"
             }
         ]
 
         # Dicionário para armazenar os valores editados
         valores_editados = {}
 
-        # Importações específicas
-        from utils.opcoes_coluna.validadores.validar_campos_livres import validar_sanitizar_campos_livres
-
         for campo in campos_config:
             nome = campo["nome"]
+            # if nome not in processo.index:
             if nome not in processo.index:
                 continue
 
@@ -183,11 +181,11 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             elif campo["tipo"] == "valor":
                 valores_editados[nome] = st.text_input("Valor **(Editar)**", value=str(formatar_valor_sem_cifrao(processo[nome])))
             elif campo["tipo"] == "decreto":
-                if pd.notna(processo[nome]):
-                    valores_editados[nome] = st.text_input(
+                valor_atual = "" if pd.isna(processo[nome]) else str(processo[nome])
+                valores_editados[nome] = st.text_input(
                     f"{campo['label']} **(Editar)**",
-                    value=str(formatar_numero_decreto(str(processo[nome])))
-                    )
+                    value=valor_atual
+                )
             else:
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="")
 
@@ -243,7 +241,7 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                     erros.append("Data de publicação inválida.")
             if "Nº do decreto" in valores_editados:
                 if not validar_numero_decreto(valores_editados["Nº do decreto"]):
-                    erros.append("Número do decreto inválido.")
+                    erros.append("Número do decreto inválido, utilize o padrão: 123.456")
             
             if erros:
                 for erro in erros:

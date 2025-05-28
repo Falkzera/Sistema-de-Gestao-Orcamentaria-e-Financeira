@@ -6,7 +6,7 @@ from utils.opcoes_coluna.situacao import mapa_cores_situacao, opcoes_situacao
 
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode, DataReturnMode, GridUpdateMode
 
-# Adicione este código com as constantes (perto de CELL_STYLE_PADRAO)
+# Personalização
 BUTTON_RENDERER = JsCode('''
 class BtnCellRenderer {
     init(params) {
@@ -62,11 +62,11 @@ CSS_CUSTOMIZADO = {
     ".ag-header-cell-label": {
         "color": "#ffffff !important", # Cor do texto do cabeçalho
         "font-weight": "650", 
-        "font-size": "12px",
+        "font-size": "11px",
         "justify-content": "center",
     },
     ".ag-cell": {
-        "font-size": "12px", 
+        "font-size": "11px", 
         "line-height": "1.4",
         "border-color": "#e6e6e6", # Cor da borda das células
     },
@@ -103,10 +103,10 @@ def build_grid_options(
     # Configurações padrão de coluna
     gb.configure_default_column(
         resizable=True,
-        autoHeight=False,
+        autoHeight=True,
         wrapText=True,
-        maxWidth=600,
-        minWidth=100,
+        maxWidth=10000,
+        minWidth=200,
         sortable=True,
         filter=False,
         floatingFilter=False,
@@ -460,7 +460,7 @@ def mostrar_tabela(
 
     num_linhas = len(df)  # Número de linhas no DataFrame
     altura_dinamica = num_linhas * 160  # 40px por linha, ajustável conforme necessário
-    altura_max = 500  # Altura máxima (ajuste conforme necessário)
+    altura_max = 600  # Altura máxima (ajuste conforme necessário)
     height = min(altura_dinamica, altura_max)
     
     # Renderiza a AgGrid

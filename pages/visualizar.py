@@ -44,7 +44,7 @@ with st.container(): # Exibição da Tabela
 
 with st.container():
     if not tem_modificacoes:
-        if selected_row is not None:
+        if selected_row is not None and "Nº do Processo" in selected_row:
             with st.expander(f"📋 **Editar Processo Selecionado📋** -> *{selected_row['Nº do Processo']}* ", expanded=False):
                 editar_unico_processo(selected_row, nome_base, df, nome_base_historica)
 

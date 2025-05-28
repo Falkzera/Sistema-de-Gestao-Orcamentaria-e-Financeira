@@ -571,21 +571,24 @@ def gerar_grafico_linha(x, y, titulo_pdf="Gráfico: Linha", nomes_series=None, c
 
 
 
-def gerar_grafico_barra(x, y, titulo_pdf="Gráfico: Barras", cores=None, texto_formatado=None, mostrar_na_tela=False):
+def gerar_grafico_barra(x, y, titulo_pdf="Gráfico: Barras", cores=None, texto_formatado=None, mostrar_na_tela=False, fonte="Arial, sans-serif", linhas_verticais=False, linhas_horizontais=False, agrupar=True, qtd_agrupar=5):
 
     df = pd.DataFrame({'x': x, 'y': y})
     df = df.sort_values(by='y', ascending=False).reset_index(drop=True)
 
-    if len(df) > 5:
-        top5 = df.iloc[:5]
-        outros = df.iloc[5:]
-        total_outros = outros['y'].sum()
-        outros_row = pd.DataFrame({'x': ['Outros'], 'y': [total_outros]})
-        df = pd.concat([top5, outros_row], ignore_index=True)
+    if agrupar:
+        if len(df) > qtd_agrupar:
+            top5 = df.iloc[:qtd_agrupar]
+            outros = df.iloc[qtd_agrupar:]
+            total_outros = outros['y'].sum()
+            outros_row = pd.DataFrame({'x': ['Outros'], 'y': [total_outros]})
+            df = pd.concat([top5, outros_row], ignore_index=True)
 
-    df_sem_outros = df[df['x'] != 'Outros'].sort_values(by='y', ascending=False)
-    df_outros = df[df['x'] == 'Outros']
-    df = pd.concat([df_sem_outros, df_outros], ignore_index=True)
+        df_sem_outros = df[df['x'] != 'Outros'].sort_values(by='y', ascending=False)
+        df_outros = df[df['x'] == 'Outros']
+
+
+        df = pd.concat([df_sem_outros, df_outros], ignore_index=True)
 
     x = df['x']
     y = df['y']
@@ -613,31 +616,31 @@ def gerar_grafico_barra(x, y, titulo_pdf="Gráfico: Barras", cores=None, texto_f
 
     fig.update_traces(
         textfont=dict(
-            family="Times New Roman, serif",
+            family=fonte,
             size=14,
             color="black"
         )
     )
 
     fig.update_layout(
-        title=None,
-        font=dict(family="Times New Roman, serif", size=14, color="black"),
+        title="",
+        font=dict(family=fonte, size=14, color="black"),
         uniformtext_minsize=14,
         uniformtext_mode='show',
         margin=dict(t=60, b=100, l=40, r=20),
         height=600,
         xaxis=dict(
             title=None,
-            tickfont=dict(family="Times New Roman, serif", size=14),
-            showgrid=False,
+            tickfont=dict(family=fonte, size=14),
+            showgrid=linhas_verticais,
             showticklabels=True,
             tickangle=0,
             automargin=True
         ),
         yaxis=dict(
             title=None,
-            tickfont=dict(family="Times New Roman, serif", size=14),
-            showgrid=False,
+            tickfont=dict(family=fonte, size=14),
+            showgrid=linhas_horizontais,
             showticklabels=True,
         ),
     )

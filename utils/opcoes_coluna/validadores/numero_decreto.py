@@ -12,7 +12,7 @@ def formatar_numero_decreto(numero: str) -> str:
     # Remove o ponto, converte para inteiro e depois formata novamente
     try:
         numero_inteiro = int(numero.replace(".", ""))
-        numero_formatado = f"{numero_inteiro // 1000:03}.{numero_inteiro % 1000:03}"
+        numero_formatado = f"{numero_inteiro // 1000:03}{numero_inteiro % 1000:03}"
         return numero_formatado
     except ValueError:
         raise ValueError("O número fornecido não está em um formato válido para conversão.")
@@ -29,5 +29,5 @@ def validar_numero_decreto(numero: str) -> bool:
     """
     if not numero.strip():
         return True
-    pattern = r"^\d{3}\.\d{3}$"
+    pattern = r"^\d{6}$"
     return re.match(pattern, numero.strip()) is not None

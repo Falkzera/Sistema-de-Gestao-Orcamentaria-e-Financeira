@@ -1,8 +1,9 @@
 import streamlit as st
+import pandas as pd
 import plotly.graph_objects as go
 
 from utils.ui.display import padrao_importacao_pagina
-from utils.confeccoes.formatar import formatar_valor, formatar_valor2
+from utils.confeccoes.formatar import formatar_valor, formatar_valor2, formatar_valor_arredondado, gerar_grafico_barra
 from src.base import func_load_base_credito_sop_geo
 from utils.limite.limite_credito import calcular_limite_credito_atual
 from utils.ui.display import titulos_pagina
@@ -15,7 +16,6 @@ limite = calcular_limite_credito_atual()
 VALOR_UTILIZADO_LIMITE = limite["valor_utilizado"]
 VALOR_DO_LIMITE = limite["valor_limite"]
 ORÇAMENTO_APROVADO_2025 = limite["orcamento_aprovado"]
-
 
 with st.container():
 
@@ -97,14 +97,11 @@ with st.container():
                     """, unsafe_allow_html=True)
 
 
-
-    # espaço
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
     # sessão em baixo coluna 1 e coluna 2
     with st.container():  # MÉTRICAS
-
 
         # Cálculos
         valor_orcamento_anual_e_executado = (VALOR_UTILIZADO_LIMITE / ORÇAMENTO_APROVADO_2025) * 100
@@ -182,15 +179,10 @@ with st.container():
 
             st.plotly_chart(fig, use_container_width=True)
 
-
-
-
 st.write('---')
-
+titulos_pagina(" Indicadores Processuais", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
 
 st.caption('Acomapnhamento da Situação Processual')
-
-
 
 
 # ---------- Dados ----------
@@ -205,33 +197,29 @@ situacao_counts.columns = ['Situação', 'Quantidade']
 
 total_processos = situacao_counts['Quantidade'].sum()
 
+qtd_processos_sem_cobertura = df[df['Origem de Recursos'].str.startswith('Sem Cobertura')].shape[0]
+
+qtd_processos_com_cobertura = df[~df['Origem de Recursos'].str.startswith('Sem Cobertura')].shape[0]
+
 def escolhendo_indicador(situacao_counts, situacao):
     return situacao_counts.set_index('Situação').get('Quantidade', {}).get(situacao, 0)
 
 # ---------- Indicadores ----------
 indicadores_situacao = {
     "Total de Processos": total_processos,
-    "Análise - SOP": escolhendo_indicador(situacao_counts, 'Análise - SOP'),
-    "Análise - SEFAZ": escolhendo_indicador(situacao_counts, 'Análise - SEFAZ'),
-    "Análise - CPOF": escolhendo_indicador(situacao_counts, 'Análise - CPOF'),
-    # "Análise - SUPLAN/SEPLAG": escolhendo_indicador(situacao_counts, 'Análise - SUPLAN/SEPLAG'),
-    # "Aprovado - CPOF": escolhendo_indicador(situacao_counts, 'Aprovado - CPOF'),
-    # "BLOCO 434050 - SOP - Superintendente": escolhendo_indicador(situacao_counts, 'BLOCO 434050 - SOP - Superintendente'),
-    # "BLOCO 434066 - SEPLAG - Demais Orgãos": escolhendo_indicador(situacao_counts, 'BLOCO 434066 - SEPLAG - Demais Orgãos'),
-    # "BLOCO 434078 - SEFAZ - Despachos e Decretos": escolhendo_indicador(situacao_counts, 'BLOCO 434078 - SEFAZ - Despachos e Decretos'),
-    # "Minuta de decreto confeccionada": escolhendo_indicador(situacao_counts, 'Minuta de decreto confeccionada'),
-    # "Na Unidade": escolhendo_indicador(situacao_counts, 'Na Unidade'),
-    # "Processo Encerrado": escolhendo_indicador(situacao_counts, 'Processo Encerrado'),
+    "Processos com Cobertura": qtd_processos_com_cobertura,
+    "Processos sem Cobertura": qtd_processos_sem_cobertura,
     "Publicado": escolhendo_indicador(situacao_counts, 'Publicado'),  
+
     }
 
 # ---------- Cores ----------
 azuis = [
     "#095aa2",
-    "#226bab",
-    "#3a7bb5",
-    "#538cbe",
-    "#6b9cc7",
+    # "#226bab",
+    # "#3a7bb5",
+    # "#538cbe",
+    # "#6b9cc7",
 
 ]
 
@@ -262,7 +250,58 @@ for idx, (titulo, valor) in enumerate(indicadores_situacao.items()):
         </style>
         """, unsafe_allow_html=True)
 
+st.write("##")
+
+with st.container():  # GRÁFICOS
+
+    tabs1, tabs2 = st.tabs(["📈 Evolução Temporal", "📊 Distribuição por Órgão (UO)"])
+
+    with tabs1:
+
+        titulos_pagina(" Evolução dos créditos públicados", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
 
 
+        df_linha = df[
+            (df['Situação'] == 'Publicado') & (df['Contabilizar no Limite?'] == 'SIM')
+        ].copy()
 
-st.write('---')
+        # Garantir que a coluna Data de Recebimento está em formato datetime
+        df_linha['Data de Recebimento'] = pd.to_datetime(df_linha['Data de Recebimento'], errors='coerce')
+
+        df_linha_agrupado = df_linha.groupby('Data de Recebimento', as_index=False)['Valor'].sum()
+        df_linha_agrupado = df_linha_agrupado.sort_values('Data de Recebimento')
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df_linha_agrupado['Data de Recebimento'],
+            y=df_linha_agrupado['Valor'],
+            mode='lines+markers',
+            line=dict(color='#095aa2', width=2),
+            marker=dict(size=5, color='#095aa2'),
+            name='Valor'
+        ))
+
+        st.plotly_chart(fig)
+
+    with tabs2:
+
+        titulos_pagina(" Valor públicado por órgão", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
+            
+        # Agrupar por 'Órgão (UO)' e somar os valores
+        df_agrupado = df[
+            (df['Situação'] == 'Publicado') & (df['Contabilizar no Limite?'] == 'SIM')
+        ].groupby('Órgão (UO)', as_index=False)['Valor'].sum()
+
+        df_agrupado = df_agrupado.sort_values(by='Valor', ascending=False)
+
+        fig = gerar_grafico_barra(
+            agrupar=True,
+            qtd_agrupar=10,
+            fonte="sans serif",
+            x=df_agrupado['Órgão (UO)'],
+            y=df_agrupado['Valor'],
+            cores="#095aa2",
+            texto_formatado=df_agrupado['Valor'].apply(formatar_valor_arredondado),  # texto correspondente ao valor do órgão UO
+            linhas_horizontais=True,
+            mostrar_na_tela=True
+        )

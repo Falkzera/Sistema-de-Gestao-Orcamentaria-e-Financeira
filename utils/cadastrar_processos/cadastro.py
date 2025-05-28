@@ -16,6 +16,25 @@ from utils.opcoes_coluna.validadores.processo import validar_processamento_campo
 from src.salvar_alteracoes import salvar_base
 
 
+def formatar_lista(lista):
+    # Se for lista com um único elemento que já é uma string formatada, tenta desempacotar
+    if isinstance(lista, list) and len(lista) == 1 and isinstance(lista[0], str) and " e " in lista[0]:
+        # Tenta desempacotar para lista de strings
+        partes = [parte.strip() for parte in lista[0].split(" e ")]
+        if len(partes) > 1:
+            lista = partes
+    if isinstance(lista, list):
+        if len(lista) == 0:
+            return ""
+        elif len(lista) == 1:
+            return str(lista[0])
+        elif len(lista) == 2:
+            return f"{lista[0]} e {lista[1]}"
+        else:
+            return f"{', '.join(map(str, lista[:-1]))} e {lista[-1]}"
+    return lista
+
+
 from datetime import datetime
 ano_corrente = datetime.now().year
 
@@ -37,8 +56,9 @@ def cadastrar_processos_credito_geo(nome_base, df):
 
     col1, col2, col3 = st.columns(3)
     tipo_credito = col1.selectbox("Tipo de Crédito **(Obrigatório)**",opcoes_tipo_credito,index=None,help="Selecione o tipo de crédito.", placeholder="Selecione o Tipo de Crédito")
-    fonte_recurso = col2.selectbox("Fonte de Recrusos **(Obrigatório)**",opcoes_fonte_recurso,index=None,help="Selecione a Unidade Orçamentária.", placeholder="Selecione a Fonte de Recursos")
-    grupo_despesa = col3.selectbox("Grupo de Despesas **(Obrigatório)**",opcoes_grupo_despesa,index=None,help="Selecione o grupo de despesa.", placeholder="Selecione um Grupo de Despesas")
+    # fonte_recurso = col2.selectbox("Fonte de Recrusos **(Obrigatório)**",opcoes_fonte_recurso,index=None,help="Selecione a Unidade Orçamentária.", placeholder="Selecione a Fonte de Recursos")
+    fonte_recurso = col2.multiselect("Fonte de Recrusos **(Obrigatório)**",opcoes_fonte_recurso,help="Selecione a Unidade Orçamentária.", placeholder="Selecione a Fonte de Recursos")
+    grupo_despesa = col3.multiselect("Grupo de Despesas **(Obrigatório)**",opcoes_grupo_despesa,help="Selecione o grupo de despesa.", placeholder="Selecione um Grupo de Despesas")
 
     col1, col2 = st.columns(2)
     valor_input = col1.text_input("Valor **(Obrigatório)**", placeholder="Ex: 1.234,56", help="Digite o valor do processo no formato: 1.234,56")
@@ -104,6 +124,12 @@ def cadastrar_processos_credito_geo(nome_base, df):
             st.stop()
 
         else:
+            # Antes de formatar, desempacote listas aninhadas ou já formatadas
+            fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
+            grupo_despesa = [item for sublist in grupo_despesa for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
+            
+            fonte_recurso_str = formatar_lista(fonte_recurso)
+            grupo_despesa_str = formatar_lista(grupo_despesa)
             agora = datetime.now()
             novo = pd.DataFrame([{
                 "Situação": situacao,
@@ -111,8 +137,8 @@ def cadastrar_processos_credito_geo(nome_base, df):
                 "Órgão (UO)": orgao_uo,
                 "Nº do Processo": numero_processo,
                 "Tipo de Crédito": tipo_credito,
-                "Fonte de Recursos": fonte_recurso,
-                "Grupo de Despesas": grupo_despesa,
+                "Fonte de Recursos": fonte_recurso_str,
+                "Grupo de Despesas": grupo_despesa_str,
                 "Valor": valor_input,
                 "Objetivo": objetivo_sanitizado,
                 "Observação": observacao_sanitizada,
@@ -132,8 +158,6 @@ def cadastrar_processos_credito_geo(nome_base, df):
             nome_base = str(nome_base)
             salvar_base(novo, nome_base)
 
-
-
 def cadastrar_processos_cpof(nome_base, df):
 
     col1, col2, col3 = st.columns(3)
@@ -146,8 +170,8 @@ def cadastrar_processos_cpof(nome_base, df):
 
     col1, col2, col3 = st.columns(3)
     tipo_despesa = col1.selectbox("Tipo de Despesa **(Obrigatório)**",opcoes_tipo_despesa,index=None,help="Selecione o Tipo de Despesa.", placeholder="Selecione o Tipo de Despesa")
-    fonte_recurso = col2.selectbox("Fonte de Recrusos **(Obrigatório)**",opcoes_fonte_recurso,index=None,help="Selecione a Fonte de Recursos.", placeholder="Selecione a Fonte de Recursos")
-    grupo_despesa = col3.selectbox("Grupo de Despesas **(Obrigatório)**",opcoes_grupo_despesa,index=None,help="Selecione o grupo de despesa.", placeholder="Selecione um Grupo de Despesas")
+    fonte_recurso = col2.multiselect("Fonte de Recrusos **(Obrigatório)**",opcoes_fonte_recurso,help="Selecione a Fonte de Recursos.", placeholder="Selecione a Fonte de Recursos")
+    grupo_despesa = col3.multiselect("Grupo de Despesas **(Obrigatório)**",opcoes_grupo_despesa,help="Selecione o grupo de despesa.", placeholder="Selecione um Grupo de Despesas")
 
     col1, col2 = st.columns(2)
     valor_input = col1.text_input("Valor **(Obrigatório)**", placeholder="Ex: 1.234,56", help="Digite o valor do processo no formato: 1.234,56")
@@ -208,14 +232,21 @@ def cadastrar_processos_cpof(nome_base, df):
                         nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
             st.stop()
         else:
+            # Desempacotar listas e formatar como string separada por vírgula, com "e" antes do último elemento
+            fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
+            grupo_despesa = [item for sublist in grupo_despesa for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
+
+            fonte_recurso_str = formatar_lista(fonte_recurso)
+            grupo_despesa_str = formatar_lista(grupo_despesa)
+
             agora = datetime.now()
             novo = pd.DataFrame([{
                 "Deliberação": deliberacao,
                 "Nº do Processo": numero_processo,
                 "Tipo de Despesa": tipo_despesa,
                 "Órgão (UO)": orgao_uo,
-                "Fonte de Recursos": fonte_recurso,
-                "Grupo de Despesas": grupo_despesa,
+                "Fonte de Recursos": fonte_recurso_str,
+                "Grupo de Despesas": grupo_despesa_str,
                 "Valor": valor_input,
                 "Objetivo": objetivo_sanitizado,
                 "Observação": observacao_sanitizada,

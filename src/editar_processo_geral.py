@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+from datetime import datetime
 
-from utils.opcoes_coluna.deliberacao import opcoes_deliberacao
-from utils.opcoes_coluna.situacao import opcoes_situacao
 from utils.opcoes_coluna.tipo_despesa import opcoes_tipo_despesa
 from utils.opcoes_coluna.orgao_uo import opcoes_orgao_uo
 from utils.opcoes_coluna.fonte_recurso import opcoes_fonte_recurso
@@ -11,13 +11,12 @@ from utils.opcoes_coluna.tipo_credito import opcoes_tipo_credito
 from utils.opcoes_coluna.contabilizar_limite import opcoes_contabilizar_limite
 from utils.opcoes_coluna.origem_recurso import opcoes_origem_recursos
 from utils.confeccoes.formatar import formatar_valor_sem_cifrao
-
 from utils.opcoes_coluna.validadores.numero_decreto import validar_numero_decreto, formatar_numero_decreto
 from utils.opcoes_coluna.validadores.data import validar_data_recebimento, validar_data_publicacao
 from utils.opcoes_coluna.validadores.numero_processo import validar_numero_processo
 from utils.opcoes_coluna.validadores.valor import validar_valor
 from utils.opcoes_coluna.validadores.numero_ata import validar_numero_ata
-from datetime import datetime
+
 from src.salvar_alteracoes import salvar_base
 from src.salvar_historico import salvar_modificacao
 from utils.opcoes_coluna.validadores.validar_campos_livres import validar_sanitizar_campos_livres
@@ -36,18 +35,24 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
     
     salvar_btn = False
 
+
+
     # na coluna Data de Recebimento, pegar a data que estiver e colocar no formato dd/mm/aaaa
     if pd.notna(processo["Data de Recebimento"]):
         try:
-            processo["Data de Recebimento"] = pd.to_datetime(processo["Data de Recebimento"]).strftime("%d/%m/%Y")
+            df.at[row_index, "Data de Recebimento"] = pd.to_datetime(processo["Data de Recebimento"]).strftime("%d/%m/%Y")
+            processo["Data de Recebimento"] = df.at[row_index, "Data de Recebimento"]
         except Exception as e:
             st.error(f"Erro ao formatar a Data de Recebimento: {e}")
 
     if pd.notna(processo["Data de Publicação"]):
         try:
-            processo["Data de Publicação"] = pd.to_datetime(processo["Data de Publicação"]).strftime("%d/%m/%Y")
+            df.at[row_index, "Data de Publicação"] = pd.to_datetime(processo["Data de Publicação"]).strftime("%d/%m/%Y")
+            processo["Data de Publicação"] = df.at[row_index, "Data de Publicação"]
         except Exception as e:
             st.error(f"Erro ao formatar a Data de Publicação: {e}")
+
+
 
     with st.form("form_edicao"): # CONSTRUÇÃO DO FORMS PARA EDIÇÃO
 
@@ -64,18 +69,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
         # Lista de campos e suas configurações
         campos_config = [
-            # {
-            # "nome": "Deliberação",
-            # "tipo": "select",
-            # "opcoes": opcoes_deliberacao,
-            # "label": "Deliberação"
-            # },
-            # {
-            # "nome": "Situação",
-            # "tipo": "select",
-            # "opcoes": opcoes_situacao,
-            # "label": "Situação"
-            # },
             {
             "nome": "Tipo de Crédito",
             "tipo": "select",
@@ -113,13 +106,13 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             },
             {
             "nome": "Fonte de Recursos",
-            "tipo": "select",
+            "tipo": "multiselect",
             "opcoes": opcoes_fonte_recurso,
             "label": "Fonte de Recursos"
             },
             {
             "nome": "Grupo de Despesas",
-            "tipo": "select",
+            "tipo": "multiselect",
             "opcoes": opcoes_grupo_despesa,
             "label": "Grupo de Despesas"
             },
@@ -164,6 +157,43 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             }
         ]
 
+        def desempacotar_multiselect(valor_atual, opcoes):
+            """
+            Converte string formatada tipo 'A, B e C' ou lista ['A, B e C'] para lista ['A', 'B', 'C']
+            """
+            import ast
+            if pd.isna(valor_atual) or valor_atual == "":
+                return []
+            if isinstance(valor_atual, list):
+                # Se for lista com um único elemento string já formatada, desempacota
+                if len(valor_atual) == 1 and isinstance(valor_atual[0], str) and " e " in valor_atual[0]:
+                    valor_atual = valor_atual[0]
+                else:
+                    return [str(v) for v in valor_atual if str(v) in opcoes]
+            if isinstance(valor_atual, str):
+                # Tenta converter string de lista para lista real
+                if valor_atual.startswith("[") and valor_atual.endswith("]"):
+                    try:
+                        lista_valores = ast.literal_eval(valor_atual)
+                        if isinstance(lista_valores, list):
+                            return [str(v) for v in lista_valores if str(v) in opcoes]
+                    except Exception:
+                        pass
+                # Desempacotar string tipo 'A, B e C'
+                if " e " in valor_atual:
+                    partes = valor_atual.rsplit(" e ", 1)
+                    primeiros = [v.strip() for v in partes[0].split(",") if v.strip()]
+                    ult = partes[1].strip()
+                    result = [v for v in primeiros if v in opcoes]
+                    if ult in opcoes:
+                        result.append(ult)
+                    return result
+                elif "," in valor_atual:
+                    return [v.strip() for v in valor_atual.split(",") if v.strip() in opcoes]
+                elif valor_atual in opcoes:
+                    return [valor_atual]
+            return []
+
         # Dicionário para armazenar os valores editados
         valores_editados = {}
 
@@ -175,6 +205,16 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
             if campo["tipo"] == "select":
                 valores_editados[nome] = editar_select(campo["label"], campo["opcoes"], nome)
+
+            elif campo["tipo"] == "multiselect":
+                valor_atual = processo[nome]
+                default = desempacotar_multiselect(valor_atual, campo["opcoes"])
+                valores_editados[nome] = st.multiselect(
+                    f"{campo['label']} **(Editar)**",
+                    options=campo["opcoes"],
+                    default=default,
+                    key=f"multiselect_{nome}"  # Adiciona uma chave única para evitar conflitos
+                )
             elif campo["tipo"] == "texto":
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="" if pd.isna(processo[nome]) else str(processo[nome]))
             elif campo["tipo"] == "area":
@@ -184,16 +224,12 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                 
             elif campo["tipo"] == "decreto":
                 valor_atual = "" if pd.isna(processo[nome]) else str(processo[(nome)])
-                valores_editados[nome] = st.text_input(
-                    f"{campo['label']} **(Editar)**",
-                    value=formatar_numero_decreto(valor_atual)
-                )
+                valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value=formatar_numero_decreto(valor_atual))
+
             elif campo["tipo"] == "Nº ATA":
                 valor_atual = "" if pd.isna(processo[nome]) else str(processo[(nome)])
-                valores_editados[nome] = st.text_input(
-                    f"{campo['label']} **(Editar)**",
-                    value=(valor_atual)
-                )
+                valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value=(valor_atual))
+
             else:
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="")
 
@@ -249,7 +285,7 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                     erros.append("Data de publicação inválida.")
             if "Nº do decreto" in valores_editados:
                 if not validar_numero_decreto(valores_editados["Nº do decreto"]):
-                    erros.append("Número do decreto inválido, utilize o padrão: 123.456")
+                    erros.append("Número do decreto inválido, utilize o padrão: 123456")
             if "Nº ATA" in valores_editados:
                 if not validar_numero_ata(valores_editados["Nº ATA"]):
                     erros.append("Preencha apenas com o número da ATA.")
@@ -270,6 +306,54 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                 def is_empty_or_none(val):
                     return val is None or (isinstance(val, float) and pd.isna(val)) or str(val).strip() == ""
 
+                def normalize_multiselect(val):
+                    """
+                    Converte qualquer representação (string formatada, lista, etc) em lista de strings, ignorando ordem.
+                    Corrige erro de ValueError para arrays numpy/pandas.
+                    """
+
+                    # Corrigir erro para arrays numpy/pandas
+                    if isinstance(val, (np.ndarray, pd.Series)):
+                        val = val.tolist()
+                    # Checagem segura para pd.isna
+                    try:
+                        if pd.isna(val):
+                            return []
+                    except Exception:
+                        pass
+                    if val == "" or val is None:
+                        return []
+                    if isinstance(val, list):
+                        # Se for lista com um único elemento string já formatada, desempacota
+                        if len(val) == 1 and isinstance(val[0], str) and " e " in val[0]:
+                            val = val[0]
+                        else:
+                            return sorted([str(v).strip() for v in val])
+                    if isinstance(val, str):
+                        import ast
+                        # Tenta converter string de lista para lista real
+                        if val.startswith("[") and val.endswith("]"):
+                            try:
+                                lista_valores = ast.literal_eval(val)
+                                if isinstance(lista_valores, list):
+                                    return sorted([str(v).strip() for v in lista_valores])
+                            except Exception:
+                                pass
+                        # Desempacotar string tipo 'A, B e C'
+                        if " e " in val:
+                            partes = val.rsplit(" e ", 1)
+                            primeiros = [v.strip() for v in partes[0].split(",") if v.strip()]
+                            ult = partes[1].strip()
+                            result = primeiros
+                            if ult:
+                                result.append(ult)
+                            return sorted([v for v in result if v])
+                        elif "," in val:
+                            return sorted([v.strip() for v in val.split(",") if v.strip()])
+                        elif val.strip():
+                            return [val.strip()]
+                    return []
+
                 for nome, novo_valor in valores_editados.items():
                     valor_antigo = processo[nome]
 
@@ -283,13 +367,35 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                             modificacoes.append(f"{nome}: {valor_antigo} -> {novo_valor}")
                             base.loc[row_index, nome] = novo_valor_float
 
+                    elif nome in ["Fonte de Recursos", "Grupo de Despesas"]:
+                        # Normaliza ambos para lista de strings e compara ignorando ordem e formatação
+                        antigo_list = normalize_multiselect(valor_antigo)
+                        novo_list = normalize_multiselect(novo_valor)
+                        if antigo_list != novo_list:
+                            modificacoes.append(f"{nome}: {antigo_list} -> {novo_list}")
+                            # Salva no formato string "A, B e C"
+                            if len(novo_list) == 0:
+                                valor_formatado = ""
+                            elif len(novo_list) == 1:
+                                valor_formatado = str(novo_list[0])
+                            else:
+                                valor_formatado = ", ".join(str(x) for x in novo_list[:-1])
+                                valor_formatado += f" e {novo_list[-1]}"
+                            base.at[row_index, nome] = valor_formatado
                     else:
                         if (is_empty_or_none(valor_antigo) and not is_empty_or_none(novo_valor)) or \
-                           (not is_empty_or_none(valor_antigo) and str(novo_valor) != str(valor_antigo)):
+                            (not is_empty_or_none(valor_antigo) and str(novo_valor) != str(valor_antigo)):
                             modificacoes.append(f"{nome}: {valor_antigo} -> {novo_valor}")
-                            base.loc[row_index, nome] = novo_valor
+                            base.at[row_index, nome] = novo_valor
+
+
+
+
+
+
 
                 base.loc[row_index, "Última Edição"] = st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S")
+
 
 
                 if modificacoes:

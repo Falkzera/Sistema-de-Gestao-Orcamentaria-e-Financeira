@@ -1,20 +1,12 @@
 import streamlit as st
 import pandas as pd
 
-from src.google_drive_utils import read_parquet_file_from_drive
+from src.base import func_load_base_credito_sop_geo
 from utils.confeccoes.formatar import (
     digitacao,
     titulo_dinamico,
-    gerar_grafico_barra,
-    gerar_grafico_linha,
     gerar_grafico_pizza,
     mostrar_tabela_pdf,
-    formatar_valor_arredondado_sem_cifrao,
-    maior_pico_producao,
-    media_producao,
-    menor_pico_producao,
-    ranking_producao,
-    recorte_temporal_ano_passado,
     formatar_valor,
     formatar_valor2,
     mes_por_extenso,
@@ -44,7 +36,7 @@ with st.container():  # LIMPAR A SESSÃO PARA OS GRÁFICOS E TABELS
         st.session_state["contador_grafico"] = 1
 
 with st.container():  # ALOCAÇÃO DO DATAFRAME
-     from src.base import func_load_base_credito_sop_geo
+     
      df = func_load_base_credito_sop_geo()
 
 # 1️⃣ Filtro reutilizável de ano e mês

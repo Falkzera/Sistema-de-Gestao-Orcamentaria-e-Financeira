@@ -221,6 +221,11 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                 valores_editados[nome] = editar_texto(campo["label"], nome, tipo="area")
             elif campo["tipo"] == "valor":
                 valores_editados[nome] = st.text_input("Valor **(Editar)**", value=str(formatar_valor_sem_cifrao(processo[nome])))
+
+            # # oara Data de Publicação
+            # elif campo["tipo"] == "texto" and campo["nome"] == "Data de Recebimento":
+            #     valor_atual = "" if pd.isna(processo[nome]) else str(processo[nome])
+            #     valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value=valor_atual, placeholder="dd/mm/aaaa")
                 
             elif campo["tipo"] == "decreto":
                 valor_atual = "" if pd.isna(processo[nome]) else str(processo[(nome)])
@@ -257,6 +262,8 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                 erros.append("Opnião SOP inválida ou vazia.")
             else:
                 valores_editados["Opnião SOP"] = opniao_sop_sanitizada
+
+        
 
         salvar_btn = st.form_submit_button("Salvar Edição ✅", use_container_width=True, type="primary", help='Clique para salvar a edição do processo na base 📁')
         cancelar_btn = st.form_submit_button("Cancelar Edição ❌", use_container_width=True, type="secondary", help='Clique para cancelar a edição ❌')
@@ -298,6 +305,16 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                         st.rerun()
 
             else:
+
+                # coletar resposta de Data de Publicação, que virá da seguinte forma -> DIA/MES/ANO e converter para formato yyyy-mm-dd
+
+                if "Data de Publicação" in valores_editados:
+                    try:
+                        if valores_editados["Data de Publicação"]:
+                            valores_editados["Data de Publicação"] = pd.to_datetime(valores_editados["Data de Publicação"], format="%d/%m/%Y").strftime("%Y-%m-%d")
+                    except Exception as e:
+                        st.error(f"Erro ao converter Data de Publicação: {e}")
+                        st.stop()
 
                 agora = datetime.now()
                 base = df
@@ -426,9 +443,7 @@ def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
             numero_proc = selected_row["Nº do Processo"]
 
             with st.container(): # VISUALIZAÇÃO DOS DETALHES
-                # expansor_editar = st.toggle("✏️ Edição de Processos Únicos", help="Clique para editar um único processo.")
 
-                # if st.button(f" ⚙️ Editar Processo: **{numero_proc}**", help="Clique para editar um único processo.", type="primary", key=f"editar_{numero_proc}"):
                 st.write(f"🔍 Você selecionou o processo: **{numero_proc}**")
                 st.session_state["editar_processo_btn_clicked"] = True
 
@@ -447,5 +462,3 @@ def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
 
                 if "processo_edit" in st.session_state:
                     formulario_edicao_processo(nome_base, df, nome_base_historica)
-
-

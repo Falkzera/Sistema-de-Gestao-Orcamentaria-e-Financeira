@@ -45,7 +45,7 @@ def filtro_ano_mes(df: pd.DataFrame, exibir_na_tela=True, key_prefix="filtro"):
     mes_padrao = hoje.month - 1 if hoje.month > 1 else 12
     ano_padrao = hoje.year if hoje.month > 1 else hoje.year - 1
 
-    df['Data de Recebimento'] = pd.to_datetime(df['Data de Recebimento'], format='%d/%m/%Y')
+    df['Data de Recebimento'] = pd.to_datetime(df['Data de Recebimento'])
     df['Ano'] = df['Data de Recebimento'].dt.year
     df['Mês'] = df['Data de Recebimento'].dt.month
 
@@ -297,7 +297,7 @@ def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
             
         titulo_dinamico(f"## 4 - Créditos Públicados")
 
-        df['Data de Publicação'] = pd.to_datetime(df['Data de Publicação'], format='%d/%m/%Y', errors='coerce')
+        df['Data de Publicação'] = pd.to_datetime(df['Data de Publicação'])
         df_publicados = df[
             (df['Situação'] == 'Publicado') &
             (df['Data de Publicação'].dt.year == ano) &

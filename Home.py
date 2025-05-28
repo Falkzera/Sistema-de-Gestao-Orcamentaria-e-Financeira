@@ -180,7 +180,7 @@ with st.container():
             st.plotly_chart(fig, use_container_width=True)
 
 st.write('---')
-titulos_pagina(" Indicadores Processuais", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
+# titulos_pagina(" Indicadores Processuais", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
 
 st.caption('Acomapnhamento da Situação Processual')
 
@@ -250,58 +250,58 @@ for idx, (titulo, valor) in enumerate(indicadores_situacao.items()):
         </style>
         """, unsafe_allow_html=True)
 
-st.write("##")
+# st.write("##")
 
-with st.container():  # GRÁFICOS
+# with st.container():  # GRÁFICOS
 
-    tabs1, tabs2 = st.tabs(["📈 Evolução Temporal", "📊 Distribuição por Órgão (UO)"])
+#     tabs1, tabs2 = st.tabs([" Distribuição por Órgão (UO)", "Evolução Temporal"])
 
-    with tabs1:
+#     with tabs2:
 
-        titulos_pagina(" Evolução dos créditos públicados", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
+#         titulos_pagina(" Evolução dos créditos públicados", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
 
 
-        df_linha = df[
-            (df['Situação'] == 'Publicado') & (df['Contabilizar no Limite?'] == 'SIM')
-        ].copy()
+#         df_linha = df[
+#             (df['Situação'] == 'Publicado') & (df['Contabilizar no Limite?'] == 'SIM')
+#         ].copy()
 
-        # Garantir que a coluna Data de Recebimento está em formato datetime
-        df_linha['Data de Recebimento'] = pd.to_datetime(df_linha['Data de Recebimento'], errors='coerce')
+#         # Garantir que a coluna Data de Recebimento está em formato datetime
+#         df_linha['Data de Recebimento'] = pd.to_datetime(df_linha['Data de Recebimento'], errors='coerce')
 
-        df_linha_agrupado = df_linha.groupby('Data de Recebimento', as_index=False)['Valor'].sum()
-        df_linha_agrupado = df_linha_agrupado.sort_values('Data de Recebimento')
+#         df_linha_agrupado = df_linha.groupby('Data de Recebimento', as_index=False)['Valor'].sum()
+#         df_linha_agrupado = df_linha_agrupado.sort_values('Data de Recebimento')
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=df_linha_agrupado['Data de Recebimento'],
-            y=df_linha_agrupado['Valor'],
-            mode='lines+markers',
-            line=dict(color='#095aa2', width=2),
-            marker=dict(size=5, color='#095aa2'),
-            name='Valor'
-        ))
+#         fig = go.Figure()
+#         fig.add_trace(go.Scatter(
+#             x=df_linha_agrupado['Data de Recebimento'],
+#             y=df_linha_agrupado['Valor'],
+#             mode='lines+markers',
+#             line=dict(color='#095aa2', width=2),
+#             marker=dict(size=5, color='#095aa2'),
+#             name='Valor'
+#         ))
 
-        st.plotly_chart(fig)
+#         st.plotly_chart(fig)
 
-    with tabs2:
+#     with tabs1:
 
-        titulos_pagina(" Valor públicado por órgão", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
+#         titulos_pagina(" Valor publicado por órgão", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
             
-        # Agrupar por 'Órgão (UO)' e somar os valores
-        df_agrupado = df[
-            (df['Situação'] == 'Publicado') & (df['Contabilizar no Limite?'] == 'SIM')
-        ].groupby('Órgão (UO)', as_index=False)['Valor'].sum()
+#         # Agrupar por 'Órgão (UO)' e somar os valores
+#         df_agrupado = df[
+#             (df['Situação'] == 'Publicado') & (df['Contabilizar no Limite?'] == 'SIM')
+#         ].groupby('Órgão (UO)', as_index=False)['Valor'].sum()
 
-        df_agrupado = df_agrupado.sort_values(by='Valor', ascending=False)
+#         df_agrupado = df_agrupado.sort_values(by='Valor', ascending=False)
 
-        fig = gerar_grafico_barra(
-            agrupar=True,
-            qtd_agrupar=10,
-            fonte="sans serif",
-            x=df_agrupado['Órgão (UO)'],
-            y=df_agrupado['Valor'],
-            cores="#095aa2",
-            texto_formatado=df_agrupado['Valor'].apply(formatar_valor_arredondado),  # texto correspondente ao valor do órgão UO
-            linhas_horizontais=True,
-            mostrar_na_tela=True
-        )
+#         fig = gerar_grafico_barra(
+#             agrupar=True,
+#             qtd_agrupar=10,
+#             fonte="sans serif",
+#             x=df_agrupado['Órgão (UO)'],
+#             y=df_agrupado['Valor'],
+#             cores="#095aa2",
+#             texto_formatado=df_agrupado['Valor'].apply(formatar_valor_arredondado),  # texto correspondente ao valor do órgão UO
+#             linhas_horizontais=True,
+#             mostrar_na_tela=True
+#         )

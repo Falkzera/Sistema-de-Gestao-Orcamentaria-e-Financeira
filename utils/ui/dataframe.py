@@ -106,7 +106,7 @@ def build_grid_options(
         autoHeight=True,
         wrapText=True,
         maxWidth=10000,
-        minWidth=200,
+        minWidth=50,
         sortable=True,
         filter=False,
         floatingFilter=False,

@@ -14,9 +14,11 @@ def func_load_base_cpof(forcar_recarregar=False):
         base["Nº ATA"] = base["Nº ATA"].str.replace('0.', '', regex=False)
         base["Nº ATA"] = base["Nº ATA"].str.replace('Sem Informação', '', regex=False)
         base["Nº ATA"] = base["Nº ATA"].str.replace('nan', '', regex=False)
+
         # base['Data de Recebimento'] = tratar_data(base['Data de Recebimento'])
         # base['Data de Publicação'] = tratar_data(base['Data de Publicação'])
-        base = base[['Deliberação', 'Nº do Processo', 'Tipo de Despesa', 'Órgão (UO)', 'Fonte de Recursos', 'Grupo de Despesas', 'Valor', 'Objetivo', 'Observação', 'Data de Recebimento', 'Data de Publicação', 'Nº ATA', 'Cadastrado Por', 'Última Edição', 'SECRETÁRIA EXECUTIVA', 'SEPLAG', 'SEFAZ', 'GABINETE CIVIL','SEGOV']]
+
+        # base = base[['Deliberação', 'Nº do Processo', 'Tipo de Despesa', 'Órgão (UO)', 'Fonte de Recursos', 'Grupo de Despesas', 'Valor', 'Objetivo', 'Observação', 'Data de Recebimento', 'Data de Publicação', 'Nº ATA', 'Cadastrado Por', 'Última Edição', 'SECRETÁRIA EXECUTIVA', 'SEPLAG', 'SEFAZ', 'GABINETE CIVIL','SEGOV']]
         st.session_state.base_cpof = base
 
     return st.session_state.base_cpof

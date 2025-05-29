@@ -1,5 +1,7 @@
 import streamlit as st
 
+st.set_page_config(page_title="Visualizar Processos", page_icon="🔍", layout="wide")
+
 from utils.ui.display import padrao_importacao_pagina, titulos_pagina
 from utils.ui.dataframe import mostrar_tabela
 from utils.auth.auth import carregar_base_por_usuario
@@ -10,7 +12,6 @@ from utils.confeccoes.resumos import mostrar_resumos_por_permissao
 
 import streamlit_nested_layout # NÃO PODE SER EXCLUÍDO, CASO CONTRÁRIO OCORRE ERRO DE IMPORTAÇÃO
 
-st.set_page_config(page_title="Visualizar Processos", page_icon="🔍", layout="wide")
 
 padrao_importacao_pagina()
 

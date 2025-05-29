@@ -1,11 +1,11 @@
 import streamlit as st
-
-from utils.ui.display import padrao_importacao_pagina
-from utils.ui.dataframe import mostrar_tabela
-from utils.ui.display import titulos_pagina
-from src.base import func_load_base_cpof
-from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes, formulario_edicao_comentario_cpof
 import numpy as np
+
+from src.base import func_load_base_cpof
+from utils.ui.display import padrao_importacao_pagina
+from utils.ui.display import titulos_pagina
+from utils.ui.dataframe import mostrar_tabela
+from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes
 
 padrao_importacao_pagina()
 
@@ -19,29 +19,20 @@ usuario_logado = st.session_state.username.upper()
 if usuario_logado in membros_cpof:
     membro_atual = usuario_logado
     st.markdown(f"🔒 **Membro atual:** {membro_atual}")
-    # Coluna_mostrar não funciona atualmente, pois as colunas ocultas, são "apagadas" quando realiza o salvamento, então todos os processos tem suas colunas apagadas ao mergir para a base salva.
-    # colunas_mostrar = ['Nº do Processo', 'Órgão (UO)', 'Valor', 'Fonte de Recursos', 'Tipo de Despesa', 'Objetivo', membro_atual, 'Observação']
-else:
-    membro_atual = st.selectbox(
-        "Selecione o membro",
-        membros_cpof,
-        key='membro',
-        help="Escolha o membro para ver os processos pendentes."
-    )
-    # colunas_mostrar = ['Nº do Processo', 'Órgão (UO)', 'Valor', 'Fonte de Recursos', 'Tipo de Despesa', 'Objetivo'] + membros_cpof + ['Observação']
 
-base_mostrar = st.session_state.base_cpof[st.session_state.base_cpof['Deliberação'] == 'Disponível aos Membros CPOF']  # Core de toda lógica!
-# base_mostrar = base_mostrar[colunas_mostrar]
+else:
+    membro_atual = st.selectbox("Selecione o membro", membros_cpof, key='membro', help="Escolha o membro para ver os processos pendentes.")
+
+# Detalhamento: a variável "base_mostrar", é core central para identificar os processos que irão ser exibidos na tela dos membros do CPOF, por enquanto está sendo definida por "Disponível aos Membros CPOF", mas pode ser alterada para outros critérios, como "Em Análise" ou "Em Revisão".
+
+base_mostrar = st.session_state.base_cpof[st.session_state.base_cpof['Deliberação'] == 'Disponível aos Membros CPOF']  # <<<<<<<<<<<
 
 if "filtro_status" not in st.session_state:
     st.session_state.filtro_status = None
 
-# Transformar respostas vazias, False ou strings vazias em NaN
-base_mostrar[membro_atual] = base_mostrar[membro_atual].replace([False, '', ' ', None], np.nan)
+base_mostrar.loc[:, membro_atual] = base_mostrar[membro_atual].replace([False, '', ' ', None], np.nan)
 
-aguardando_resposta_df = base_mostrar[
-    base_mostrar[membro_atual].isna()
-]
+aguardando_resposta_df = base_mostrar[base_mostrar[membro_atual].isna()]
 
 respondidos_df = base_mostrar[base_mostrar[membro_atual].notna()]
 
@@ -53,7 +44,7 @@ indicadores_situacao = {
     "Processos Respondidos": respondidos,
 }
 
-with st.container(): # Botões principais RESPONDIDOS vs AGUARDANDO RESPOSTA - Responsta
+with st.container(): # Aqui o usuário irá alternar entre os processos respondidos e os que aguardam resposta
         
     col1, col2 = st.columns(2)
     with col1:
@@ -66,38 +57,11 @@ with st.container(): # Botões principais RESPONDIDOS vs AGUARDANDO RESPOSTA - R
 
 # with st.container(): # APÓS A SELEÇÃO DOS BOTÕES ACIMA
 
-resposta_em_bloco = False
-editar_processo = False
-
 if st.session_state.filtro_status in ["Processos Aguardando Resposta", "Processos Respondidos"]:
+
     st.write('---')
 
-    # opcao_selecionada = st.radio(
-    #     "Label_visibility false",
-    #     options=["**Habilitar Edição**", "**Parecer em Bloco**"],
-    #     captions=["*Insira o parecer técnico na tabela abaixo.*", "*Selecione um ou mais processos para informar o parecer em bloco.*"],
-    #     index=0,
-    #     key="opcao_radio",
-    #     horizontal=True,
-    #     label_visibility="collapsed",
-    # )
-
-    # if opcao_selecionada == "**Parecer em Bloco**":
-    #     resposta_em_bloco = True
-    #     editar_processo = True
-    # elif opcao_selecionada == "**Habilitar Edição**":
-    #     editar_processo = True
-
     df = aguardando_resposta_df if st.session_state.filtro_status == "Processos Aguardando Resposta" else respondidos_df
-
-    # if st.session_state.filtro_status == "Processos Aguardando Resposta" and resposta_em_bloco:
-    #     df.loc[:, membro_atual] = False  # Adiciona a coluna 'Selecionar' para permitir seleção em bloco
-
-    #     df = df[[membro_atual] + [col for col in df.columns if col != membro_atual]]
-    #     editable_columns = [membro_atual] 
-
-    # elif editar_processo:
-    #     editable_columns = [membro_atual]
 
     base_mostrar, selected_row = mostrar_tabela(df, editable_columns=[membro_atual], mostrar_na_tela=True, enable_click=True, nome_tabela=f"{st.session_state.filtro_status} ({len(df)}) - {membro_atual}")
 

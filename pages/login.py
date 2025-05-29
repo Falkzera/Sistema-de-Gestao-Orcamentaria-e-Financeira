@@ -1,7 +1,7 @@
 import streamlit as st
-from utils.ui.display import customizar_sidebar
+
 from utils.auth.auth import login
-from utils.ui.display import titulos_pagina, desenvolvido
+from utils.ui.display import customizar_sidebar, titulos_pagina, desenvolvido
 
 st.set_page_config(page_title="Sistema de Login", page_icon="🔐", layout="centered")
 

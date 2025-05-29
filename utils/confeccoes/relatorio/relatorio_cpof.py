@@ -46,6 +46,7 @@ def filtro_ano_mes(df: pd.DataFrame, exibir_na_tela=True, key_prefix="filtro"):
     ano_padrao = hoje.year if hoje.month > 1 else hoje.year - 1
 
     df['Data de Recebimento'] = pd.to_datetime(df['Data de Recebimento'])
+    
     df['Ano'] = df['Data de Recebimento'].dt.year
     df['Mês'] = df['Data de Recebimento'].dt.month
 

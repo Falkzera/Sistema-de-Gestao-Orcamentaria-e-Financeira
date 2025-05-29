@@ -1,19 +1,17 @@
 import streamlit as st
-import pandas as pd
+
+from src.base import func_load_base_cpof, func_load_base_credito_sop_geo
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina
+from src.salvar_historico import exibir_historico
 
 st.set_page_config(page_title="Histórico de Modificações", page_icon="📜", layout="wide")
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina
-from src.salvar_historico import exibir_historico
-from src.base import func_load_base_cpof, func_load_base_credito_sop_geo
-
 padrao_importacao_pagina()
+
 titulos_pagina("Histórico Processual", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-history"></i>' )
 
-# Bases disponíveis para histórico
 base_opcoes = ["Histórico CPOF", "Histórico Crédito SOP/GEO"]
 
-# Mapeamento para garantir o nome correto do histórico
 historico_map = {
     "Base CPOF": "Histórico CPOF",
     "Base Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
@@ -21,7 +19,6 @@ historico_map = {
     "Histórico Crédito SOP/GEO": "Histórico Crédito SOP/GEO"
 }
 
-# Verifica o acesso do usuário logado
 usuario = st.session_state.get("username", None)
 bases_disponiveis = []
 if usuario and "base_access" in st.secrets and usuario in st.secrets["base_access"]:
@@ -38,10 +35,8 @@ if len(bases_disponiveis) == 1:
 else:
     base_escolhida = st.selectbox("Escolha o tipo de histórico:", bases_disponiveis)
 
-# Associa o nome escolhido ao nome raiz da base via historico_map
 nome_base = historico_map.get(base_escolhida, base_escolhida)
 
-# Carrega o DataFrame da base escolhida usando as funções corretas
 if nome_base == "Histórico CPOF":
     df = func_load_base_cpof()
 elif nome_base == "Histórico Crédito SOP/GEO":
@@ -50,7 +45,6 @@ else:
     st.error("Base de histórico não reconhecida.")
     st.stop()
 
-# Coleta os Processos ID da base escolhida
 if "processos_filtrados" in st.session_state and not st.session_state.processos_filtrados.empty:
     processos_disponiveis = st.session_state.processos_filtrados["Processo ID"].tolist()
 else:

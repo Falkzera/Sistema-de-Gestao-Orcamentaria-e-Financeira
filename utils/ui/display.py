@@ -42,7 +42,7 @@ def exibir_menu_navegacao():
         "home": {"nome_exibicao": "Home", "caminho": "Home.py", "icone": ""},
     }
 
-    st.sidebar.markdown("---")
+    # st.sidebar.markdown("---")
 
     if "logged_in" not in st.session_state or not st.session_state.logged_in:
         criar_botao_navegacao("Login", "pages/login.py", "🔐", "primary")

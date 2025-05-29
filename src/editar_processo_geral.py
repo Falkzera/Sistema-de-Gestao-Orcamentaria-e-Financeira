@@ -263,8 +263,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             else:
                 valores_editados["Opnião SOP"] = opniao_sop_sanitizada
 
-        
-
         salvar_btn = st.form_submit_button("Salvar Edição ✅", use_container_width=True, type="primary", help='Clique para salvar a edição do processo na base 📁')
         cancelar_btn = st.form_submit_button("Cancelar Edição ❌", use_container_width=True, type="secondary", help='Clique para cancelar a edição ❌')
         if cancelar_btn:
@@ -315,6 +313,16 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                     except Exception as e:
                         st.error(f"Erro ao converter Data de Publicação: {e}")
                         st.stop()
+
+                if "Data de Recebimento" in valores_editados:
+                    try:
+                        if valores_editados["Data de Recebimento"]:
+                            valores_editados["Data de Recebimento"] = pd.to_datetime(valores_editados["Data de Recebimento"], format="%d/%m/%Y").strftime("%Y-%m-%d")
+                    except Exception as e:
+                        st.error(f"Erro ao converter Data de Recebimento: {e}")
+                        st.stop()
+
+                
 
                 agora = datetime.now()
                 base = df
@@ -399,6 +407,24 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                                 valor_formatado = ", ".join(str(x) for x in novo_list[:-1])
                                 valor_formatado += f" e {novo_list[-1]}"
                             base.at[row_index, nome] = valor_formatado
+
+                    elif nome in ["Data de Recebimento", "Data de Publicação"]: # Este bloco impede que a mudança do formato da data seja considerada uma modificação, pois o formato é apenas visual.
+                        def normalizar_data(data):
+                            if is_empty_or_none(data):
+                                return None
+                            try:
+                                # Tenta converter para datetime, aceitando ambos formatos
+                                return pd.to_datetime(str(data), dayfirst=True).date()
+                            except Exception:
+                                return None
+
+                        data_antiga = normalizar_data(valor_antigo)
+                        data_nova = normalizar_data(novo_valor)
+                        if data_antiga != data_nova:
+                            modificacoes.append(f"{nome}: {valor_antigo} -> {novo_valor}")
+                            base.at[row_index, nome] = novo_valor
+
+
                     else:
                         if (is_empty_or_none(valor_antigo) and not is_empty_or_none(novo_valor)) or \
                             (not is_empty_or_none(valor_antigo) and str(novo_valor) != str(valor_antigo)):

@@ -49,7 +49,6 @@ def cadastrar_processos_credito_geo(nome_base, df):
 
     origem_recursos = col3.selectbox("Origem de Recursos **(Obrigatório)**",opcoes_origem_recursos,index=None,help="Selecione a origem dos recursos.", placeholder="Selecione a Origem de Recursos")
 
-
     col1, col2 = st.columns(2)
     orgao_uo = col1.selectbox("Órgão(UO) **(Obrigatório)**",opcoes_orgao_uo,index=None,help="Selecione a Unidade Orçamentária.", placeholder="Selecione a UO")
     contabilizar_limite = col2.selectbox("Contabilizar no Limite? **(Obrigatório)**",opcoes_contabilizar_limite,index=None,help="Selecione se o processo deve ser contabilizado no limite.", placeholder="Selecione Sim ou Não")
@@ -89,6 +88,7 @@ def cadastrar_processos_credito_geo(nome_base, df):
         data_recebimento, 
         contabilizar_limite   
     ]
+
     if any(not campo for campo in nao_podem_estar_vazios):
         st.info("⚠️ Preencha todos os campos obrigatórios.")
         st.stop()
@@ -112,6 +112,13 @@ def cadastrar_processos_credito_geo(nome_base, df):
             for erro in erros:
                 st.error(erro)
             st.stop()
+
+        # Convertendo data_recebimento em formato yyyy-mm-dd
+        # try:
+        data_recebimento = datetime.strptime(data_recebimento, "%d/%m/%Y").strftime("%Y-%m-%d")
+        # except ValueError:
+        #     st.error("⚠️ Data de recebimento inválida. Use o formato DD/MM/AAAA.")
+        #     st.stop()
 
         objetivo_sanitizado = campos_sanitizados['objetivo']
         observacao_sanitizada = campos_sanitizados['observacao']

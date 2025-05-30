@@ -1,4 +1,3 @@
-
 def get_flag_mapping():
     """
     Retorna um dicionário que mapeia os nomes dos países (como aparecem em NO_PAIS)

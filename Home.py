@@ -1,9 +1,8 @@
 import streamlit as st
-import pandas as pd
 import plotly.graph_objects as go
 
 from utils.ui.display import padrao_importacao_pagina
-from utils.confeccoes.formatar import formatar_valor, formatar_valor2, formatar_valor_arredondado, gerar_grafico_barra
+from utils.confeccoes.formatar import formatar_valor, formatar_valor2
 from src.base import func_load_base_credito_sop_geo
 from utils.limite.limite_credito import calcular_limite_credito_atual
 from utils.ui.display import titulos_pagina

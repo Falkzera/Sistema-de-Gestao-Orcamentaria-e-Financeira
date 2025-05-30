@@ -1,11 +1,28 @@
 import streamlit as st
 import pandas as pd
-from streamlit_gsheets import GSheetsConnection
+
 from datetime import datetime
-from src.salvar_historico import salvar_modificacoes_em_lote
-from src.salvar_historico import salvar_modificacao
+
+from streamlit_gsheets import GSheetsConnection
+
+from src.salvar_historico import salvar_modificacoes_em_lote, salvar_modificacao
 
 def salvar_base(df, nome_base):
+    """
+    Salva as alterações de um DataFrame em uma worksheet do Google Sheets, atualizando ou inserindo linhas conforme o 'Nº do Processo'.
+    Parâmetros:
+        df (pd.DataFrame): DataFrame contendo os dados a serem salvos ou atualizados.
+        nome_base (str): Nome da worksheet no Google Sheets onde os dados serão salvos.
+    Comportamento:
+        - Conecta à worksheet especificada usando a conexão 'gsheets'.
+        - Para cada linha em 'df', atualiza a linha correspondente em 'base' (worksheet) se o 'Nº do Processo' já existir; caso contrário, adiciona a nova linha.
+        - Caso as colunas 'Nº do Processo' não existam em ambos os DataFrames, concatena os dados.
+        - Atualiza a worksheet com os dados modificados.
+        - Exibe mensagem de sucesso e força recarregamento do estado da sessão.
+    Erros:
+        - Exibe mensagem de erro se 'nome_base' não for uma string.
+    """
+
     conn = st.connection("gsheets", type=GSheetsConnection)
     if not isinstance(nome_base, str):
         st.error("Nome da base inválido ao salvar. Informe o nome do worksheet como string.")
@@ -31,9 +48,6 @@ def salvar_base(df, nome_base):
     st.success(f"Salvo com Sucesso! ✅")
     st.session_state["forcar_recarregar"] = True
     del st.session_state["forcar_recarregar"]
-    # st.rerun() # -> Retirado porque em cadastras.py, ao cadastrar o processo não aparece em mostrar_tabela
-    # st.write(f"Base salva: {nome_base}")
-
 
 def inicializar_e_gerenciar_modificacoes(selected_row, escolha_coluna=None):
     """
@@ -145,7 +159,6 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
     df_base: DataFrame da base principal (será atualizado e salvo)
     """
     
-
     if not st.session_state.modificacoes:
         st.warning("Nenhuma modificação pendente para salvar.")
         return
@@ -177,13 +190,11 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
         modificacao_texto = f"{coluna_status} alterada de '{status_antes}' para '{status_depois}'"
         processos_modificados.append((processo_id, modificacao_texto))
 
-
         # Atualiza o dataframe base (df_base) em memória
         idx_base = df_base[df_base['Nº do Processo'] == processo_id].index
         if not idx_base.empty:
             df_base.at[idx_base[0], coluna_status] = status_depois
             df_base.at[idx_base[0], 'Última Edição'] = f"{st.session_state.username.title()} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
-    
     
     # Atualiza a base no session_state para refletir as alterações na interface
     if nome_base_principal == "Base CPOF":
@@ -204,20 +215,25 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
     st.session_state.status_inicial = {}
     st.rerun()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 def formulario_edicao_comentario_cpof(numero_processo, membro_cpof, resposta_cpof):
+    """
+    Atualiza o comentário/resposta de um membro do CPOF para um ou mais processos na base de dados.
+    Para cada processo informado, verifica se a resposta fornecida difere da resposta anterior.
+    Se houver alteração, atualiza o campo correspondente ao membro do CPOF, registra a data e o usuário da última edição,
+    salva a modificação no histórico e persiste as alterações na base de dados.
+    Parâmetros:
+        numero_processo (str ou list[str]): Número(s) do processo a ser(em) atualizado(s).
+        membro_cpof (str): Nome da coluna correspondente ao membro do CPOF.
+        resposta_cpof (str): Nova resposta/comentário a ser registrada.
+    Efeitos colaterais:
+        - Atualiza a base de dados em st.session_state.base_cpof.
+        - Salva o histórico de modificações.
+        - Exibe mensagens de erro ou informação via Streamlit.
+    Exceções:
+        - Exibe mensagem de erro via Streamlit se houver falha ao salvar a base de dados.
+        - Exibe mensagem informativa se nenhuma modificação for necessária.
+    """
+
     base = st.session_state.base_cpof
     resposta_cpof = resposta_cpof.strip()
     agora = datetime.now()

@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-#mostrar tabela
-from utils.ui.dataframe import mostrar_tabela
+from datetime import datetime
+
 from utils.opcoes_coluna.deliberacao import opcoes_deliberacao
 from utils.opcoes_coluna.situacao import opcoes_situacao
 from utils.opcoes_coluna.tipo_despesa import opcoes_tipo_despesa
@@ -11,6 +11,7 @@ from utils.opcoes_coluna.grupo_despesa import opcoes_grupo_despesa
 from utils.opcoes_coluna.tipo_credito import opcoes_tipo_credito
 from utils.opcoes_coluna.contabilizar_limite import opcoes_contabilizar_limite
 from utils.opcoes_coluna.origem_recurso import opcoes_origem_recursos
+from utils.ui.dataframe import mostrar_tabela
 from utils.confeccoes.formatar import formatar_valor_br
 from utils.opcoes_coluna.validadores.processo import validar_processamento_campos
 from src.salvar_alteracoes import salvar_base
@@ -35,30 +36,24 @@ def formatar_lista(lista):
     return lista
 
 
-from datetime import datetime
+
 ano_corrente = datetime.now().year
 
-def cadastrar_processos_credito_geo(nome_base, df):
+def cadastrar_processos_credito_geo(nome_base, df): # SOP/GEO
         
     col1, col2, col3 = st.columns(3)
 
     numero_processo = col1.text_input("Nº do Processo **(Obrigatório)**",placeholder=f"E:00000.0000000000/{ano_corrente}",help=f"Digite o número do processo no formato: E:00000.0000000000/{ano_corrente}")
     numero_processo = str(numero_processo).strip() 
-
     situacao = col2.selectbox("Situação **(Obrigatório)**",opcoes_situacao,index=None,help="Selecione a situação do processo.", placeholder="Selecione a Situação")
-
     origem_recursos = col3.selectbox("Origem de Recursos **(Obrigatório)**",opcoes_origem_recursos,index=None,help="Selecione a origem dos recursos.", placeholder="Selecione a Origem de Recursos")
-
     col1, col2 = st.columns(2)
     orgao_uo = col1.selectbox("Órgão(UO) **(Obrigatório)**",opcoes_orgao_uo,index=None,help="Selecione a Unidade Orçamentária.", placeholder="Selecione a UO")
     contabilizar_limite = col2.selectbox("Contabilizar no Limite? **(Obrigatório)**",opcoes_contabilizar_limite,index=None,help="Selecione se o processo deve ser contabilizado no limite.", placeholder="Selecione Sim ou Não")
-
     col1, col2, col3 = st.columns(3)
     tipo_credito = col1.selectbox("Tipo de Crédito **(Obrigatório)**",opcoes_tipo_credito,index=None,help="Selecione o tipo de crédito.", placeholder="Selecione o Tipo de Crédito")
-    # fonte_recurso = col2.selectbox("Fonte de Recrusos **(Obrigatório)**",opcoes_fonte_recurso,index=None,help="Selecione a Unidade Orçamentária.", placeholder="Selecione a Fonte de Recursos")
     fonte_recurso = col2.multiselect("Fonte de Recrusos **(Obrigatório)**",opcoes_fonte_recurso,help="Selecione a Unidade Orçamentária.", placeholder="Selecione a Fonte de Recursos")
     grupo_despesa = col3.multiselect("Grupo de Despesas **(Obrigatório)**",opcoes_grupo_despesa,help="Selecione o grupo de despesa.", placeholder="Selecione um Grupo de Despesas")
-
     col1, col2 = st.columns(2)
     valor_input = col1.text_input("Valor **(Obrigatório)**", placeholder="Ex: 1.234,56", help="Digite o valor do processo no formato: 1.234,56")
     data_recebimento = col2.text_input("Data de recebimento **(Obrigatório)**", placeholder="DD/MM/AAAA", help="Digite a data de recebimento do processo no formato: DD/MM/AAAA")
@@ -69,9 +64,7 @@ def cadastrar_processos_credito_geo(nome_base, df):
     col1, col2 = st.columns(2)
     objetivo = col1.text_input("Objetivo **(Obrigatório)**", placeholder="Ex: Descrição do objetivo do processo.", help="Digite o objetivo do processo.")
     observacao = col2.text_input("Observação Processual", placeholder="Ex: Digite se houver alguma observação.", help="Digite uma observação ao processo, normalmente utilizado para descrever erros no processo.")
-
     obs_sop = st.text_area("Opnião Técnica SOP", placeholder="Ex: Opinião técnica da SOP sobre o processo.", help="Digite a opinião da SOP sobre o processo, para instruir a alta gestão.")
-
     data_publicacao = ''
     numero_decreto = ''
 
@@ -94,6 +87,7 @@ def cadastrar_processos_credito_geo(nome_base, df):
         st.stop()
 
     st.write('---')
+
     if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary", help='Clique para cadastrar o processo na base 📁'):
 
         # ✅ Valida os campos
@@ -113,13 +107,7 @@ def cadastrar_processos_credito_geo(nome_base, df):
                 st.error(erro)
             st.stop()
 
-        # Convertendo data_recebimento em formato yyyy-mm-dd
-        # try:
         data_recebimento = datetime.strptime(data_recebimento, "%d/%m/%Y").strftime("%Y-%m-%d")
-        # except ValueError:
-        #     st.error("⚠️ Data de recebimento inválida. Use o formato DD/MM/AAAA.")
-        #     st.stop()
-
         objetivo_sanitizado = campos_sanitizados['objetivo']
         observacao_sanitizada = campos_sanitizados['observacao']
         obs_sop_sanitizada = campos_sanitizados['obs_sop']
@@ -165,21 +153,17 @@ def cadastrar_processos_credito_geo(nome_base, df):
             nome_base = str(nome_base)
             salvar_base(novo, nome_base)
 
-def cadastrar_processos_cpof(nome_base, df):
+def cadastrar_processos_cpof(nome_base, df): # CPOF
 
     col1, col2, col3 = st.columns(3)
-
     numero_processo = col1.text_input("Nº do Processo **(Obrigatório)**",placeholder=f"E:00000.0000000000/{ano_corrente}",help=f"Digite o número do processo no formato: E:00000.0000000000/{ano_corrente}")
     numero_processo = str(numero_processo).strip() 
     deliberacao = col2.selectbox("Deliberação **(Obrigatório)**",opcoes_deliberacao,index=None,help="Selecione a deliberação do processo.", placeholder="Selecione a deliberação")
     orgao_uo = col3.selectbox("Órgão (UO) **(Obrigatório)**",opcoes_orgao_uo,index=None,help="Selecione o Órgão(UO).", placeholder="Selecione o Órgão(UO)")
-
-
     col1, col2, col3 = st.columns(3)
     tipo_despesa = col1.selectbox("Tipo de Despesa **(Obrigatório)**",opcoes_tipo_despesa,index=None,help="Selecione o Tipo de Despesa.", placeholder="Selecione o Tipo de Despesa")
     fonte_recurso = col2.multiselect("Fonte de Recrusos **(Obrigatório)**",opcoes_fonte_recurso,help="Selecione a Fonte de Recursos.", placeholder="Selecione a Fonte de Recursos")
     grupo_despesa = col3.multiselect("Grupo de Despesas **(Obrigatório)**",opcoes_grupo_despesa,help="Selecione o grupo de despesa.", placeholder="Selecione um Grupo de Despesas")
-
     col1, col2 = st.columns(2)
     valor_input = col1.text_input("Valor **(Obrigatório)**", placeholder="Ex: 1.234,56", help="Digite o valor do processo no formato: 1.234,56")
     data_recebimento = col2.text_input("Data de recebimento **(Obrigatório)**", placeholder="DD/MM/AAAA", help="Digite a data de recebimento do processo no formato: DD/MM/AAAA")
@@ -276,19 +260,3 @@ def mostrar_cadastro_por_permissao(df, nome_base):
         cadastrar_processos_credito_geo(df, nome_base)
     elif nome_base == "Base CPOF":
         cadastrar_processos_cpof(df, nome_base)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

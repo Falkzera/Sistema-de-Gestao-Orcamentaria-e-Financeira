@@ -1,3 +1,5 @@
+import re
+
 def formatar_numero_decreto(numero: str) -> str:
     """
     Transforma o número do decreto em inteiro e o formata de acordo com as regras de validar_numero_decreto.
@@ -17,14 +19,9 @@ def formatar_numero_decreto(numero: str) -> str:
     except ValueError:
         raise ValueError("O número fornecido não está em um formato válido para conversão.")
     
-
-# utils/validadores/numero_decreto.py
-
-import re
-
 def validar_numero_decreto(numero: str) -> bool:
     """
-    Valida se o número do decreto está no formato 000.000 (três dígitos, ponto, três dígitos)
+    Valida se o número do decreto está no formato de seis digitos,
     ou permite que esteja em branco.
     """
     if not numero.strip():

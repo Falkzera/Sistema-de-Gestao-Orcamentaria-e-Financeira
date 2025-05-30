@@ -24,4 +24,3 @@ def funcao_ibge_leite_industrializado():
     df.to_parquet(parquet_buffer, index=False)
     parquet_buffer.seek(0)  
     update_base(parquet_buffer, 'ibge_leite_industrializado.parquet')
-

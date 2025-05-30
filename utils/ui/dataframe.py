@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from utils.opcoes_coluna.deliberacao import mapa_cores_deliberacao, opcoes_deliberacao
 from utils.opcoes_coluna.situacao import mapa_cores_situacao, opcoes_situacao
 

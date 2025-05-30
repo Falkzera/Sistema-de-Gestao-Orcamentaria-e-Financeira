@@ -1,5 +1,3 @@
-# utils/buscadores/grupo_despesa.py
-
 opcoes_grupo_despesa = [
     "1",
     "2",

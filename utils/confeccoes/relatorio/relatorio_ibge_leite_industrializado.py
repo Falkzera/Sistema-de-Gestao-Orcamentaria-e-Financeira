@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
 
 from src.google_drive_utils import read_parquet_file_from_drive
@@ -10,17 +9,8 @@ from utils.confeccoes.formatar import (
     gerar_grafico_linha,
     gerar_grafico_pizza,
     mostrar_tabela_pdf,
-    formatar_valor_arredondado_sem_cifrao,
-    maior_pico_producao,
-    media_producao,
-    menor_pico_producao,
-    ranking_producao,
-    recorte_temporal_ano_passado,
-    formatar_valor,
     formatar_valor2,
     formatar_valor_sem_cifrao,
-    por_extenso,
-
 )
 
 with st.container(): # CORES

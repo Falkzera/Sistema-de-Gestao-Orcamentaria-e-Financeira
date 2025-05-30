@@ -12,7 +12,6 @@ from utils.confeccoes.formatar import (
     formatar_valor_arredondado_sem_cifrao,
     maior_pico_producao,
     media_producao,
-    menor_pico_producao,
     ranking_producao,
     recorte_temporal_ano_passado
 )
@@ -22,8 +21,7 @@ def montar_relatorio_anp_lgn(df):
     with st.container():  # CARREGAMENTO DATASET
 
         def load_data():
-
-            # df = pd.read_csv('delta/COMBUSTIVEL/lgn.csv', sep=';')    
+             
             df = read_parquet_file_from_drive('anp_lgn.parquet')
 
             return df
@@ -108,7 +106,7 @@ def montar_relatorio_anp_lgn(df):
 
             df_data_al = df_al.groupby('DATA')['PRODUÇÃO'].sum().reset_index()
 
-            # Gerar gráfico com a função gerar_grafico_barra
+            # Gráfico
             gerar_grafico_barra(
                 x=df_data_al['DATA'],
                 y=df_data_al['PRODUÇÃO'],

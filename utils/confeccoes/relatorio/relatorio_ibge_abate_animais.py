@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
 
 from src.google_drive_utils import read_parquet_file_from_drive
@@ -10,20 +9,12 @@ from utils.confeccoes.formatar import (
     gerar_grafico_linha,
     gerar_grafico_pizza,
     mostrar_tabela_pdf,
-    formatar_valor_arredondado_sem_cifrao,
-    maior_pico_producao,
-    media_producao,
-    menor_pico_producao,
-    ranking_producao,
-    recorte_temporal_ano_passado,
     formatar_valor,
     formatar_valor2,
     formatar_valor_sem_cifrao,
     por_extenso,
 
 )
-
-
 
 with st.container(): # CORES
     color_tres = ['#095aa2', '#0e89f7', '#042b4d']
@@ -93,7 +84,6 @@ def montar_relatorio_ibge_abate_animais(df):
                 nomes_series=nomes_series,
                 cores=cores
             )
-
 
         with st.container(): # SESSÃO 4.1.2 - TEXTO 2
 
@@ -234,4 +224,3 @@ def montar_relatorio_ibge_abate_animais(df):
 
             ranking_estado_serie_ano_atual['VALOR'] = ranking_estado_serie_ano_atual['VALOR'].apply(formatar_valor_sem_cifrao)
             mostrar_tabela_pdf(ranking_estado_serie_ano_atual, nome_tabela="Ranking Nordeste")
-        

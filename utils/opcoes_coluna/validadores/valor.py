@@ -1,5 +1,3 @@
-# utils/validadores/valor.py
-
 import re
 
 def validar_valor(valor_str: str) -> bool:

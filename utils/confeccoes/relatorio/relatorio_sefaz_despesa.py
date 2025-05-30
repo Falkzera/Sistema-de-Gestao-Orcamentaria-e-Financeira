@@ -1,26 +1,14 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 
 from src.google_drive_utils import read_parquet_file_from_drive
 from utils.confeccoes.formatar import (
     digitacao,
     titulo_dinamico,
-    gerar_grafico_barra,
     gerar_grafico_linha,
-    gerar_grafico_pizza,
     mostrar_tabela_pdf,
-    formatar_valor_arredondado_sem_cifrao,
-    maior_pico_producao,
-    media_producao,
-    menor_pico_producao,
-    ranking_producao,
-    recorte_temporal_ano_passado,
     formatar_valor,
     formatar_valor2,
-    formatar_valor_sem_cifrao,
-    por_extenso,
-    formatar_valor_usd,
     mes_por_extenso,
     por_extenso_reais
 
@@ -91,7 +79,6 @@ def montar_relatorio_sefaz_despesa(df):
                             despendidos por mês durante o referido ano.")
 
             with st.container(): # TABELA 1
-                
 
                 df_ug_selecionada_vs_todas_ug_tabela = df_ug_selecionada_vs_todas_ug.copy()
                 df_ug_selecionada_vs_todas_ug_tabela['DATA'] = df_ug_selecionada_vs_todas_ug['DATA'].dt.to_period('M')

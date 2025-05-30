@@ -1,10 +1,9 @@
+import requests
 import pandas as pd
 from datetime import datetime, timedelta
 from unidecode import unidecode
-import requests
 from io import BytesIO
-from src.google_drive_utils import read_parquet_file_from_drive
-from src.google_drive_utils import update_base
+from src.google_drive_utils import read_parquet_file_from_drive, update_base
 
 data_atual = datetime.now()
 data_ontem = data_atual - timedelta(days=1)
@@ -27,43 +26,26 @@ def funcao_sefaz_dotacao():
             response = requests.get(url, verify=False)
             df = pd.read_excel(BytesIO(response.content))
         
-
     except Exception as e:
         print('Erro na atualização da DOTAÇÃO:')
         print(e)
-        #stop
-    import streamlit as st
+
+
     df_drive = read_parquet_file_from_drive('sefaz_dotacao.parquet')
-    # df_drive = pd.read_parquet('sefaz_despesa.parquet')
-    ##
     df_drive['DATA'] = pd.to_datetime(df_drive['DATA'], format='%Y-%m')
     df_drive['ANO'] = df_drive['DATA'].dt.year
     df_drive = df_drive[df_drive['ANO'] != 2025]
     df_drive = df_drive.drop(columns=['ANO'])
-    ###
-    
     sigla = read_parquet_file_from_drive('sigla.parquet')
-
     sigla['UO'] = sigla['UO'].astype('object')
-
-    # Verificar o tamanho do DataFrame antes da adição da coluna
     print('Antes da adição da coluna, o df tinha:', df.shape)
-
-    # Criar um dicionário para mapear UO para SIGLA_UO
     sigla_dict = sigla.set_index('UO')['SIGLA_UO'].to_dict()
-
-    # Adicionar a coluna SIGLA_UO ao DataFrame df
     df['SIGLA_UO'] = df['UO'].map(sigla_dict)
-
-    # Verificar o tamanho do DataFrame após a adição da coluna
     print('Depois da adição da coluna, o df tem:', df.shape)
-
-    # Implementação da DATA
     df['DATA'] = df['ANO'].astype(str) + '-' + df['MES'].astype(str)
     df['DATA'] = pd.to_datetime(df['DATA'], format='%Y-%m')
     df.drop(['ANO', 'MES'], axis=1, inplace=True)
 
-    # Ordenando as colunas
     df = df[['DATA','PODER', 'UO', 'SIGLA_UO', 'DESCRICAO_UO', 'UG', 'DESCRICAO_UG', 'FUNCAO',
         'DESCRICAO_FUNCAO', 'SUB_FUNCAO', 'DESCRICAO_SUB_FUNCAO', 'PROGRAMA',
         'PROGRAMA_DESCRICAO', 'PROJETO', 'PROJETO_DESCRICAO', 'PT',
@@ -98,15 +80,11 @@ def funcao_sefaz_dotacao():
 
     df['DESCRICAO_UO'] = df['DESCRICAO_UO'].astype(str)
     df['DESCRICAO_UG'] = df['DESCRICAO_UG'].astype(str)
-
-
     df['DESCRICAO_UG'] = df['DESCRICAO_UG'].str.upper().str.strip().apply(lambda x: unidecode(x))
-
-
     df['DESCRICAO_UG'] = df['DESCRICAO_UG'].str.upper().str.strip()
 
     def unificar_descricao(df):
-        # Encontrar a descrição com maior comprimento para cada UG
+
         maiores_descricoes_ug = df.groupby('UG')['DESCRICAO_UG'].apply(lambda x: x.loc[x.str.len().idxmax()])
         maiores_descricoes_uo = df.groupby('UO')['DESCRICAO_UO'].apply(lambda x: x.loc[x.str.len().idxmax()])
         

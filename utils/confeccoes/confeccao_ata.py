@@ -1,21 +1,13 @@
 import streamlit as st
-import pandas as pd
+import tempfile
+from weasyprint import HTML
+
 from utils.confeccoes.formatar import (
     digitacao,
     titulo_dinamico,mostrar_tabela_pdf, 
     inserir_imagem_centrada_relatorio,
     cabecalho_dinamico
 )
-
-
-from docx import Document
-from docx.shared import Pt, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-import re
-import tempfile
-from weasyprint import HTML
-import markdown
-import tempfile
 
 def gerar_pdf_weasy_ata_cpof(conteudo_pdf, nome_arquivo="relatorio.pdf"):
     # Juntar o conteúdo e converter markdown → HTML
@@ -92,7 +84,6 @@ def gerar_pdf_weasy_ata_cpof(conteudo_pdf, nome_arquivo="relatorio.pdf"):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
         HTML(string=html_final).write_pdf(f.name)
         return f.name
-
 
 with st.container():  # LIMPAR A SESSÃO PARA OS GRÁFICOS E TABELS
 

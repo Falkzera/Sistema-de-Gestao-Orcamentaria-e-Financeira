@@ -56,7 +56,6 @@ def funcao_mdic_comercio_exterior():
     df.drop(columns=['year', 'monthNumber', 'chapterCode'], inplace=True)
     df['CATEGORIA'] = df['CATEGORIA'].replace({'export': 'EXPORTACAO', 'import': 'IMPORTACAO'})
     df['NO_MUN'] = df['NO_MUN'].str.replace(' - AL', '', regex=False)
-    # transformando em inteiro VL_FOB
     df['VL_FOB'] = df['VL_FOB'].astype(float).round(2)
 
     parquet_buffer = BytesIO()

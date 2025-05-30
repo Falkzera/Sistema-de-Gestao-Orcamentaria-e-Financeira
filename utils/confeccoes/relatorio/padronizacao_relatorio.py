@@ -1,8 +1,25 @@
-from weasyprint import HTML
-import markdown
+import re
 import tempfile
+from weasyprint import HTML
+from docx import Document
+from docx.shared import Pt, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+
 
 def gerar_pdf_weasy_padrao(conteudo_pdf, nome_arquivo="relatorio.pdf"):
+    """
+    Gera um arquivo PDF a partir de conteúdo HTML utilizando a biblioteca WeasyPrint, aplicando um estilo padrão para relatórios.
+    Parâmetros:
+        conteudo_pdf (list of str): Lista de strings contendo o conteúdo HTML que será inserido no corpo do PDF.
+        nome_arquivo (str, opcional): Nome sugerido para o arquivo PDF gerado. Padrão é "relatorio.pdf".
+    Retorna:
+        str: Caminho temporário para o arquivo PDF gerado.
+    Observações:
+        - O conteúdo fornecido deve estar em HTML, pois não há conversão de Markdown para HTML nesta função.
+        - O PDF é salvo em um arquivo temporário, cujo caminho é retornado pela função.
+        - O estilo aplicado inclui formatação de texto, títulos, margens e numeração de páginas.
+    """
+
     # Juntar o conteúdo e converter markdown → HTML
     html_conteudo = "\n".join(conteudo_pdf)  # conteúdo já é HTML, não precisa de conversão
     html_final = f"""
@@ -77,15 +94,6 @@ def gerar_pdf_weasy_padrao(conteudo_pdf, nome_arquivo="relatorio.pdf"):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
         HTML(string=html_final).write_pdf(f.name)
         return f.name
-
-
-
-
-from docx import Document
-from docx.shared import Pt, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-import re
-import tempfile
 
 def gerar_docx(conteudo_pdf, nome_arquivo="relatorio.docx"):
     """

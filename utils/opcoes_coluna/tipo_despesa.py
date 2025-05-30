@@ -1,5 +1,3 @@
-# utils/buscadores/origem_recursos.py
-
 opcoes_tipo_despesa = [
     "Aquisição",
     "Capacitação",

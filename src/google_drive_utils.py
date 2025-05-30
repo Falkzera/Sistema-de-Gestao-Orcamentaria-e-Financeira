@@ -1,11 +1,16 @@
 import json
+import os
+import io
+
+import gspread
+import tempfile
+
+import pandas as pd
 import streamlit as st
+
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
-import io
-import pandas as pd
-import gspread
+from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 
 def authenticate_service_account():
     """
@@ -36,10 +41,6 @@ def download_file(service, file_id):
         status, done = downloader.next_chunk()
     file_data.seek(0)
     return file_data
-
-import os
-import tempfile
-from googleapiclient.http import MediaFileUpload
 
 def upload_file_to_drive(service, file_buffer, file_name, folder_id):
     """
@@ -170,8 +171,6 @@ def read_parquet_file_from_drive(file_name):
     # Ler o arquivo Parquet e retornar o DataFrame
     return pd.read_parquet(file_data)
 
-
-
 def read_geojson_file_from_drive(file_name):
     """
     Lê um arquivo `.geojson` de uma pasta específica no Google Drive a partir de seu nome
@@ -208,8 +207,6 @@ def read_geojson_file_from_drive(file_name):
 
     # Retorna o caminho do arquivo local
     return local_file_path
-
-
 
 def download_file_by_name(service, folder_id, file_name):
     """

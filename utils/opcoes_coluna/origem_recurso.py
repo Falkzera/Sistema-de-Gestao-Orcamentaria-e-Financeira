@@ -1,5 +1,3 @@
-# utils/buscadores/origem_recursos.py
-
 opcoes_origem_recursos = [
     "Sem Cobertura",
     "Redução/Anulação",

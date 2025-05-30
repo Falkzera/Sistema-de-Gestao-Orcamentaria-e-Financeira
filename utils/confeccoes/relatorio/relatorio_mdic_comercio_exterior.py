@@ -1,25 +1,13 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 
 from src.google_drive_utils import read_parquet_file_from_drive
 from utils.confeccoes.formatar import (
     digitacao,
     titulo_dinamico,
-    gerar_grafico_barra,
     gerar_grafico_linha,
-    gerar_grafico_pizza,
     mostrar_tabela_pdf,
-    formatar_valor_arredondado_sem_cifrao,
-    maior_pico_producao,
-    media_producao,
-    menor_pico_producao,
-    ranking_producao,
-    recorte_temporal_ano_passado,
-    formatar_valor,
     formatar_valor2,
-    formatar_valor_sem_cifrao,
-    por_extenso,
     formatar_valor_usd,
 
 )
@@ -79,9 +67,6 @@ def montar_relatorio_mdic_comercio_exterior(df):
                 df_importacao['Importação'] = df_importacao['Importação'].apply(formatar_valor_usd)
                 df_exportacao['Município'] = df_exportacao['Município'].str.title()
                 df_importacao['Município'] = df_importacao['Município'].str.title()
-
-                # df_exportacao = df_exportacao.set_index('Município')
-                # df_importacao = df_importacao.set_index('Município')
                 df_exportacao_importacao = pd.concat([df_exportacao, df_importacao], axis=1)
 
 
@@ -302,4 +287,3 @@ def montar_relatorio_mdic_comercio_exterior(df):
             seguido de {df_tri_ano_atual[df_tri_ano_atual['CATEGORIA'] == 'IMPORTACAO'].groupby('NO_SH2_POR')['VL_FOB'].sum().nlargest(3).iloc[1:].idxmax().lower()}</b> \
             e {df_tri_ano_atual[df_tri_ano_atual['CATEGORIA'] == 'IMPORTACAO'].groupby('NO_SH2_POR')['VL_FOB'].sum().nlargest(3).iloc[2:].idxmax().lower()}</b>. \
             ")
-

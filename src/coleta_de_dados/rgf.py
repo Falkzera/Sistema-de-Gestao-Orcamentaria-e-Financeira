@@ -1,13 +1,11 @@
-import pandas as pd
-from siconfipy import get_fiscal, get_budget, br_cods
+from siconfipy import get_fiscal
 from datetime import datetime
-from src.google_drive_utils import update_base
 from io import BytesIO
+from src.google_drive_utils import update_base
 
 ano_atual = datetime.now().year
 ano_passado = ano_atual - 1
 anos = list(range(2023, ano_atual))
-
 
 def funcao_rgf():
 
@@ -33,12 +31,10 @@ def funcao_rgf():
         ('DIVIDA_CONSOLIDADA_SOBRE_RCL', DIVIDA_CONSOLIDADA_SOBRE_RCL)
     ]
 
-    # Salva os DataFrames em arquivos Parquet
     for nome_base, base in bases:
         parquet_buffer = BytesIO()
         base.to_parquet(parquet_buffer, index=False)
         parquet_buffer.seek(0)
 
-        # Usando o nome da base como parte do nome do arquivo
         file_name = nome_base + '.parquet'
         update_base(parquet_buffer, file_name)

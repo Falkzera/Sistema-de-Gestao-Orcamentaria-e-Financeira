@@ -8,7 +8,6 @@ import pandas as pd
 from num2words import num2words
 from utils.ui.dataframe import mostrar_tabela
 
-
 def formatar_valor(valor, casas_decimais=2):
     negativo = valor < 0  
     valor = abs(valor)  
@@ -569,9 +568,26 @@ def gerar_grafico_linha(x, y, titulo_pdf="Gráfico: Linha", nomes_series=None, c
 
     inserir_grafico_pdf(fig, titulo=titulo_pdf)
 
-
-
 def gerar_grafico_barra(x, y, titulo_pdf="Gráfico: Barras", cores=None, texto_formatado=None, mostrar_na_tela=False, fonte="Arial, sans-serif", linhas_verticais=False, linhas_horizontais=False, agrupar=True, qtd_agrupar=5):
+    """
+    Gera um gráfico de barras a partir de listas de valores, com opções de agrupamento, personalização de cores e exibição.
+
+    Parâmetros:
+        x (list): Lista de rótulos para o eixo x.
+        y (list): Lista de valores para o eixo y.
+        titulo_pdf (str, opcional): Título do gráfico para exportação em PDF. Padrão é "Gráfico: Barras".
+        cores (list, opcional): Lista de cores para as barras. Se None, utiliza cores padrão.
+        texto_formatado (list, opcional): Lista de textos a serem exibidos nas barras. Se None, não exibe texto.
+        mostrar_na_tela (bool, opcional): Se True, exibe o gráfico na tela usando Streamlit. Padrão é False.
+        fonte (str, opcional): Fonte a ser utilizada nos textos do gráfico. Padrão é "Arial, sans-serif".
+        linhas_verticais (bool, opcional): Se True, exibe linhas verticais no gráfico. Padrão é False.
+        linhas_horizontais (bool, opcional): Se True, exibe linhas horizontais no gráfico. Padrão é False.
+        agrupar (bool, opcional): Se True, agrupa os menores valores em uma barra "Outros" caso exceda qtd_agrupar. Padrão é True.
+        qtd_agrupar (int, opcional): Quantidade máxima de barras antes de agrupar o restante em "Outros". Padrão é 5.
+
+    Retorna:
+        None. O gráfico é exibido na tela (opcional) e inserido em um PDF -> Com PDF Weasy.
+    """
 
     df = pd.DataFrame({'x': x, 'y': y})
     df = df.sort_values(by='y', ascending=False).reset_index(drop=True)
@@ -650,20 +666,38 @@ def gerar_grafico_barra(x, y, titulo_pdf="Gráfico: Barras", cores=None, texto_f
 
     inserir_grafico_pdf(fig, titulo=titulo_pdf)
 
-
 def gerar_relatorio_origem_recurso_com_graficos(df_filtrado, origem_recurso, n=3, tipo_grafico='nenhum'):
+    """
+    Gera um relatório detalhado sobre solicitações de crédito sem cobertura para uma determinada origem de recurso,
+    incluindo análise dos órgãos solicitantes, valores totais, fontes de recursos, e a geração opcional de gráficos.
+
+    Parâmetros:
+        df_filtrado (pd.DataFrame): DataFrame filtrado contendo os dados das solicitações.
+        origem_recurso (str): Origem de recurso a ser analisada.
+        n (int, opcional): Número de órgãos com maiores montantes a serem destacados no relatório (padrão: 3).
+        tipo_grafico (str, opcional): Tipo de gráfico a ser gerado. Pode ser 'pizza', 'barra' ou 'nenhum' (padrão: 'nenhum').
+
+    Funcionalidades:
+        - Filtra os dados pela origem de recurso especificada.
+        - Calcula e exibe o número de órgãos solicitantes, valor total solicitado e fontes de recursos envolvidas.
+        - Destaca os n órgãos com maiores montantes, detalhando processos, fontes e grupos de despesas.
+        - Exibe uma tabela formatada dos dados filtrados.
+        - Gera gráficos de pizza ou barra, conforme especificado, para visualização dos valores por órgão.
+        - Caso não haja órgãos solicitantes para a origem de recurso, informa o usuário e encerra a execução.
+
+    Observações:
+        - Requer funções auxiliares como `digitacao`, `formatar_valor`, `por_extenso_reais`, `mostrar_tabela_pdf`,
+          `gerar_grafico_pizza`, `gerar_grafico_barra` e `formatar_valor_arredondado`.
+        - Assegura que nenhuma ação gráfica é tomada se `tipo_grafico` for 'nenhum'.
+    """
 
     df_origem_recurso = df_filtrado[df_filtrado['Origem de Recursos'] == origem_recurso]
-
     maiores_montantes = df_origem_recurso.groupby('Órgão (UO)')['Valor'].sum().nlargest(n)
-
     qtd_orgaos = df_origem_recurso['Órgão (UO)'].nunique()
     qntd_valor_total = df_origem_recurso['Valor'].sum()
     fontes_recurso = df_origem_recurso['Fonte de Recursos'].unique()
-    
     fontes_recurso_texto = ', '.join(fontes_recurso)
 
-    # Gerando o texto detalhado
     if qtd_orgaos == 0:
         digitacao(
             f'''Não foram encontrados órgãos solicitantes para a origem de recurso {origem_recurso}.'''
@@ -684,7 +718,6 @@ def gerar_relatorio_origem_recurso_com_graficos(df_filtrado, origem_recurso, n=3
         nome_tabela=f"Tabela de Dados - {origem_recurso}"
     )
 
- 
     for idx, (orgao, valor) in enumerate(maiores_montantes.items()):
 
         df_maior_montante = df_origem_recurso[df_origem_recurso['Órgão (UO)'] == orgao]
@@ -753,8 +786,6 @@ def formatar_valor_br(valor_str: str) -> str:
         return f"{valor_float:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
     except:
         return valor_str  # Retorna original se erro
-
-
 
 def maior_pico_producao(df):
     """
@@ -827,14 +858,23 @@ def ranking_producao(df):
         
     return df_ranking
 
-def recorte_temporal_ano_passado(df): # MUDEI PARA ANO PRESENTE
+def recorte_temporal_ano_passado(df): # MUDEI PARA ANO PRESENTE ENTÃO O NOME DA VARIAVEL NÃO ESTÁ CORRETO! 
     ano_max = df['DATA'].max().year
     df_ano_passado = df[(df['DATA'].dt.year == ano_max)].copy()
     return df_ano_passado
 
-
-
 def formatar_valor_usd(valor, casas_decimais=2):
+    """
+    Formata um valor numérico em dólares americanos (USD) para uma string legível, utilizando separadores de milhar, casas decimais e sufixos de escala (mil, milhões, bilhões).
+    Parâmetros:
+        valor (float ou int): O valor numérico a ser formatado.
+        casas_decimais (int, opcional): Número de casas decimais a serem exibidas. Padrão é 2.
+    Retorna:
+        str: O valor formatado como string, incluindo o símbolo de dólar, separadores de milhar, casas decimais e sufixo de escala apropriado.
+    Exemplo:
+        formatar_valor_usd(1234567.89) -> 'US$ 1.234.567,89 milhões'
+        formatar_valor_usd(-987654321.12, 1) -> 'US$ -987.654.321,1 milhões'
+    """
     negativo = valor < 0  
     valor = abs(valor)  
     
@@ -853,14 +893,23 @@ def formatar_valor_usd(valor, casas_decimais=2):
 
     numero_formatado = f"{valor_formatado:.{casas_decimais}f}"
     parte_inteira, parte_decimal = numero_formatado.split(".")
-    
     parte_inteira_formatada = ".".join([parte_inteira[max(i - 3, 0):i] for i in range(len(parte_inteira) % 3, len(parte_inteira) + 1, 3) if i])
-
     resultado = f"US$ {'-' if negativo else ''}{parte_inteira_formatada},{parte_decimal} {sufixo}".strip()
 
     return resultado
 
 def formatar_valor_arredondado_sem_cifrao(valor, casas_decimais=2):
+    """
+    Formata um valor numérico em uma string arredondada, sem o símbolo de cifrão, utilizando abreviações para milhares, milhões e bilhões.
+    Parâmetros:
+        valor (float ou int): O valor numérico a ser formatado.
+        casas_decimais (int, opcional): Número de casas decimais a serem exibidas. Padrão é 2.
+    Retorna:
+        str: O valor formatado como string, com separador de milhar (ponto), separador decimal (vírgula) e sufixo apropriado ("mil", "Mi", "Bi"), sem símbolo de moeda.
+    Exemplo:
+        formatar_valor_arredondado_sem_cifrao(1234567.89)
+        # Retorna: '1.234,57 Mi'
+    """
     negativo = valor < 0  
     valor = abs(valor)  
     
@@ -880,7 +929,6 @@ def formatar_valor_arredondado_sem_cifrao(valor, casas_decimais=2):
     numero_formatado = f"{valor_formatado:.{casas_decimais}f}"
     parte_inteira, parte_decimal = numero_formatado.split(".")
     parte_inteira_formatada = ".".join([parte_inteira[max(i - 3, 0):i] for i in range(len(parte_inteira) % 3, len(parte_inteira) + 1, 3) if i])
-
     resultado = f"{'-' if negativo else ''}{parte_inteira_formatada},{parte_decimal} {sufixo}".strip()
 
     return resultado

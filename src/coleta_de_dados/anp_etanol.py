@@ -1,9 +1,7 @@
-
-import pandas as pd
 import requests
+import pandas as pd
 from io import BytesIO
 from src.google_drive_utils import update_base
-
 
 def funcao_anp_etanol():
 
@@ -28,11 +26,3 @@ def funcao_anp_etanol():
         print(f"CSV parsing failed: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
-
-
-
-
-
-

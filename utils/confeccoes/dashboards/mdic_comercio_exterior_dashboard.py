@@ -9,7 +9,6 @@ from utils.confeccoes.formatar import formatar_valor_usd
 from src.google_drive_utils import read_parquet_file_from_drive
 from utils.confeccoes.dashboards.mdic_bandeiras import get_flag_mapping as _get_flag_mapping
 
-
 def azul_gradient(valor):
     limites = [
         (0, [230, 244, 255, 180]),

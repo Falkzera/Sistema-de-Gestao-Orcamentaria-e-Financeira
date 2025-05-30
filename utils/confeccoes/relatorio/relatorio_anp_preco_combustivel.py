@@ -7,14 +7,7 @@ from utils.confeccoes.formatar import (
     titulo_dinamico,
     gerar_grafico_barra,
     gerar_grafico_linha,
-    gerar_grafico_pizza,
     mostrar_tabela_pdf,
-    formatar_valor_arredondado_sem_cifrao,
-    maior_pico_producao,
-    media_producao,
-    menor_pico_producao,
-    ranking_producao,
-    recorte_temporal_ano_passado,
     formatar_valor,
     formatar_valor2,
 )
@@ -560,5 +553,3 @@ def montar_relatorio_anp_preco_combustivel(df):
             \
             Por fim, o GNV registrou uma variação de {formatar_valor2(df_tri_estado_anual_gnv['VARIAÇÃO %'].values[-1])}, \
             com uma alteração de {formatar_valor(df_tri_estado_anual_gnv['DIFERENCA'].values[-1])} no preço médio. ")
-
-

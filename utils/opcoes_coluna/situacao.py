@@ -1,5 +1,3 @@
-# utils/buscadores/origem_recursos.py
-
 opcoes_situacao = [
     "Análise - SOP",
     "Análise - SEFAZ",
@@ -25,7 +23,6 @@ opcoes_situacao = [
     "Análise - SUPLAN/SEPLAG",
     "Minuta de decreto confeccionada"
 ]
-
 
 mapa_cores_situacao = {
     # Análises em andamento (tons de amarelo/laranja)

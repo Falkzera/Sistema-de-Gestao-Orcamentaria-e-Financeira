@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import plotly.graph_objects as go
 from src.google_drive_utils import read_parquet_file_from_drive
 from utils.confeccoes.formatar import formatar_valor2
@@ -108,7 +107,3 @@ def render_rgf_dashboard():
             st.plotly_chart(fig, use_container_width=True)
 
             st.expander(f':blue[Tabela] - Dívida Consolidada / RCL Ajustada', expanded=False).data_editor(df, use_container_width=True, hide_index=True)
-
-
-
-

@@ -1,10 +1,3 @@
-# utils/buscadores/orgao_uo.py
-
-# em vez de escrever um a um, realizar uma logica para coletar os valores atraves de st.session_state.base[Órgão (UO)] e depois fazer um set para retirar os duplicados
-# e depois fazer um sort para deixar em ordem alfabética
-# e depois fazer um list para transformar em lista novamente
-# e depois fazer um append para adicionar a lista de opções
-
 opcoes_orgao_uo = [
     "DIVERSOS ÓRGÃOS",
     "GABCIVIL",

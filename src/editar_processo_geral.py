@@ -35,9 +35,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
     
     salvar_btn = False
 
-
-
-    # na coluna Data de Recebimento, pegar a data que estiver e colocar no formato dd/mm/aaaa
     if pd.notna(processo["Data de Recebimento"]):
         try:
             df.at[row_index, "Data de Recebimento"] = pd.to_datetime(processo["Data de Recebimento"]).strftime("%d/%m/%Y")
@@ -52,9 +49,7 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
         except Exception as e:
             st.error(f"Erro ao formatar a Data de Publicação: {e}")
 
-
-
-    with st.form("form_edicao"): # CONSTRUÇÃO DO FORMS PARA EDIÇÃO
+    with st.form("form_edicao"): 
 
         def editar_select(label, opcoes, coluna): # Função para Construção dos Campos de selectbox.
             valor_atual = processo[coluna]
@@ -67,7 +62,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
         
         # TODOS OS CAMPOS E OPÇÕES POSSÍVEIS!
 
-        # Lista de campos e suas configurações
         campos_config = [
             {
             "nome": "Tipo de Crédito",
@@ -199,7 +193,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
         for campo in campos_config:
             nome = campo["nome"]
-            # if nome not in processo.index:
             if nome not in processo.index:
                 continue
 
@@ -222,11 +215,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             elif campo["tipo"] == "valor":
                 valores_editados[nome] = st.text_input("Valor **(Editar)**", value=str(formatar_valor_sem_cifrao(processo[nome])))
 
-            # # oara Data de Publicação
-            # elif campo["tipo"] == "texto" and campo["nome"] == "Data de Recebimento":
-            #     valor_atual = "" if pd.isna(processo[nome]) else str(processo[nome])
-            #     valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value=valor_atual, placeholder="dd/mm/aaaa")
-                
             elif campo["tipo"] == "decreto":
                 valor_atual = "" if pd.isna(processo[nome]) else str(processo[(nome)])
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value=formatar_numero_decreto(valor_atual))
@@ -238,7 +226,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             else:
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="")
 
-        # Sanitização dos campos livres após coleta dos valores
         erros = []
 
         # Sanitização e validação dos campos livres
@@ -321,8 +308,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                     except Exception as e:
                         st.error(f"Erro ao converter Data de Recebimento: {e}")
                         st.stop()
-
-                
 
                 agora = datetime.now()
                 base = df
@@ -424,22 +409,13 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                             modificacoes.append(f"{nome}: {valor_antigo} -> {novo_valor}")
                             base.at[row_index, nome] = novo_valor
 
-
                     else:
                         if (is_empty_or_none(valor_antigo) and not is_empty_or_none(novo_valor)) or \
                             (not is_empty_or_none(valor_antigo) and str(novo_valor) != str(valor_antigo)):
                             modificacoes.append(f"{nome}: {valor_antigo} -> {novo_valor}")
                             base.at[row_index, nome] = novo_valor
 
-
-
-
-
-
-
                 base.loc[row_index, "Última Edição"] = st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S")
-
-
 
                 if modificacoes:
                     try:
@@ -462,7 +438,6 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                 if not modificacoes:
                     st.info("ℹ️ Nenhuma modificação foi realizada pois o mesmo permanece inalterado. ℹ️")
 
-
 def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
 
         if selected_row:
@@ -482,7 +457,6 @@ def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
                     st.session_state["processo_edit"] = numero_proc
                     st.rerun()
 
-                # Resetar o clique do botão quando o processo for modificado ou edição finalizada
                 if "processo_edit" not in st.session_state and st.session_state.get("editar_processo_btn_clicked"):
                     st.session_state["editar_processo_btn_clicked"] = False
 

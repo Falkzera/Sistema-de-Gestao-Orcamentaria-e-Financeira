@@ -12,7 +12,6 @@ from utils.confeccoes.formatar import (
     formatar_valor_arredondado_sem_cifrao,
     maior_pico_producao,
     media_producao,
-    menor_pico_producao,
     ranking_producao,
     recorte_temporal_ano_passado
 )
@@ -104,7 +103,6 @@ def montar_relatorio_anp_etanol(df):
             # Divide a coluna PRODUÇÃO por 1000 para ambos os dataframes
             df_data_al_anidro['PRODUÇÃO'] = df_data_al_anidro['PRODUÇÃO'] / 1000
             df_data_al_hidratado['PRODUÇÃO'] = df_data_al_hidratado['PRODUÇÃO'] / 1000
-
 
             gerar_grafico_linha(
                 x=[df_data_al_anidro['DATA'], df_data_al_hidratado['DATA']],
@@ -213,7 +211,6 @@ def montar_relatorio_anp_etanol(df):
         atingiu o seu máximo {maior_pico_producao(df_al)} m³. \
        ")
         
-
         with st.container(): # Gráfico!
 
             df_data_al = df_al.groupby('DATA')['PRODUÇÃO'].sum().reset_index()
@@ -228,7 +225,6 @@ def montar_relatorio_anp_etanol(df):
                 cores=['#0b4754', '#54180b'] * len(df_data_al),
                 texto_formatado=df_data_al['PRODUÇÃO'].apply(formatar_valor_arredondado_sem_cifrao),
             )
-
 
             digitacao(f" \
             Abaixo podemos observar o ranking de produção de etanol por estado e por região. \
@@ -267,10 +263,6 @@ def montar_relatorio_anp_etanol(df):
             df_ne['UNIDADE DA FEDERAÇÃO'] = df_ne['UNIDADE DA FEDERAÇÃO'].str.title()
             mostrar_tabela_pdf(ranking_producao(df_ne), nome_tabela=f"Ranking de Produção de etanol - Nordeste")
             
-
-
-
-
             df_ne['UNIDADE DA FEDERAÇÃO'] = df_ne['UNIDADE DA FEDERAÇÃO'].replace({'Paraiba': 'Paraíba'})
             gerar_grafico_pizza(labels=df_ne['UNIDADE DA FEDERAÇÃO'], values=df_ne['PRODUÇÃO'], titulo_pdf=f'Produção de etanol por Estados do Nordeste',
                                 cores=cores_1)

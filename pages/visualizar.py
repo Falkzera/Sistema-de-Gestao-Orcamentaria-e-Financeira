@@ -12,7 +12,6 @@ from utils.confeccoes.resumos import mostrar_resumos_por_permissao
 
 import streamlit_nested_layout # NÃO PODE SER EXCLUÍDO, CASO CONTRÁRIO OCORRE ERRO DE IMPORTAÇÃO
 
-
 padrao_importacao_pagina()
 
 titulos_pagina("Visualizador de Processos", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder-open"></i>' )

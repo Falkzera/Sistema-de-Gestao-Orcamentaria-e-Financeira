@@ -1,5 +1,12 @@
 import streamlit as st
 
+from src.base import (
+    func_load_base_cpof,
+    func_load_historico_cpof,
+    func_load_base_credito_sop_geo,
+    func_load_historico_credito_sop_geo
+)
+
 def controle_sessao():
     """
     Inicializa as variáveis de sessão necessárias para o controle de autenticação.
@@ -65,12 +72,7 @@ def carregar_base_por_usuario(
     Permite forçar recarregamento do Google Sheets.
     Retorna o DataFrame já armazenado em session_state pelo base.py.
     """
-    from src.base import (
-        func_load_base_cpof,
-        func_load_historico_cpof,
-        func_load_base_credito_sop_geo,
-        func_load_historico_credito_sop_geo
-    )
+
 
     # Mapeamento do nome da base para a função de carregamento e chave do session_state
     bases = {

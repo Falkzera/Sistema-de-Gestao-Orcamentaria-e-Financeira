@@ -17,7 +17,6 @@ from utils.confeccoes.formatar import (
     recorte_temporal_ano_passado
 )
 
-
 def montar_relatorio_anp_gn(df):
 
     with st.container():  # CARREGAMENTO DATASET

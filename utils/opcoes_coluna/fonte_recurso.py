@@ -1,5 +1,3 @@
-# utils/buscadores/orgao_uo.py
-
 opcoes_fonte_recurso = [
     "500",
     "501",

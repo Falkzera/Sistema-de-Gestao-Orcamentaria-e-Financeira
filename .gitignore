@@ -2,4 +2,3 @@
 .venv/
 /.venv
 .streamlit/secrets.toml
-notebook/

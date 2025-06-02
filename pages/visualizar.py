@@ -8,7 +8,7 @@ from utils.auth.auth import carregar_base_por_usuario
 from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes
 from utils.filtros.filtro import filtros_de_busca
 from src.editar_processo_geral import editar_unico_processo
-from utils.confeccoes.resumos import mostrar_resumos_por_permissao
+from utils.confeccoes.resumos import mostrar_resumos_por_permissao, formatar_valor
 
 import streamlit_nested_layout # NÃO PODE SER EXCLUÍDO, CASO CONTRÁRIO OCORRE ERRO DE IMPORTAÇÃO
 
@@ -28,6 +28,9 @@ with st.container(): # Exibição da Tabela
         enable_click=True,
         nome_tabela=f"{nome_base}",
     )
+
+    if "Valor" in df.columns:
+        st.write(f"**Valor Total:** {formatar_valor(df['Valor'].sum())} | **Quantidade de processos:** {len(df)}")
 
     tem_modificacoes = inicializar_e_gerenciar_modificacoes(selected_row)
 

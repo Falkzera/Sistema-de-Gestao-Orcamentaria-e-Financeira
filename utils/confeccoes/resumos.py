@@ -81,19 +81,19 @@ def resumo_publicados_geo(df):
         hoje = datetime.now().date()
 
         datas_disponiveis = df['Data de Publicação'].dropna().unique()
-        datas_disponiveis = [data for data in datas_disponiveis if re.match(r"\d{2}/\d{2}/\d{4}", data)]
-        datas_disponiveis = [datetime.strptime(data, "%d/%m/%Y").date() for data in datas_disponiveis]
+
+        datas_disponiveis = [data for data in datas_disponiveis if re.match(r"\d{4}-\d{2}-\d{2}", data)]
+        datas_disponiveis = [datetime.strptime(data, "%Y-%m-%d").date() for data in datas_disponiveis]
 
         datas_disponiveis.append(hoje)
         datas_disponiveis.sort(reverse=True)
-
         hoje = st.selectbox(
             label="Datas disponíveis:",
             options=datas_disponiveis,
-            format_func=lambda x: x.strftime("%d/%m/%Y"), 
+            format_func=lambda x: x.strftime("%d/%m/%Y"),  # Mostra em dd/mm/aaaa
         )
 
-        st.session_state.data_atual = hoje.strftime("%d/%m/%Y")
+        st.session_state.data_atual = hoje.strftime("%Y-%m-%d")  # Pesquisa/filtra em yyyy-mm-dd
 
         titulos_pagina(f"Resumos de Créditos Publicados - ({st.session_state.data_atual})", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-calendar"></i>')
 

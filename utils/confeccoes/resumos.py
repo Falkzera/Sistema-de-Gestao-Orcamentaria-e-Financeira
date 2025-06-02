@@ -87,6 +87,10 @@ def resumo_publicados_geo(df):
 
         datas_disponiveis.append(hoje)
         datas_disponiveis.sort(reverse=True)
+
+        # <<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>
+        # Há um bug de, quando tem uma publicação no dia atual, o selectbox mostra duplicado
+
         hoje = st.selectbox(
             label="Datas disponíveis:",
             options=datas_disponiveis,
@@ -94,23 +98,25 @@ def resumo_publicados_geo(df):
         )
 
         st.session_state.data_atual = hoje.strftime("%Y-%m-%d")  # Pesquisa/filtra em yyyy-mm-dd
+        # mas mostra pro usuario em dd/mm/aaaa
+        st.session_state.data_atual_display = hoje.strftime("%d/%m/%Y")
 
-        titulos_pagina(f"Resumos de Créditos Publicados - ({st.session_state.data_atual})", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-calendar"></i>')
+        titulos_pagina(f"Resumos de Créditos Publicados - ({st.session_state.data_atual_display})", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-calendar"></i>')
 
         df_resumo_publicado = df[df['Data de Publicação'] == st.session_state.data_atual]
 
         if df_resumo_publicado.empty:
-            st.info(f"⚠️ Não há processos publicados em ({st.session_state.data_atual}).")
+            st.info(f"⚠️ Não há processos publicados em ({st.session_state.data_atual_display}).")
             st.stop()
 
         if df_resumo_publicado is not df_resumo_publicado.empty:
-            
-            st.success(f"{(len(df_resumo_publicado))} ({por_extenso(len(df_resumo_publicado)).title()}) Processos Publicados em ({st.session_state.data_atual}).")
+
+            st.success(f"{(len(df_resumo_publicado))} ({por_extenso(len(df_resumo_publicado)).title()}) Processos Publicados em ({st.session_state.data_atual_display}).")
 
             colunas_escolhidas = ['Órgão (UO)','Nº do decreto', 'Fonte de Recursos', 'Valor']
             limite = calcular_limite_credito_atual()
 
-            descricao_texto = f"_Relação dos *Publicados em {st.session_state.data_atual}*_\n\n"
+            descricao_texto = f"_Relação dos *Publicados em {st.session_state.data_atual_display}*_\n\n"
             for index, row in df_resumo_publicado.iterrows():
                 descricao = f""
                 for coluna in colunas_escolhidas:

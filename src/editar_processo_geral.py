@@ -3,6 +3,10 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
+import warnings
+
+warnings.filterwarnings("ignore", category=pd.errors.SettingWithCopyWarning)
+
 from utils.opcoes_coluna.tipo_despesa import opcoes_tipo_despesa
 from utils.opcoes_coluna.orgao_uo import opcoes_orgao_uo
 from utils.opcoes_coluna.fonte_recurso import opcoes_fonte_recurso

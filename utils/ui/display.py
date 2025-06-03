@@ -134,6 +134,7 @@ def configurar_cabecalho_principal():
 def titulos_pagina(
     text,
     font_size="3.1em",
+    # text_color="#3064AD",
     text_color="#3064AD",
     icon=None
 ):

@@ -607,7 +607,9 @@ def gerar_grafico_barra(x, y, titulo_pdf="Gráfico: Barras", cores=None, texto_f
         df = pd.concat([df_sem_outros, df_outros], ignore_index=True)
 
     x = df['x']
-    y = df['y']
+    y = df['y'] # <<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>> O VALOR AQUI, ESTÁ EM UMA ORDEM E O 'X' ESTÁ EM OUTRA ORDEM, ISSO DA CONFLITO QUANDO É COLOCADO "OUTROS"
+
+
     # texto_formatado = texto_formatado if texto_formatado else y
 
     if cores is None:

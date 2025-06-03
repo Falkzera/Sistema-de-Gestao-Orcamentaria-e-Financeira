@@ -297,20 +297,20 @@ token_uri = "https://oauth2.googleapis.com/token"
 sigof_project/
 ├── 📄 Home.py                           # Página principal (250 linhas)
 │   ├── Dashboard de indicadores orçamentários
-│   ├── Métricas do orçamento 2025 (R$ 18,5 bi)
-│   ├── Cálculo de limite de execução (10%)
+│   ├── Métricas do orçamento
+│   ├── Cálculo de limite de execução
 │   └── Gráficos de pizza e indicadores visuais
 │
-├── 📁 pages/                            # Módulos da aplicação (444 linhas)
-│   ├── 🔐 login.py                      # Sistema de autenticação (34 linhas)
-│   ├── ➕ cadastro.py                   # Cadastro de processos (24 linhas)
+├── 📁 pages/                           # Módulos da aplicação (444 linhas)
+│   ├── 🔐 login.py                     # Sistema de autenticação (34 linhas)
+│   ├── ➕ cadastro.py                  # Cadastro de processos (24 linhas)
 │   ├── 👁️ visualizar.py                # Visualização e edição (50 linhas)
 │   ├── 💬 canal_resposta_cpof.py       # Interface CPOF (76 linhas)
 │   ├── 📊 relatorio.py                 # Geração de relatórios (159 linhas)
 │   ├── 📜 historico.py                 # Auditoria e histórico (71 linhas)
 │   └── 📈 dashboards.py                # Dashboards especializados (30 linhas)
 │
-├── 📁 src/                              # Lógica de negócio (1.229 linhas)
+├── 📁 src/                             # Lógica de negócio (1.229 linhas)
 │   ├── 🗄️ base.py                      # Camada de dados (55 linhas)
 │   │   ├── func_load_base_cpof()
 │   │   ├── func_load_base_credito_sop_geo()
@@ -343,12 +343,12 @@ sigof_project/
 │   │   └── carregar_base_por_usuario()
 │   │
 │   ├── 📋 confeccoes/                   # Relatórios (2.565 linhas - 27% do código)
-│   │   ├── 🎨 formatar.py              # Formatação (935 linhas)
+│   │   ├── 🎨 formatar.py               # Formatação (935 linhas)
 │   │   ├── 📄 gerar_baixar_confeccao.py # PDFs (155 linhas)
-│   │   ├── 📝 confeccao_ata.py         # Atas CPOF (138 linhas)
-│   │   ├── 📊 resumos.py               # Resumos orçamentários (340 linhas)
-│   │   ├── 📈 dashboards/              # Dashboards específicos
-│   │   └── 📋 relatorio/               # Relatórios especializados
+│   │   ├── 📝 confeccao_ata.py          # Atas CPOF (138 linhas)
+│   │   ├── 📊 resumos.py                # Resumos orçamentários (340 linhas)
+│   │   ├── 📈 dashboards/               # Dashboards específicos
+│   │   └── 📋 relatorio/                # Relatórios especializados
 │   │
 │   ├── 💰 limite/                       # Cálculos orçamentários (26 linhas)
 │   │   ├── ORÇAMENTO_APROVADO_2025 = R$ 18.544.820.466,00

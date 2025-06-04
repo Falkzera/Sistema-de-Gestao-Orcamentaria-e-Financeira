@@ -17,7 +17,8 @@ padrao_importacao_pagina()
 titulos_pagina("Visualizador de Processos", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder-open"></i>' )
 
 with st.container(): # Carregamento da base PRECISA VER UMA FORMA DE EVITAR O RECARREGAMENTO DA BASE CONSTANTEMENTE!
-    df, nome_base, nome_base_historica = carregar_base_por_usuario() # Tempo de execução está obivamente atrlado a essa função aqui, depurar ela mais tarde
+    df, nome_base, nome_base_historica = carregar_base_por_usuario(apenas_base=True) # Tempo de execução está obivamente atrlado a essa função aqui, depurar ela mais tarde
+        
     df = filtros_de_busca(df)
 
 with st.container(): # Exibição da Tabela

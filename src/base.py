@@ -50,6 +50,24 @@ def func_load_historico_credito_sop_geo(forcar_recarregar=False):
     if "historico" not in st.session_state or forcar_recarregar:
         conn = st.connection("gsheets", type=GSheetsConnection)
         base = conn.read(worksheet="Histórico Crédito SOP/GEO", ttl=300)
+        base["Fonte de Recursos"] = base["Fonte de Recursos"].astype(str)
         st.session_state.historico_credito_sop_geo = base
 
     return st.session_state.historico_credito_sop_geo
+
+def func_load_base_ted(forcar_recarregar=False):
+    if "base" not in st.session_state or forcar_recarregar:
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        base = conn.read(worksheet="Base TED", ttl=300)
+
+        st.session_state.base_ted = base
+
+    return st.session_state.base_ted
+
+def func_load_historico_ted(forcar_recarregar=False):
+    if "historico" not in st.session_state or forcar_recarregar:
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        base = conn.read(worksheet="Histórico TED", ttl=300)
+        st.session_state.historico_ted = base
+
+    return st.session_state.historico_ted

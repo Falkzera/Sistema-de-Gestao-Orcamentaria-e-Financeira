@@ -165,11 +165,9 @@ def resumo_geral_geo(df):
         if numero_processo:
             processo_selecionado = df[df["Nº do Processo"].isin(numero_processo)]
 
-            colunas_desejadas = ["Nº do Processo", "Órgão (UO)", "Objetivo", "Fonte de Recursos", "Valor", "Opnião SOP"]
+            colunas_desejadas = ["Nº do Processo", "Origem de Recursos", "Órgão (UO)", "Objetivo", "Fonte de Recursos", "Valor", "Opnião SOP"]
 
-             
-
-            cada_tipo_origem = processo_selecionado['Origem de Recursos'].unique()  
+            cada_tipo_origem = processo_selecionado['Origem de Recursos'].unique()
 
             processo_selecionado = processo_selecionado.copy()
             processo_selecionado['Valor_sem_formatacao'] = (
@@ -201,12 +199,7 @@ def resumo_geral_geo(df):
                 for _, row in processos_por_origem.iterrows():
                     descricao = f"\n"
                     for coluna in colunas_desejadas:
-                        # Só adiciona se não for vazia ou NaN
-                        # import pandas as pd
-                        # if coluna in row and pd.notna(row[coluna]) and str(row[coluna]).strip() != "":
-                        #     descricao += f"*{coluna}*: {row[coluna]}\n"
 
-                    # OPNIÃO SOP NÃO SALVANDO NA EDIÇÃO DE PROCESSOS
                         if coluna in row:
                             import pandas as pd
                             if coluna == "Opnião SOP" and pd.isna(row[coluna]):

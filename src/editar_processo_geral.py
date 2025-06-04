@@ -16,7 +16,7 @@ from utils.opcoes_coluna.contabilizar_limite import opcoes_contabilizar_limite
 from utils.opcoes_coluna.origem_recurso import opcoes_origem_recursos
 from utils.confeccoes.formatar import formatar_valor_sem_cifrao
 from utils.opcoes_coluna.validadores.numero_decreto import validar_numero_decreto, formatar_numero_decreto
-from utils.opcoes_coluna.validadores.data import validar_data_recebimento, validar_data_publicacao
+from utils.opcoes_coluna.validadores.data import validar_data_recebimento, validar_data_publicacao, validar_data_encerramento
 from utils.opcoes_coluna.validadores.numero_processo import validar_numero_processo
 from utils.opcoes_coluna.validadores.valor import validar_valor
 from utils.opcoes_coluna.validadores.numero_ata import validar_numero_ata
@@ -39,19 +39,35 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
     
     salvar_btn = False
 
-    if pd.notna(processo["Data de Recebimento"]):
-        try:
-            df.at[row_index, "Data de Recebimento"] = pd.to_datetime(processo["Data de Recebimento"]).strftime("%d/%m/%Y")
-            processo["Data de Recebimento"] = df.at[row_index, "Data de Recebimento"]
-        except Exception as e:
-            st.error(f"Erro ao formatar a Data de Recebimento: {e}")
+    try:
+        if pd.notna(processo["Data de Recebimento"]):
+            try:
+                df.at[row_index, "Data de Recebimento"] = pd.to_datetime(processo["Data de Recebimento"]).strftime("%d/%m/%Y")
+                processo["Data de Recebimento"] = df.at[row_index, "Data de Recebimento"]
+            except Exception as e:
+                st.error(f"Erro ao formatar a Data de Recebimento: {e}")
+    except KeyError as e:
+        print("Coluna Inexistente:", e)
 
-    if pd.notna(processo["Data de Publicação"]):
-        try:
-            df.at[row_index, "Data de Publicação"] = pd.to_datetime(processo["Data de Publicação"]).strftime("%d/%m/%Y")
-            processo["Data de Publicação"] = df.at[row_index, "Data de Publicação"]
-        except Exception as e:
-            st.error(f"Erro ao formatar a Data de Publicação: {e}")
+    try:
+        if pd.notna(processo["Data de Publicação"]):
+            try:
+                df.at[row_index, "Data de Publicação"] = pd.to_datetime(processo["Data de Publicação"]).strftime("%d/%m/%Y")
+                processo["Data de Publicação"] = df.at[row_index, "Data de Publicação"]
+            except Exception as e:
+                st.error(f"Erro ao formatar a Data de Publicação: {e}")
+    except KeyError as e:
+        print("Coluna Inexistente:", e)
+    
+    try:
+        if pd.notna(processo["Data de Encerramento"]):
+            try:
+                df.at[row_index, "Data de Encerramento"] = pd.to_datetime(processo["Data de Encerramento"]).strftime("%d/%m/%Y")
+                processo["Data de Encerramento"] = df.at[row_index, "Data de Encerramento"]
+            except Exception as e:
+                st.error(f"Erro ao formatar a Data de Encerramento: {e}")
+    except KeyError as e:
+        print("Coluna Inexistente:", e)
 
     with st.form("form_edicao"): 
 
@@ -144,6 +160,11 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             "label": "Data de Publicação"
             },
             {
+            "nome": "Data de Encerramento", # <<<<<<<<<<<<<<<<< PROCESSO DO TED <<<<<<<<<<<<<<<<<
+            "tipo": "texto",
+            "label": "Data de Encerramento"
+            },
+            {
             "nome": "Nº ATA",
             "tipo": "texto",
             "label": "Nº ATA"
@@ -152,7 +173,39 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             "nome": "Nº do decreto",
             "tipo": "decreto",
             "label": "Nº do decreto"
-            }
+            },
+            {
+            "nome": "Nº do TED", #<<<<<<<<<< PROCESSO DO TED DAQUI PARA BAIXO<<<<<<<<<<<<<<<
+            "tipo": "texto",
+            "label": "Nº do TED"
+            },
+            {
+            "nome": "Termo Aditivo",
+            "tipo": "texto",
+            "label": "Termo Aditivo"
+            },
+            {
+            "nome": "UO Concedente",
+            "tipo": "select",
+            "opcoes": opcoes_orgao_uo,
+            "label": "UO Concedente"
+            },
+            {
+            "nome": "UO Executante",
+            "tipo": "select",
+            "opcoes": opcoes_orgao_uo,
+            "label": "UO Executante"
+            },
+            {
+            "nome": "Programa de Trabalho",
+            "tipo": "texto",
+            "label": "Programa de Trabalho"
+            },
+            {
+            "nome": "Natureza de Despesa",
+            "tipo": "texto",
+            "label": "Natureza de Despesa" # <<<<<<<<<<<<<<<<<< 
+            },
         ]
 
         def desempacotar_multiselect(valor_atual, opcoes):
@@ -279,6 +332,9 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             if "Data de Publicação" in valores_editados:
                 if not validar_data_publicacao(valores_editados["Data de Publicação"]):
                     erros.append("Data de publicação inválida.")
+            if "Data de Encerramento" in valores_editados:
+                if not validar_data_encerramento(valores_editados["Data de Encerramento"]):
+                    erros.append("Data de encerramento inválida.")
             if "Nº do decreto" in valores_editados:
                 if not validar_numero_decreto(valores_editados["Nº do decreto"]):
                     erros.append("Número do decreto inválido, utilize o padrão: 123456")
@@ -311,6 +367,13 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                             valores_editados["Data de Recebimento"] = pd.to_datetime(valores_editados["Data de Recebimento"], format="%d/%m/%Y").strftime("%Y-%m-%d")
                     except Exception as e:
                         st.error(f"Erro ao converter Data de Recebimento: {e}")
+                        st.stop()
+                if "Data de Encerramento" in valores_editados:
+                    try:
+                        if valores_editados["Data de Encerramento"]:
+                            valores_editados["Data de Encerramento"] = pd.to_datetime(valores_editados["Data de Encerramento"], format="%d/%m/%Y").strftime("%Y-%m-%d")
+                    except Exception as e:
+                        st.error(f"Erro ao converter Data de Encerramento: {e}")
                         st.stop()
 
                 agora = datetime.now()
@@ -397,7 +460,7 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                                 valor_formatado += f" e {novo_list[-1]}"
                             base.at[row_index, nome] = valor_formatado
 
-                    elif nome in ["Data de Recebimento", "Data de Publicação"]: # Este bloco impede que a mudança do formato da data seja considerada uma modificação, pois o formato é apenas visual.
+                    elif nome in ["Data de Recebimento", "Data de Publicação", "Data de Encerramento"]: # Este bloco impede que a mudança do formato da data seja considerada uma modificação, pois o formato é apenas visual.
                         def normalizar_data(data):
                             if is_empty_or_none(data):
                                 return None

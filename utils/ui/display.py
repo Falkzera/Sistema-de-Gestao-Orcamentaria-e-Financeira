@@ -59,6 +59,9 @@ def exibir_menu_navegacao():
             criar_botao_navegacao(info["nome_exibicao"], info["caminho"], info["icone"], "primary")
 
     st.sidebar.markdown("---")
+    if st.sidebar.button("Sobre o Sistema", use_container_width=True, type='primary'):
+        # st.session_state.selected_page = "Sobre"
+        st.switch_page("pages/sobre.py")
     if st.sidebar.button("SAIR", use_container_width=True, type='secondary'):
 
         for key in st.session_state.keys():

@@ -4,7 +4,9 @@ from src.base import (
     func_load_base_cpof,
     func_load_historico_cpof,
     func_load_base_credito_sop_geo,
-    func_load_historico_credito_sop_geo
+    func_load_historico_credito_sop_geo,
+    func_load_base_ted,
+    func_load_historico_ted
 )
 
 def controle_sessao():
@@ -65,7 +67,7 @@ def carregar_base_por_usuario(
     titulo_selectbox="Selecione a base de dados:",
     chave_selectbox="base_selectbox",
     forcar_recarregar=False,
-    apenas_historico=False,
+    apenas_base=False,
 ):
     """
     Carrega a base de dados apropriada com base no usuário logado e nas permissões definidas em secrets.toml.
@@ -79,13 +81,16 @@ def carregar_base_por_usuario(
         "Base CPOF": {"func": func_load_base_cpof, "session_key": "base_cpof"},
         "Histórico CPOF": {"func": func_load_historico_cpof, "session_key": "historico_cpof"},
         "Base Crédito SOP/GEO": {"func": func_load_base_credito_sop_geo, "session_key": "base_creditos_sop_geo"},
-        "Histórico Crédito SOP/GEO": {"func": func_load_historico_credito_sop_geo, "session_key": "historico_credito_sop_geo"}
+        "Histórico Crédito SOP/GEO": {"func": func_load_historico_credito_sop_geo, "session_key": "historico_credito_sop_geo"},
+        "Base TED": {"func": func_load_base_ted, "session_key": "base_ted"},
+        "Histórico TED": {"func": func_load_historico_ted, "session_key": "historico_ted"}
     }
     historico_map = {
         "Base CPOF": "Histórico CPOF",
         "Base Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
         "Histórico CPOF": "Histórico CPOF",
-        "Histórico Crédito SOP/GEO": "Histórico Crédito SOP/GEO"
+        "Histórico Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
+        "Base TED": "Histórico TED",
     }
 
     if "username" not in st.session_state or not st.session_state.username:
@@ -99,8 +104,21 @@ def carregar_base_por_usuario(
     if not bases_permitidas:
         st.error(f"Usuário {username} não tem permissão para acessar nenhuma base de dados.")
         return None, "Nenhuma base carregada", None
+    
+    if apenas_base:
+        # Permitir apenas as bases principais (não históricas) na seleção
+        bases_historicas = [
+            "Histórico CPOF",
+            "Histórico Crédito SOP/GEO",
+            "Histórico TED"
+        ]
+        bases_permitidas = [base for base in bases_permitidas if base not in bases_historicas]
 
-    if len(bases_permitidas) >= 4:
+    else:
+        # Permitir apenas bases que existem no mapeamento 'bases'
+        bases_permitidas = [base for base in bases_permitidas if base in bases]
+
+    if len(bases_permitidas) >= 2:
         nome_base_selecionada = st.selectbox(
             titulo_selectbox,
             bases_permitidas,
@@ -125,8 +143,5 @@ def carregar_base_por_usuario(
         st.error(f"Erro ao carregar a base '{nome_base_selecionada}'.")
         return None, nome_base_selecionada, None
     
-    if apenas_historico: # ADICIONAR AQUI LÓGICA DE ESCOLHER QUAL BASE HISTÓRICO CARREGAR, IMPEDINDO QUE SEJA SELECIONADO ATRAVÉS DO SELECTBOX AS BASES QUE NÃO SEJAM HISTÓRICAS
-        return base_dados, nome_base_selecionada, None
-
     nome_base_historica = historico_map.get(nome_base_selecionada, None)
     return base_dados, nome_base_selecionada, nome_base_historica

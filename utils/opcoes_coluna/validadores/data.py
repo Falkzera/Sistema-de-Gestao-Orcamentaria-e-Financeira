@@ -35,3 +35,15 @@ def validar_data_publicacao(data_str: str) -> bool:
     data = datetime.strptime(data_str.strip(), "%d/%m/%Y")
     now = datetime.now()
     return data <= now  # Impedir data futura
+
+def validar_data_encerramento(data_str: str) -> bool:
+    """
+    Valida a data de encerramento como opcional, permitindo que esteja em branco,
+    mas se preenchida, deve estar no formato DD/MM/AAAA e pode ser uma data futura.
+    """
+    if not data_str or data_str.strip() == "":
+        return True  # Permitir campo em branco
+    if not validar_data_br(data_str):
+        return False
+    data = datetime.strptime(data_str.strip(), "%d/%m/%Y")
+    return data # Impedir data futura

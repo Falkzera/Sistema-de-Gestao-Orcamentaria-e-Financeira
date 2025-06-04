@@ -4,7 +4,7 @@ from utils.ui.display import padrao_importacao_pagina, titulos_pagina
 from utils.confeccoes.dashboards.rgf_dashboard import render_rgf_dashboard
 from utils.confeccoes.dashboards.mdic_comercio_exterior_dashboard import render_mdic_comercio_exterior_dashboard
 
-from utils.confeccoes.dashboards.paines_externos import observatorio_orcamento
+from utils.confeccoes.dashboards.paines_externos import observatorio_orcamento, preco_combustivel
 
 st.set_page_config(page_title="Dashboards", page_icon="📊", layout="wide")
 
@@ -16,6 +16,8 @@ col1, col2, col3 = st.columns([1, 1, 1])
 
 if "pagina_atual" not in st.session_state:
     st.session_state["pagina_atual"] = "Observatório do Orçamento"
+
+# salvar em cache
 
 with col1:
     if st.button("Observatório do Orçamento", use_container_width=True, type="primary"):

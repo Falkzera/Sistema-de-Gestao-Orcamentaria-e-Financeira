@@ -86,6 +86,9 @@ def inicializar_e_gerenciar_modificacoes(selected_row, escolha_coluna=None):
         elif "Situação" in selected_row:
             coluna_status = "Situação"
             print("Coluna Situação encontrada na tabela.")
+        elif "Situação TED" in selected_row:
+            coluna_status = "Situação TED"
+            print("Coluna Situação TED encontrada na tabela.")
         else:
             st.warning("Não existe coluna 'Deliberação' nem 'Situação' na tabela. A ação não pode ser completada.")
             return False
@@ -172,6 +175,8 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
             coluna_status = "Deliberação"
         elif "Situação Anterior" in exemplo_mod and "Situação Atual" in exemplo_mod:
             coluna_status = "Situação"
+        elif "Situação TED Anterior" in exemplo_mod and "Situação TED Atual" in exemplo_mod:
+            coluna_status = "Situação TED"
         else:
             st.warning("Não foi possível identificar a coluna de status para salvar as modificações.")
         # return

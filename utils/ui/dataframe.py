@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Dict, Any
 from utils.opcoes_coluna.deliberacao import mapa_cores_deliberacao, opcoes_deliberacao
 from utils.opcoes_coluna.situacao import mapa_cores_situacao, opcoes_situacao
+from utils.opcoes_coluna.situacao_ted import mapa_cores_situacao_ted, opcoes_situacao_ted
 
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode, DataReturnMode, GridUpdateMode
 
@@ -167,6 +168,10 @@ def build_grid_options(
             nome_coluna_status = "Deliberação"
             mapa_cores_coluna = mapa_cores_deliberacao
             opcoes_coluna = opcoes_deliberacao
+        elif "Situação TED" in columns:
+            nome_coluna_status = "Situação TED"
+            mapa_cores_coluna = mapa_cores_situacao_ted
+            opcoes_coluna = opcoes_situacao_ted
 
     # Estilo condicional da coluna de status (deliberacao/situacao), se existir
     if nome_coluna_status and nome_coluna_status in columns and mapa_cores_coluna:

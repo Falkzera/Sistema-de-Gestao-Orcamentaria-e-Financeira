@@ -1,4 +1,4 @@
-opcoes_situacao = [
+opcoes_situacao = sorted([
     "Análise - SOP",
     "Análise - SEFAZ",
     "Não Reconhecido - SEFAZ",
@@ -21,8 +21,10 @@ opcoes_situacao = [
     "Atendido - Decreto Folha",
     "Aguardando correção da unidade",
     "Análise - SUPLAN/SEPLAG",
-    "Minuta de decreto confeccionada"
-]
+    "Minuta de decreto confeccionada",
+    "Em vigência",
+    "CONCLUIDO",
+])
 
 mapa_cores_situacao = {
     # Análises em andamento (tons de amarelo/laranja)

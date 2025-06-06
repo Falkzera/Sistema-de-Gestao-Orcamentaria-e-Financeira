@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from streamlit_tags import st_tags
 
 import warnings
 
@@ -24,6 +25,181 @@ from utils.opcoes_coluna.validadores.numero_ata import validar_numero_ata
 from src.salvar_alteracoes import salvar_base
 from src.salvar_historico import salvar_modificacao
 from utils.opcoes_coluna.validadores.validar_campos_livres import validar_sanitizar_campos_livres
+
+# Ao salvar, desempacotar lista para string "A", "A e B", "A, B e C"
+def lista_para_string_tags(tags_list):
+    tags_list = [str(x).strip() for x in tags_list if str(x).strip()]
+    if not tags_list:
+        return ""
+    if len(tags_list) == 1:
+        return tags_list[0]
+    if len(tags_list) == 2:
+        return f"{tags_list[0]} e {tags_list[1]}"
+    return ", ".join(tags_list[:-1]) + f" e {tags_list[-1]}"
+
+def string_para_lista_tags(valor):
+    if not valor or (isinstance(valor, float) and pd.isna(valor)):
+        return []
+    if isinstance(valor, list):
+        # Se já for lista, retorna limpa
+        return [str(v).strip() for v in valor if str(v).strip()]
+    if isinstance(valor, str):
+        valor = valor.strip()
+        # Remove colchetes e aspas se vier como string de lista
+        if valor.startswith("[") and valor.endswith("]"):
+            import ast
+            try:
+                lista_valores = ast.literal_eval(valor)
+                return [str(v).strip() for v in lista_valores if str(v).strip()]
+            except Exception:
+                pass
+        # Trata formato "A, B e C"
+        if " e " in valor:
+            partes = valor.rsplit(" e ", 1)
+            primeiros = [v.strip() for v in partes[0].split(",") if v.strip()]
+            ult = partes[1].strip()
+            result = primeiros
+            if ult:
+                result.append(ult)
+            return result
+        # Trata apenas vírgulas
+        elif "," in valor:
+            return [v.strip() for v in valor.split(",") if v.strip()]
+        elif valor:
+            return [valor]
+    return []
+
+def desempacotar_multiselect(valor_atual, opcoes):
+            """
+            Converte string formatada tipo 'A, B e C' ou lista ['A, B e C'] para lista ['A', 'B', 'C']
+            """
+            import ast
+            if pd.isna(valor_atual) or valor_atual == "":
+                return []
+            if isinstance(valor_atual, list):
+                # Se for lista com um único elemento string já formatada, desempacota
+                if len(valor_atual) == 1 and isinstance(valor_atual[0], str) and " e " in valor_atual[0]:
+                    valor_atual = valor_atual[0]
+                else:
+                    return [str(v) for v in valor_atual if str(v) in opcoes]
+            if isinstance(valor_atual, str):
+                # Tenta converter string de lista para lista real
+                if valor_atual.startswith("[") and valor_atual.endswith("]"):
+                    try:
+                        lista_valores = ast.literal_eval(valor_atual)
+                        if isinstance(lista_valores, list):
+                            return [str(v) for v in lista_valores if str(v) in opcoes]
+                    except Exception:
+                        pass
+                # Desempacotar string tipo 'A, B e C'
+                if " e " in valor_atual:
+                    partes = valor_atual.rsplit(" e ", 1)
+                    primeiros = [v.strip() for v in partes[0].split(",") if v.strip()]
+                    ult = partes[1].strip()
+                    result = [v for v in primeiros if v in opcoes]
+                    if ult in opcoes:
+                        result.append(ult)
+                    return result
+                elif "," in valor_atual:
+                    return [v.strip() for v in valor_atual.split(",") if v.strip() in opcoes]
+                elif valor_atual in opcoes:
+                    return [valor_atual]
+            return []
+
+def is_empty_or_none(val):
+    return val is None or (isinstance(val, float) and pd.isna(val)) or str(val).strip() == ""
+
+def normalize_multiselect(val):
+    """
+    Converte qualquer representação (string formatada, lista, etc) em lista de strings, ignorando ordem.
+    Corrige erro de ValueError para arrays numpy/pandas.
+    """
+
+    # Corrigir erro para arrays numpy/pandas
+    if isinstance(val, (np.ndarray, pd.Series)):
+        val = val.tolist()
+    # Checagem segura para pd.isna
+    try:
+        if pd.isna(val):
+            return []
+    except Exception:
+        pass
+    if val == "" or val is None:
+        return []
+    if isinstance(val, list):
+        # Se for lista com um único elemento string já formatada, desempacota
+        if len(val) == 1 and isinstance(val[0], str) and " e " in val[0]:
+            val = val[0]
+        else:
+            return sorted([str(v).strip() for v in val])
+    if isinstance(val, str):
+        import ast
+        # Tenta converter string de lista para lista real
+        if val.startswith("[") and val.endswith("]"):
+            try:
+                lista_valores = ast.literal_eval(val)
+                if isinstance(lista_valores, list):
+                    return sorted([str(v).strip() for v in lista_valores])
+            except Exception:
+                pass
+        # Desempacotar string tipo 'A, B e C'
+        if " e " in val:
+            partes = val.rsplit(" e ", 1)
+            primeiros = [v.strip() for v in partes[0].split(",") if v.strip()]
+            ult = partes[1].strip()
+            result = primeiros
+            if ult:
+                result.append(ult)
+            return sorted([v for v in result if v])
+        elif "," in val:
+            return sorted([v.strip() for v in val.split(",") if v.strip()])
+        elif val.strip():
+            return [val.strip()]
+    return []
+
+def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
+
+    if selected_row:
+        numero_proc = selected_row["Nº do Processo"]
+
+        with st.container(): # VISUALIZAÇÃO DOS DETALHES
+
+            st.write(f"🔍 Você selecionou o processo: **{numero_proc}**")
+            st.session_state["editar_processo_btn_clicked"] = True
+
+            if "processo_edit" in st.session_state:
+                if st.session_state["processo_edit"] != numero_proc:
+                    del st.session_state["processo_edit"]
+                    st.session_state["editar_processo_btn_clicked"] = False
+                    st.rerun()
+            else:
+                st.session_state["processo_edit"] = numero_proc
+                st.rerun()
+
+            if "processo_edit" not in st.session_state and st.session_state.get("editar_processo_btn_clicked"):
+                st.session_state["editar_processo_btn_clicked"] = False
+
+            if "processo_edit" in st.session_state:
+                formulario_edicao_processo(nome_base, df, nome_base_historica)
+
+def normalize_tags(val):
+    if not val or (isinstance(val, float) and pd.isna(val)):
+        return []
+    if isinstance(val, list):
+        return sorted([str(v).strip() for v in val if str(v).strip()])
+    if isinstance(val, str):
+        if " e " in val:
+            partes = val.rsplit(" e ", 1)
+            primeiros = [v.strip() for v in partes[0].split(",") if v.strip()]
+            ult = partes[1].strip()
+            result = primeiros
+            if ult:
+                result.append(ult)
+            return sorted([v for v in result if v])
+        elif "," in val:
+            return sorted([v.strip() for v in val.split(",") if v.strip()])
+        elif val.strip():
+            return [val.strip()]
 
 def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
@@ -198,55 +374,20 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             },
             {
             "nome": "Programa de Trabalho",
-            "tipo": "texto",
+            "tipo": "tags",
             "label": "Programa de Trabalho"
             },
             {
             "nome": "Natureza de Despesa",
-            "tipo": "texto",
-            "label": "Natureza de Despesa" # <<<<<<<<<<<<<<<<<< 
+            "tipo": "tags",
+            "label": "Natureza de Despesa"
             },
         ]
 
-        def desempacotar_multiselect(valor_atual, opcoes):
-            """
-            Converte string formatada tipo 'A, B e C' ou lista ['A, B e C'] para lista ['A', 'B', 'C']
-            """
-            import ast
-            if pd.isna(valor_atual) or valor_atual == "":
-                return []
-            if isinstance(valor_atual, list):
-                # Se for lista com um único elemento string já formatada, desempacota
-                if len(valor_atual) == 1 and isinstance(valor_atual[0], str) and " e " in valor_atual[0]:
-                    valor_atual = valor_atual[0]
-                else:
-                    return [str(v) for v in valor_atual if str(v) in opcoes]
-            if isinstance(valor_atual, str):
-                # Tenta converter string de lista para lista real
-                if valor_atual.startswith("[") and valor_atual.endswith("]"):
-                    try:
-                        lista_valores = ast.literal_eval(valor_atual)
-                        if isinstance(lista_valores, list):
-                            return [str(v) for v in lista_valores if str(v) in opcoes]
-                    except Exception:
-                        pass
-                # Desempacotar string tipo 'A, B e C'
-                if " e " in valor_atual:
-                    partes = valor_atual.rsplit(" e ", 1)
-                    primeiros = [v.strip() for v in partes[0].split(",") if v.strip()]
-                    ult = partes[1].strip()
-                    result = [v for v in primeiros if v in opcoes]
-                    if ult in opcoes:
-                        result.append(ult)
-                    return result
-                elif "," in valor_atual:
-                    return [v.strip() for v in valor_atual.split(",") if v.strip() in opcoes]
-                elif valor_atual in opcoes:
-                    return [valor_atual]
-            return []
-
         # Dicionário para armazenar os valores editados
         valores_editados = {}
+        with st.container(border=True):
+            st.info("ℹ️ Se a opção de edição não aparecer, tente aumentar ou diminuir o zoom da página (CTRL + ou CTRL -) ℹ️")
 
         for campo in campos_config:
             nome = campo["nome"]
@@ -259,27 +400,62 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             elif campo["tipo"] == "multiselect":
                 valor_atual = processo[nome]
                 default = desempacotar_multiselect(valor_atual, campo["opcoes"])
+                # st.write(f"**DEFAULT MULTISELECT:** {valor_atual}")  # Exibe o valor atual para referência
                 valores_editados[nome] = st.multiselect(
                     f"{campo['label']} **(Editar)**",
                     options=campo["opcoes"],
                     default=default,
-                    key=f"multiselect_{nome}"  # Adiciona uma chave única para evitar conflitos
+                    key=f"multiselect_{nome}"
                 )
+            elif campo["tipo"] == "tags":
+                
+                # Corrige: sempre converte string "A, B e C" para lista ["A", "B", "C"] para o st_tags
+                valor_atual = processo[nome]
+                # st.write(f"**VALOR ATUAL:** {valor_atual}")  # Exibe o valor atual para referência
+                default = string_para_lista_tags(valor_atual)
+                # default = valor_atual
+                # st.write(f"**Valor DEFAULT:** {default}")  # Exibe o valor atual para referência
+                # Garante que default seja sempre uma lista (mesmo se None ou vazio)
+                if not default:
+                    default = []
+
+                # Garante que default seja uma lista de strings únicas e limpas
+                # st.write(f"**Valor DEFAULT (após limpeza):** {default}")  # Exibe o valor atual para referência
+                # Use a dynamic key that changes with the default value to force re-render
+
+                # NOTA: ST_TAGS neste caso está com um bug, que provavelmente vem de dentro da biblioteca, algo relacionado com o estado de sessão do componente imagino. Pois em determinado momento ele não renderiza o proprio widget, ficnado um espaço em branco, e não exibe o valor atual, mesmo que esteja correto. A solução é clicar no botão de editar novamente, e ele renderiza corretamente.
+                # e para resolver é necessario: adicionar uma chave única para o componente
+                # adicionando a chave unica:
+                # st.write(f"**Chave única:** {f'tags_{nome}_{default}'}")  # Exibe a chave única para referência
+
+                # Adicionar KEY no parametro abaixo só atrapalhou!
+
+                # Aqui claramente existe um bug do wigdet st_tags que deve ter algum conflito por estar inserido dentro de um form!
+                # Ocorre que as vezes, quando se modifica a seleção em select_row de dataframe, ocasiona um "sumiço" do widget, porém a solução para o usuário de maniera rápida é modificar o zoom da página e o widget volta a aparecer kkkkkk.
+                # então CTRL + ou CTRL - para aumentar ou diminuir o zoom da página, e o widget volta a aparecer. Ridículo, mas é o que temos no momento.
+
+
+                tags = st_tags(
+                    label=f"{campo['label']} **(Editar)**",
+                    text='Pressione enter para adicionar',
+                    value=default,
+                )
+
+                valores_editados[nome] = lista_para_string_tags(tags)
+                # st.write(f"Valores editados: {valores_editados[nome]}")  # Exibe os valores editados para referência
+
             elif campo["tipo"] == "texto":
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="" if pd.isna(processo[nome]) else str(processo[nome]))
             elif campo["tipo"] == "area":
                 valores_editados[nome] = editar_texto(campo["label"], nome, tipo="area")
             elif campo["tipo"] == "valor":
                 valores_editados[nome] = st.text_input("Valor **(Editar)**", value=str(formatar_valor_sem_cifrao(processo[nome])))
-
             elif campo["tipo"] == "decreto":
                 valor_atual = "" if pd.isna(processo[nome]) else str(processo[(nome)])
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value=formatar_numero_decreto(valor_atual))
-
             elif campo["tipo"] == "Nº ATA":
                 valor_atual = "" if pd.isna(processo[nome]) else str(processo[(nome)])
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value=(valor_atual))
-
             else:
                 valores_editados[nome] = st.text_input(f"{campo['label']} **(Editar)**", value="")
 
@@ -379,58 +555,7 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                 agora = datetime.now()
                 base = df
                 modificacoes = []
-
-                def is_empty_or_none(val):
-                    return val is None or (isinstance(val, float) and pd.isna(val)) or str(val).strip() == ""
-
-                def normalize_multiselect(val):
-                    """
-                    Converte qualquer representação (string formatada, lista, etc) em lista de strings, ignorando ordem.
-                    Corrige erro de ValueError para arrays numpy/pandas.
-                    """
-
-                    # Corrigir erro para arrays numpy/pandas
-                    if isinstance(val, (np.ndarray, pd.Series)):
-                        val = val.tolist()
-                    # Checagem segura para pd.isna
-                    try:
-                        if pd.isna(val):
-                            return []
-                    except Exception:
-                        pass
-                    if val == "" or val is None:
-                        return []
-                    if isinstance(val, list):
-                        # Se for lista com um único elemento string já formatada, desempacota
-                        if len(val) == 1 and isinstance(val[0], str) and " e " in val[0]:
-                            val = val[0]
-                        else:
-                            return sorted([str(v).strip() for v in val])
-                    if isinstance(val, str):
-                        import ast
-                        # Tenta converter string de lista para lista real
-                        if val.startswith("[") and val.endswith("]"):
-                            try:
-                                lista_valores = ast.literal_eval(val)
-                                if isinstance(lista_valores, list):
-                                    return sorted([str(v).strip() for v in lista_valores])
-                            except Exception:
-                                pass
-                        # Desempacotar string tipo 'A, B e C'
-                        if " e " in val:
-                            partes = val.rsplit(" e ", 1)
-                            primeiros = [v.strip() for v in partes[0].split(",") if v.strip()]
-                            ult = partes[1].strip()
-                            result = primeiros
-                            if ult:
-                                result.append(ult)
-                            return sorted([v for v in result if v])
-                        elif "," in val:
-                            return sorted([v.strip() for v in val.split(",") if v.strip()])
-                        elif val.strip():
-                            return [val.strip()]
-                    return []
-
+            
                 for nome, novo_valor in valores_editados.items():
                     valor_antigo = processo[nome]
 
@@ -460,7 +585,27 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                                 valor_formatado += f" e {novo_list[-1]}"
                             base.at[row_index, nome] = valor_formatado
 
-                    elif nome in ["Data de Recebimento", "Data de Publicação", "Data de Encerramento"]: # Este bloco impede que a mudança do formato da data seja considerada uma modificação, pois o formato é apenas visual.
+                    elif nome in ["Programa de Trabalho", "Natureza de Despesa"]:
+                        # Normaliza ambos para lista de strings e compara ignorando ordem e formatação
+
+                        antigo_list = normalize_tags(valor_antigo)
+                        # st.write(f"Valor antigo: {antigo_list}")  # Exibe o valor antigo para referência
+                        novo_list = normalize_tags(novo_valor)
+                        # esse valor que deve estar em tags !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        # st.write(f"Valor novo: {novo_list}")  # Exibe o valor novo para referência
+                        if antigo_list != novo_list:
+                            modificacoes.append(f"{nome}: {antigo_list} -> {novo_list}")
+                            # Salva no formato string "A, B e C"
+                            if len(novo_list) == 0:
+                                valor_formatado = ""
+                            elif len(novo_list) == 1:
+                                valor_formatado = str(novo_list[0])
+                            else:
+                                valor_formatado = ", ".join(str(x) for x in novo_list[:-1])
+                                valor_formatado += f" e {novo_list[-1]}"
+                            base.at[row_index, nome] = valor_formatado
+                    elif nome in ["Data de Recebimento", "Data de Publicação", "Data de Encerramento"]:
+                        # Este bloco impede que a mudança do formato da data seja considerada uma modificação, pois o formato é apenas visual.
                         def normalizar_data(data):
                             if is_empty_or_none(data):
                                 return None
@@ -504,28 +649,3 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
                 
                 if not modificacoes:
                     st.info("ℹ️ Nenhuma modificação foi realizada pois o mesmo permanece inalterado. ℹ️")
-
-def editar_unico_processo(selected_row, nome_base, df, nome_base_historica):
-
-        if selected_row:
-            numero_proc = selected_row["Nº do Processo"]
-
-            with st.container(): # VISUALIZAÇÃO DOS DETALHES
-
-                st.write(f"🔍 Você selecionou o processo: **{numero_proc}**")
-                st.session_state["editar_processo_btn_clicked"] = True
-
-                if "processo_edit" in st.session_state:
-                    if st.session_state["processo_edit"] != numero_proc:
-                        del st.session_state["processo_edit"]
-                        st.session_state["editar_processo_btn_clicked"] = False
-                        st.rerun()
-                else:
-                    st.session_state["processo_edit"] = numero_proc
-                    st.rerun()
-
-                if "processo_edit" not in st.session_state and st.session_state.get("editar_processo_btn_clicked"):
-                    st.session_state["editar_processo_btn_clicked"] = False
-
-                if "processo_edit" in st.session_state:
-                    formulario_edicao_processo(nome_base, df, nome_base_historica)

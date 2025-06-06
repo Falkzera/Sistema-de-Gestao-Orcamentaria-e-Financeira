@@ -69,7 +69,7 @@ if st.session_state.filtro_status in ["Processos Aguardando Resposta", "Processo
 
     if tem_modificacoes:
         
-        if st.button("Salvar ✅", type="primary"):
+        if st.button("Salvar", type="primary"):
             salvar_modificacoes_selectbox_mae("Histórico CPOF", "Base CPOF", df, escolha_coluna=membro_atual)
             st.session_state["forcar_recarregar"] = True
             del st.session_state["forcar_recarregar"]

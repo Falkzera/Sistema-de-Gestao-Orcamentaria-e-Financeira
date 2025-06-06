@@ -59,6 +59,7 @@ def func_load_base_ted(forcar_recarregar=False):
     if "base" not in st.session_state or forcar_recarregar:
         conn = st.connection("gsheets", type=GSheetsConnection)
         base = conn.read(worksheet="Base TED", ttl=300)
+        base["Fonte de Recursos"] = base["Fonte de Recursos"].astype(str)
 
         st.session_state.base_ted = base
 

@@ -1,17 +1,17 @@
-opcoes_deliberacao = [
+opcoes_deliberacao = sorted([
     "Aprovado",
     "Aprovado com condicionante",
     "Aprovado parcial",
     "Devolvido",
     "Diligência",
+    "Disponível aos Membros CPOF",
+    "Disponível para a próxima Reunião do CPOF",
     "Indeferido",
     "Intempestivo",
     "Material de consumo",
     "Segurar",
     "Vencido",
-    "Disponível aos Membros CPOF",
-    "Disponível para a próxima Reunião do CPOF",
-]
+])
 
 mapa_cores_deliberacao = {
     # Status de aprovação (tons de verde)

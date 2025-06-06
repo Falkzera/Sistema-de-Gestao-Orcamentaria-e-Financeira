@@ -3,6 +3,7 @@ opcoes_orgao_uo = [
     "GABCIVIL",
     "VICEGOV",
     "ALE",
+    "ENC. GERAIS",
     "TC",
     "AFUNCONTAS",
     "ESCOLA DE CONTAS",

@@ -58,6 +58,8 @@ def filtros_de_busca(df_filtrado):
         coluna_filtro = "Deliberação"
     elif "Situação" in df_filtrado.columns:
         coluna_filtro = "Situação"
+    elif "Situação TED" in df_filtrado.columns:
+        coluna_filtro = "Situação TED"
     else:
         st.warning("Não foi possível filtrar: coluna 'Deliberação' ou 'Situação' não encontrada.")
         return df_filtrado

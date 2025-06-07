@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 
 from src.base import func_load_base_cpof
-from utils.ui.display import padrao_importacao_pagina
+from utils.ui.display import padrao_importacao_pagina, rodape_desenvolvedor
 from utils.ui.display import titulos_pagina
 from utils.ui.dataframe import mostrar_tabela
 from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes
@@ -74,3 +74,6 @@ if st.session_state.filtro_status in ["Processos Aguardando Resposta", "Processo
             st.session_state["forcar_recarregar"] = True
             del st.session_state["forcar_recarregar"]
             st.rerun()
+
+
+rodape_desenvolvedor()

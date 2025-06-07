@@ -298,9 +298,52 @@ def update_base(file_buffer, nome_arquivo):
     if existing_files:
         for file in existing_files:
             service.files().delete(fileId=file['id']).execute()
-            st.info(f"Arquivo antigo {file_name} excluído do Google Drive.")
+            print(f"Arquivo antigo {file_name} excluído do Google Drive.")
 
     # Faz o upload do arquivo mais recente diretamente do buffer de memória
     file_id = upload_file_to_drive(service, file_buffer, file_name, folder_id)
     
-    st.success(f'Arquivo {file_name} enviado com sucesso para o Google Drive!')
+    print(f'Arquivo {file_name} enviado com sucesso para o Google Drive!')
+
+def read_pickle_file_from_drive(file_name):
+    """
+    Lê um arquivo .pkl (pickle) do Google Drive e retorna o objeto carregado.
+    """
+    import pickle
+    # Autentica no Google Drive
+    service = authenticate_service_account()
+    folder_id = st.secrets["pasta_bases"]["FOLDER_ID"]
+
+    # Buscar o arquivo pelo nome
+    files = list_files_in_drive(service, folder_id, file_name)
+    if not files:
+        st.warning(f"Arquivo pickle '{file_name}' não encontrado na pasta do Drive.")
+        return None
+
+    file = files[0]
+    file_data = download_file(service, file['id'])
+    file_data.seek(0)
+    return pickle.load(file_data)
+
+def save_pickle_file_to_drive(file_name, obj):
+    """
+    Salva um objeto Python como arquivo .pkl (pickle) no Google Drive.
+    Se já existir, substitui o arquivo.
+    """
+    import pickle
+    # Serializa o objeto para um buffer em memória
+    buffer = io.BytesIO()
+    pickle.dump(obj, buffer)
+    buffer.seek(0)
+
+    # Autentica no Google Drive
+    service = authenticate_service_account()
+    folder_id = st.secrets["pasta_bases"]["FOLDER_ID"]
+
+    # Remove arquivo antigo se existir
+    existing_files = list_files_in_drive(service, folder_id, file_name)
+    for file in existing_files:
+        service.files().delete(fileId=file['id']).execute()
+
+    # Faz upload do novo arquivo
+    upload_file_to_drive(service, buffer, file_name, folder_id)

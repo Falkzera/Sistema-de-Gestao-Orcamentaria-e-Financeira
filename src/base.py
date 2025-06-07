@@ -27,9 +27,17 @@ def func_load_historico_cpof(forcar_recarregar=False):
     return st.session_state.historico_cpof
 
 def func_load_base_credito_sop_geo(forcar_recarregar=False):
+    
     if "base" not in st.session_state or forcar_recarregar:
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        base = conn.read(worksheet="Base Crédito SOP/GEO", ttl=300)
+        try:
+            conn = st.connection("gsheets", type=GSheetsConnection)
+            base = conn.read(worksheet="Base Crédito SOP/GEO", ttl=300)
+
+        except Exception as e:
+            st.info("Verifique a conexão com a Internet 🛜 e recarregue a página")
+            print(f"Log de erro: {e}")
+            st.stop()
+
         base["Fonte de Recursos"] = base["Fonte de Recursos"].astype(str)
         base["Grupo de Despesas"] = base["Grupo de Despesas"].astype(str)
         base["Nº do decreto"] = base["Nº do decreto"].astype(str)

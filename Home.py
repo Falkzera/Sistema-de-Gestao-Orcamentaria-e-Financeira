@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-from utils.ui.display import padrao_importacao_pagina
+from utils.ui.display import padrao_importacao_pagina, rodape_desenvolvedor
 from utils.confeccoes.formatar import formatar_valor, formatar_valor2
 from src.base import func_load_base_credito_sop_geo
 from utils.limite.limite_credito import calcular_limite_credito_atual
@@ -304,3 +304,4 @@ for idx, (titulo, valor) in enumerate(indicadores_situacao.items()):
 #             linhas_horizontais=True,
 #             mostrar_na_tela=True
 #         )
+rodape_desenvolvedor()

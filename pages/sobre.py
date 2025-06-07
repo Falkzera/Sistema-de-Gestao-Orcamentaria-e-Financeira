@@ -1,6 +1,6 @@
 import streamlit as st
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
 
 st.set_page_config(page_title="Dashboards", page_icon="📊", layout="wide")
 
@@ -20,4 +20,7 @@ with st.container(border=True):
         """,
         unsafe_allow_html=True
     )
+
+
+rodape_desenvolvedor()
 

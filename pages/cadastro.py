@@ -1,6 +1,6 @@
 import streamlit as st
 
-from utils.ui.display import padrao_importacao_pagina
+from utils.ui.display import padrao_importacao_pagina, rodape_desenvolvedor
 from utils.ui.display import titulos_pagina
 from utils.auth.auth import carregar_base_por_usuario
 from utils.cadastrar_processos.cadastro import cadastrar_processos_credito_geo, cadastrar_processos_cpof, cadastrar_processos_ted
@@ -24,3 +24,6 @@ elif nome_base == "Base TED":
     cadastrar_processos_ted(nome_base, df)
 else:
     st.warning("Você não tem permissão para cadastrar processos.")
+
+
+rodape_desenvolvedor()

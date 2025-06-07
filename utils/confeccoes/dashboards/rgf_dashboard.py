@@ -13,7 +13,7 @@ def render_rgf_dashboard():
 
             @st.cache_data
             def load_data():
-                df = read_parquet_file_from_drive('RGF-DESPESA-PESSOAL-RECEITA-CORRENTE-LIQUIDA.parquet')
+                df = read_parquet_file_from_drive('DESPESA_COM_PESSOAL_SOBRE_RCL_AJUSTADA.parquet')
                 return df
             df = load_data()
 
@@ -47,7 +47,7 @@ def render_rgf_dashboard():
         with st.container(): # Carregamento dos Dados
             @st.cache_data
             def load_data():
-                df = read_parquet_file_from_drive('RGF-DIVIDA-CONSOLIDADA-LIQUIDA-RECEITA-CORRENTE-LIQUIDA.parquet')
+                df = read_parquet_file_from_drive('DIVIDIDA_CONSOLIDADA_LIQUIDA_SOBRE_RCL.parquet')
                 return df
             df = load_data()
             
@@ -59,9 +59,32 @@ def render_rgf_dashboard():
             ano_max = df["DATA"].max()
 
             col1, col2, col3 = st.columns(3)
-            col1.metric(label='Dívida Consolidada Líquida / RCL Ajustada', value=formatar_valor2(df[df['DATA'] == ano_max]['valor'].sum()), delta=ano_max, delta_color='off',border=True)
-            col2.metric(label='Dívida Consolidada Líquida / RCL Ajustada', value=formatar_valor2(df['valor'].iloc[-2].sum()), delta=df['DATA'].iloc[-2], delta_color='off',border=True)
-            col3.metric(label='Dívida Consolidada Líquida / RCL Ajustada', value=formatar_valor2(df['valor'].iloc[-3].sum()), delta=df['DATA'].iloc[-3], delta_color='off',border=True)
+            try:
+                col1.metric(
+                    label='Dívida Consolidada Líquida / RCL Ajustada',
+                    value=formatar_valor2(df[df['DATA'] == ano_max]['valor'].sum()),
+                    delta=ano_max, delta_color='off', border=True
+                )
+            except Exception as e:
+                print(f"Erro ao exibir métrica: {e}")
+
+            try:
+                col2.metric(
+                    label='Dívida Consolidada Líquida / RCL Ajustada',
+                    value=formatar_valor2(df['valor'].iloc[-2].sum()),
+                    delta=df['DATA'].iloc[-2], delta_color='off', border=True
+                )
+            except Exception as e:
+                print(f"Erro ao exibir métrica: {e}")
+
+            try:
+                col3.metric(
+                    label='Dívida Consolidada Líquida / RCL Ajustada',
+                    value=formatar_valor2(df['valor'].iloc[-3].sum()),
+                    delta=df['DATA'].iloc[-3], delta_color='off', border=True
+                )
+            except Exception as e:
+                print(f"Erro ao exibir métrica: {e}")
 
             fig = go.Figure()
             fig.add_trace(go.Bar(x=df['DATA'], y=df['valor'], marker_color ='#095aa2', text=df['valor'].apply(formatar_valor2), textposition='inside', name=f'Dívida Consolidada Líquida / RCL Ajustada'))
@@ -82,7 +105,7 @@ def render_rgf_dashboard():
         with st.container():
             @st.cache_data
             def load_data():
-                df = read_parquet_file_from_drive('RGF-DIVIDA-CONSOLIDADA-RECEITA-CORRENTE-LIQUIDA.parquet')
+                df = read_parquet_file_from_drive('DIVIDA_CONSOLIDADA_SOBRE_RCL.parquet')
                 return df
             df = load_data()
 
@@ -93,9 +116,32 @@ def render_rgf_dashboard():
             ano_max = df["DATA"].max()
 
             col1, col2, col3 = st.columns(3)
-            col1.metric(label='Dívida Consolidada / RCL Ajustada', value=formatar_valor2(df[df['DATA'] == ano_max]['valor'].sum()), delta=ano_max, delta_color='off',border=True)
-            col2.metric(label='Dívida Consolidada / RCL Ajustada', value=formatar_valor2(df['valor'].iloc[-2].sum()), delta=df['DATA'].iloc[-2], delta_color='off',border=True)
-            col3.metric(label='Dívida Consolidada / RCL Ajustada', value=formatar_valor2(df['valor'].iloc[-3].sum()), delta=df['DATA'].iloc[-3], delta_color='off',border=True)
+            try:
+                col1.metric(
+                    label='Dívida Consolidada / RCL Ajustada',
+                    value=formatar_valor2(df[df['DATA'] == ano_max]['valor'].sum()),
+                    delta=ano_max, delta_color='off', border=True
+                )
+            except Exception as e:
+                print(f"Erro ao exibir métrica: {e}")
+
+            try:
+                col2.metric(
+                    label='Dívida Consolidada / RCL Ajustada',
+                    value=formatar_valor2(df['valor'].iloc[-2].sum()),
+                    delta=df['DATA'].iloc[-2], delta_color='off', border=True
+                )
+            except Exception as e:
+                print(f"Erro ao exibir métrica: {e}")
+
+            try:
+                col3.metric(
+                    label='Dívida Consolidada / RCL Ajustada',
+                    value=formatar_valor2(df['valor'].iloc[-3].sum()),
+                    delta=df['DATA'].iloc[-3], delta_color='off', border=True
+                )
+            except Exception as e:
+                print(f"Erro ao exibir métrica: {e}")
 
             fig = go.Figure()
             fig.add_trace(go.Bar(x=df['DATA'], y=df['valor'], marker_color ='#095aa2', text=df['valor'].apply(formatar_valor2), textposition='inside', name=f'Dívida Consolidada / RCL Ajustada'))

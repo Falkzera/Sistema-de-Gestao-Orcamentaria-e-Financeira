@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Visualizar Processos", page_icon="🔍", layout="wide")
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
 from utils.ui.dataframe import mostrar_tabela
 from utils.auth.auth import carregar_base_por_usuario
 from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes
@@ -52,3 +52,6 @@ with st.container():
 with st.container():
     
     mostrar_resumos_por_permissao(df, nome_base)
+
+
+rodape_desenvolvedor()

@@ -1,6 +1,6 @@
 import streamlit as st
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
 from utils.confeccoes.dashboards.rgf_dashboard import render_rgf_dashboard
 from utils.confeccoes.dashboards.mdic_comercio_exterior_dashboard import render_mdic_comercio_exterior_dashboard
 
@@ -54,3 +54,6 @@ elif st.session_state.get("pagina_atual") == "Observatório do Orçamento":
         )
 
         observatorio_orcamento()
+
+
+rodape_desenvolvedor()

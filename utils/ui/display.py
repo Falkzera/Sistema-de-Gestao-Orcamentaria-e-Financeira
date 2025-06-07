@@ -33,6 +33,7 @@ def exibir_menu_navegacao():
     """
     # Mapeamento de páginas com nomes padronizados (iguais ao secrets.toml)
     paginas = {
+        "repositorio": {"nome_exibicao": "Repositório de Dados", "caminho": "pages/repositorio.py", "icone": ""},
         "canal_resposta_cpof": {"nome_exibicao": "Manifestação Técnica", "caminho": "pages/canal_resposta_cpof.py", "icone": ""},
         "dashboards": {"nome_exibicao": "Dashboards", "caminho": "pages/dashboards.py", "icone": ""},
         "relatorio": {"nome_exibicao": "Relatório", "caminho": "pages/relatorio.py", "icone": ""},
@@ -238,7 +239,7 @@ def desenvolvido():
         border-radius: 10px;
         padding: 18px 12px 14px 12px;
         margin-bottom: 10px;
-        font-size: 1.05em;
+        font-size: 0.75em;
         font-weight: 500;
         box-shadow: 0 2px 8px rgba(48,100,173,0.08);
     }
@@ -265,8 +266,21 @@ def padrao_importacao_pagina():
     customizar_sidebar()
     verificar_permissao()
     exibir_menu_navegacao()
-    desenvolvido()
+    # desenvolvido()
     st.markdown(
     '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />',
     unsafe_allow_html=True
 )
+    
+
+def rodape_desenvolvedor():
+    st.write("---")
+    st.markdown("""
+    <br>
+    <div style='text-align: center; color: #666; font-size: 0.95em; margin-top:2em;'>
+        <span style="color:#3064AD;font-weight:700;">Desenvolvido por</span> &nbsp;|&nbsp;
+        <a href="https://www.linkedin.com/in/falkzera/" target="_blank" title="Ver LinkedIn de Lucas Falcão" style="color: #3064AD; font-weight:700; text-decoration: underline;">
+            Lucas Falcão
+        </a>
+    </div>
+    """, unsafe_allow_html=True)

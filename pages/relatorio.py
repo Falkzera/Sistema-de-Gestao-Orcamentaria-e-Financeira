@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Relatório", page_icon="📄", layout="wide")
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
 from utils.confeccoes.formatar import mes_por_extenso
 
 padrao_importacao_pagina() # Está colocado em cima, para que seja carregado mais rápido
@@ -157,3 +157,6 @@ elif escolha_relatorio == "Relatório de Despesas dos Órgãos":
             parametros_funcao={"df": df},
             tipo_arquivo="pdf",
         )
+
+
+rodape_desenvolvedor()

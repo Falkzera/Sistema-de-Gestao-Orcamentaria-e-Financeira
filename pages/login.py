@@ -32,3 +32,10 @@ with st.container(border=True):
 
         else:
             st.error("Usuário ou senha incorretos.")
+    
+    # Construir um botão de outra cor, com o nome "Acesso Externo", onde irá colocar como st.session_state.username, o nome "externo"
+    if st.button("Acesso Externo", help="Clique para acessar como externo", use_container_width=True, type='secondary'):
+        st.session_state.logged_in = True
+        st.session_state.username = "externo"
+        st.session_state.page_access = st.secrets["page_access"]["externo"]
+        st.switch_page("Home.py")

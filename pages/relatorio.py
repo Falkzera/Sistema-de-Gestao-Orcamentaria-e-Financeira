@@ -82,6 +82,8 @@ with st.container(): # Código para o usuário SUDO e talvez ADMIN
 
 # >>>>>>>>>>>>>> RELATÓRIOS PARA O USUÁRIO BAIXAR <<<<<<<<<<<<<<<<
 
+restringir_usuario_externo_relatorio = ["Relatório CPOF", "Relatório de Despesas dos Órgãos"]
+
 relatorio_opcoes = [
     "Relatório CPOF",
     "Boletim Conjuntural Alagoano",
@@ -90,7 +92,14 @@ relatorio_opcoes = [
 
 df = None
 
-escolha_relatorio = st.selectbox("Selecione o relatório que deseja gerar:", relatorio_opcoes)
+# Restringe opções para usuário externo
+usuario = st.session_state.get("username", "")
+if usuario and usuario.lower() == "externo":
+    opcoes_filtradas = [op for op in relatorio_opcoes if op not in restringir_usuario_externo_relatorio]
+else:
+    opcoes_filtradas = relatorio_opcoes
+
+escolha_relatorio = st.selectbox("Selecione o relatório que deseja gerar:", opcoes_filtradas)
 
 if escolha_relatorio == "Relatório CPOF":
     

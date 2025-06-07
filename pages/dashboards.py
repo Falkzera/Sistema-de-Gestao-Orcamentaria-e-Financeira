@@ -11,28 +11,40 @@ st.set_page_config(page_title="Dashboards", page_icon="📊", layout="wide")
 padrao_importacao_pagina()
 
 titulos_pagina("Dashboards", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-project-diagram"></i>' )
+
+restringir_usuario_externo_dashboard = ["Observatório do Orçamento", "Dashboard - RGF"]
+
+usuario = st.session_state.get("username", "")
+
+# Definir dashboards disponíveis conforme usuário
+if usuario and usuario.lower() == "externo":
+    dashboards_disponiveis = ["Mapa do Comércio Exterior"]
+else:
+    dashboards_disponiveis = ["Observatório do Orçamento", "Mapa do Comércio Exterior", "Dashboard - RGF"]
+
 st.caption("Selecione o dashboard que deseja acessar:")
 col1, col2, col3 = st.columns([1, 1, 1])
 
-if "pagina_atual" not in st.session_state:
-    st.session_state["pagina_atual"] = "Observatório do Orçamento"
-
-# salvar em cache
+if "pagina_atual" not in st.session_state or st.session_state["pagina_atual"] not in dashboards_disponiveis:
+    st.session_state["pagina_atual"] = dashboards_disponiveis[0]
 
 with col1:
-    if st.button("Observatório do Orçamento", use_container_width=True, type="primary"):
-        st.session_state["pagina_atual"] = "Observatório do Orçamento"
-        st.rerun()
+    if "Observatório do Orçamento" in dashboards_disponiveis:
+        if st.button("Observatório do Orçamento", use_container_width=True, type="primary"):
+            st.session_state["pagina_atual"] = "Observatório do Orçamento"
+            st.rerun()
 
 with col2:
-    if st.button("Mapa do Comércio Exterior", use_container_width=True, type="primary"):
-        st.session_state["pagina_atual"] = "Mapa do Comércio Exterior"
-        st.rerun()
+    if "Mapa do Comércio Exterior" in dashboards_disponiveis:
+        if st.button("Mapa do Comércio Exterior", use_container_width=True, type="primary"):
+            st.session_state["pagina_atual"] = "Mapa do Comércio Exterior"
+            st.rerun()
 
 with col3:
-    if st.button("Dashboard - RGF", use_container_width=True, type="primary"):
-        st.session_state["pagina_atual"] = "Dashboard - RGF"
-        st.rerun()
+    if "Dashboard - RGF" in dashboards_disponiveis:
+        if st.button("Dashboard - RGF", use_container_width=True, type="primary"):
+            st.session_state["pagina_atual"] = "Dashboard - RGF"
+            st.rerun()
 
 if st.session_state.get("pagina_atual") == "Mapa do Comércio Exterior":
     st.session_state["pagina_atual"] = "Mapa do Comércio Exterior"

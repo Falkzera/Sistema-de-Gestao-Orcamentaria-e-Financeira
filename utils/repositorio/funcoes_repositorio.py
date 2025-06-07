@@ -16,8 +16,10 @@ from src.coleta_de_dados.rgf import funcao_rgf
 from src.google_drive_utils import read_pickle_file_from_drive, save_pickle_file_to_drive
 from src.google_drive_utils import read_parquet_file_from_drive
 
-
-
+esconder_base_usuario_externo = [
+    "dotacao_ano_corrente", "despesas_ano_corrente", "rgf_completo",
+    "divida_consolidada", "divida_liquida", "despesa_pessoal", "itcmd", "icms", "ipva"
+]
 bases = [
     {
         "id": "dotacao_ano_corrente",
@@ -269,3 +271,13 @@ def processar_download(nome_base):
     except Exception as e:
         print(f"Base NÃO baixada {nome_base}, MOTIVO: {str(e)}")
         return None, None
+
+def restringir_usuario_externo_base(usuario):
+    """
+    Retorna a lista de bases filtradas para o usuário.
+    Usuário 'externo' NÃO vê as bases em esconder_base_usuario_externo.
+    Usuários diferentes de 'externo' veem todas as bases.
+    """
+    if usuario and usuario.lower() == "externo":
+        return [b for b in bases if b["id"] not in esconder_base_usuario_externo]
+    return bases

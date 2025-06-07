@@ -2,14 +2,16 @@ import streamlit as st
 
 import base64
 from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
-from utils.repositorio.funcoes_repositorio import processar_download, bases
+from src.google_drive_utils import read_parquet_file_from_drive
+from utils.repositorio.funcoes_repositorio import restringir_usuario_externo_base
+
+from utils.repositorio.funcoes_repositorio import processar_download
 
 st.set_page_config(page_title="Repositório de Dados", page_icon="📂", layout="wide")
 
 padrao_importacao_pagina()
+
 titulos_pagina("Repositório de Dados", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder"></i>')
-
-
 
 # CSS e HTML para os cards
 cards_html = f"""
@@ -139,7 +141,10 @@ cards_html = f"""
 <div class="cards-container" id="cardsContainer">
 """
 
-for base in bases:
+usuario = st.session_state.get("username", "")
+bases_filtradas = restringir_usuario_externo_base(usuario)
+
+for base in bases_filtradas:
     tag_colors = ["primary", "success", "warning"]
     tags_html = ""
     for i, tag in enumerate(base["tags"]):
@@ -198,7 +203,7 @@ search_term = st.text_input("🔍 Buscar bases de dados...", "", help="Pesquise 
 st.caption("Ao clicar em Download, você receberá os dados mais recentes. O tempo de download pode variar conforme o tamanho da base selecionada.")
 
 cols = st.columns(3)
-for idx, base in enumerate(bases):
+for idx, base in enumerate(bases_filtradas):
     # Filtro de busca
     if search_term.strip():
         termo = search_term.strip().lower()

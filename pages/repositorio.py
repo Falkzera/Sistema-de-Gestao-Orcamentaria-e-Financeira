@@ -2,7 +2,6 @@ import streamlit as st
 
 import base64
 from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
-from src.google_drive_utils import read_parquet_file_from_drive
 from utils.repositorio.funcoes_repositorio import restringir_usuario_externo_base
 
 from utils.repositorio.funcoes_repositorio import processar_download

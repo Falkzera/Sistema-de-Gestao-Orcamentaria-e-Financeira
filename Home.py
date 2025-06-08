@@ -304,4 +304,9 @@ for idx, (titulo, valor) in enumerate(indicadores_situacao.items()):
 #             linhas_horizontais=True,
 #             mostrar_na_tela=True
 #         )
+
+
+from utils.confeccoes.email.email import rotina_envio_email_ted
+rotina_envio_email_ted()
+
 rodape_desenvolvedor()

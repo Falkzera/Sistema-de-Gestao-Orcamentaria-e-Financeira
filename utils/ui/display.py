@@ -230,7 +230,6 @@ def desenvolvido():
     Retorna:
         None
     """
-    st.sidebar.write("---")
     st.sidebar.markdown("""
     <style>
     .creditos-dev {
@@ -239,9 +238,10 @@ def desenvolvido():
         border-radius: 10px;
         padding: 18px 12px 14px 12px;
         margin-bottom: 10px;
-        font-size: 0.75em;
+        font-size: 0.91em;
         font-weight: 500;
         box-shadow: 0 2px 8px rgba(48,100,173,0.08);
+        text-align: left;
     }
     .creditos-dev a {
         color: #3064AD;
@@ -254,7 +254,7 @@ def desenvolvido():
     }
     </style>
     <div class="creditos-dev">
-        Desenvolvido por: <a href="https://www.linkedin.com/in/falkzera/" target="_blank">Lucas Falcão</a>
+        Desenvolvedor: <a href="https://www.linkedin.com/in/falkzera/" target="_blank">Lucas Falcão</a>
     </div>
     """, unsafe_allow_html=True)
 

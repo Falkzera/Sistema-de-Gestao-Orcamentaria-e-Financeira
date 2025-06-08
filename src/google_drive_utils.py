@@ -317,7 +317,7 @@ def read_pickle_file_from_drive(file_name):
     # Buscar o arquivo pelo nome
     files = list_files_in_drive(service, folder_id, file_name)
     if not files:
-        st.warning(f"Arquivo pickle '{file_name}' não encontrado na pasta do Drive.")
+        print(f"Arquivo pickle '{file_name}' não encontrado na pasta do Drive.")
         return None
 
     file = files[0]

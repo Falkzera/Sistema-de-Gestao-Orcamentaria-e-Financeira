@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![SIGOF Logo](./image/logo_sigof.png)
+<img src="./image/sigof.png" alt="SIGOF Logo" width="400"/>
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-red.svg)](https://streamlit.io)

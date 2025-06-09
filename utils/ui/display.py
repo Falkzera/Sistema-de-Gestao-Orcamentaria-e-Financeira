@@ -87,6 +87,7 @@ def configurar_sidebar_marca():
     Exibe o logo de ALAGOAS e um separador visual na barra lateral.
     """
     st.sidebar.image("image/ALAGOAS.png")
+    # st.sidebar.image("image/sigof.png")
     st.sidebar.caption('---')
 
 def configurar_cabecalho_principal():
@@ -284,3 +285,5 @@ def rodape_desenvolvedor():
         </a>
     </div>
     """, unsafe_allow_html=True)
+    st.sidebar.markdown("---")
+    st.sidebar.image("image/sigof.png")

@@ -6,7 +6,9 @@ from utils.ui.display import customizar_sidebar, titulos_pagina, desenvolvido
 st.set_page_config(page_title="Sistema de Login", page_icon="🔐", layout="centered")
 
 customizar_sidebar()
+st.sidebar.image("image/sigof.png")
 desenvolvido()
+
 
 st.markdown(
 '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />',

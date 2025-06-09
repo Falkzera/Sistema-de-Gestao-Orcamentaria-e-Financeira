@@ -8,7 +8,7 @@ padrao_importacao_pagina()
 
 st.write("######")
 with st.container(border=True):
-
+    
     titulos_pagina("Sobre", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-info-circle"></i>' )
 
     st.markdown(

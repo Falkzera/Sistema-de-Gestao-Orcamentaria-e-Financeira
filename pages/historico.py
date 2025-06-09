@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.base import func_load_base_cpof, func_load_base_credito_sop_geo, func_load_base_ted
+from src.base import func_load_base_cpof, func_load_base_credito_sop_geo, func_load_base_ted, func_load_base_sop_geral
 from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
 from src.salvar_historico import exibir_historico
 
@@ -10,12 +10,13 @@ padrao_importacao_pagina()
 
 titulos_pagina("Histórico Processual", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-history"></i>' )
 
-base_opcoes = ["Histórico CPOF", "Histórico Crédito SOP/GEO", "Histórico TED"]
+base_opcoes = ["Histórico CPOF", "Histórico Crédito SOP/GEO", "Histórico TED", "Histórico SOP/GERAL"]
 
 historico_map = {
     "Base CPOF": "Histórico CPOF",
     "Base Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
-    "Base TED": "Histórico TED"
+    "Base TED": "Histórico TED",
+    "Base SOP/GERAL": "Histórico SOP/GERAL"
 }
 
 usuario = st.session_state.get("username", None)
@@ -41,7 +42,9 @@ if nome_base == "Histórico CPOF":
 elif nome_base == "Histórico Crédito SOP/GEO":
     df = func_load_base_credito_sop_geo()
 elif nome_base == "Histórico TED":
-    df = func_load_base_ted()
+    df = func_load_base_ted()   
+elif nome_base == "Histórico SOP/GERAL":
+    df = func_load_base_sop_geral()
 else:
     st.error("Base de histórico não reconhecida.")
     st.stop()

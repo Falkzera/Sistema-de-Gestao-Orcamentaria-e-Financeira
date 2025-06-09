@@ -44,9 +44,9 @@ with st.container(): # Código para o usuário SUDO e talvez ADMIN
 
     if (
         "username" in st.session_state
-        and "page_access" in st.secrets
-        and st.session_state.username in st.secrets["page_access"]
-        and len(st.secrets["page_access"][st.session_state.username]) >= 7
+        and "base_acess" in st.secrets
+        and st.session_state.username in st.secrets["base_acess"]
+        and len(st.secrets["base_acess"][st.session_state.username]) >= 7
     ):
 
         with st.container():  # Atualização das Bases -> Será permitido apenas para o admin

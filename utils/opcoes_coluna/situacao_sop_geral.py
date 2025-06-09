@@ -1,11 +1,13 @@
 opcoes_situacao_geral_sop = sorted([
-    "GEO",
-    "GORC",
-    "GEP",
+    "Encaminhado à GEO",
+    "Encaminhado à GEP",
+    "Encaminhado à GORC",
+    "Encaminhado à SOP",
 ])
 
 mapa_cores_situacao_geral_sop = {
-    "GEO": "#FFD700",  
-    "GORC": "#4240AD",  
-    "GEP": "#1AAAA5", 
+    "Encaminhado à GEO": "#F0DB66",
+    "Encaminhado à GEP": "#706ED8",
+    "Encaminhado à GORC": "#60D4D1",
+    "Encaminhado à SOP": "#83E676",
 }

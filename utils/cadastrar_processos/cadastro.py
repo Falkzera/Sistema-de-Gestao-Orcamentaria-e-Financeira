@@ -5,11 +5,13 @@ from datetime import datetime
 from utils.opcoes_coluna.deliberacao import opcoes_deliberacao
 from utils.opcoes_coluna.situacao import opcoes_situacao
 from utils.opcoes_coluna.situacao_ted import opcoes_situacao_ted
+from utils.opcoes_coluna.situacao_sop_geral import opcoes_situacao_geral_sop
 from utils.opcoes_coluna.tipo_despesa import opcoes_tipo_despesa
 from utils.opcoes_coluna.orgao_uo import opcoes_orgao_uo
 from utils.opcoes_coluna.fonte_recurso import opcoes_fonte_recurso
 from utils.opcoes_coluna.grupo_despesa import opcoes_grupo_despesa
 from utils.opcoes_coluna.tipo_credito import opcoes_tipo_credito
+from utils.opcoes_coluna.tipo_processo import opcoes_tipo_processo
 from utils.opcoes_coluna.contabilizar_limite import opcoes_contabilizar_limite
 from utils.opcoes_coluna.origem_recurso import opcoes_origem_recursos
 from utils.ui.dataframe import mostrar_tabela
@@ -18,11 +20,9 @@ from utils.opcoes_coluna.validadores.processo import validar_processamento_campo
 from src.salvar_alteracoes import salvar_base
 from utils.ui.display import titulos_pagina
 
-
 def formatar_lista(lista):
-    # Se for lista com um único elemento que já é uma string formatada, tenta desempacotar
+
     if isinstance(lista, list) and len(lista) == 1 and isinstance(lista[0], str) and " e " in lista[0]:
-        # Tenta desempacotar para lista de strings
         partes = [parte.strip() for parte in lista[0].split(" e ")]
         if len(partes) > 1:
             lista = partes
@@ -37,11 +37,9 @@ def formatar_lista(lista):
             return f"{', '.join(map(str, lista[:-1]))} e {lista[-1]}"
     return lista
 
-
-
 ano_corrente = datetime.now().year
 
-def cadastrar_processos_credito_geo(nome_base, df): # SOP/GEO
+def cadastrar_processos_credito_geo(nome_base, df):
     with st.container(border=True):
         titulos_pagina("Cadastro de Processos Crédito SOP/GEO", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder"></i>' )
             
@@ -94,7 +92,6 @@ def cadastrar_processos_credito_geo(nome_base, df): # SOP/GEO
 
         if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary", help='Clique para cadastrar o processo na base 📁'):
 
-            # ✅ Valida os campos
             erros, campos_sanitizados = validar_processamento_campos(
                 numero_processo,
                 valor_input,
@@ -123,7 +120,6 @@ def cadastrar_processos_credito_geo(nome_base, df): # SOP/GEO
                 st.stop()
 
             else:
-                # Antes de formatar, desempacote listas aninhadas ou já formatadas
                 fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
                 grupo_despesa = [item for sublist in grupo_despesa for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
                 
@@ -149,7 +145,6 @@ def cadastrar_processos_credito_geo(nome_base, df): # SOP/GEO
                     "Cadastrado Por": st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S"),
                 }])
 
-                # TRATAR O VALOR (DE R$ 1.234,56 PARA 1234.56)
                 novo["Valor"] = novo["Valor"].apply(
                     lambda x: float(x.replace(".", "").replace(",", "."))
                 )
@@ -157,7 +152,7 @@ def cadastrar_processos_credito_geo(nome_base, df): # SOP/GEO
                 nome_base = str(nome_base)
                 salvar_base(novo, nome_base)
 
-def cadastrar_processos_cpof(nome_base, df): # CPOF
+def cadastrar_processos_cpof(nome_base, df): 
 
     with st.container(border=True):
 
@@ -204,7 +199,6 @@ def cadastrar_processos_cpof(nome_base, df): # CPOF
         st.write('---')
         if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary", help='Clique para cadastrar o processo na base 📁'):
 
-            # ✅ Valida os campos
             erros, campos_sanitizados = validar_processamento_campos(
                 numero_processo,
                 valor_input,
@@ -230,7 +224,6 @@ def cadastrar_processos_cpof(nome_base, df): # CPOF
                             nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
                 st.stop()
             else:
-                # Desempacotar listas e formatar como string separada por vírgula, com "e" antes do último elemento
                 fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
                 grupo_despesa = [item for sublist in grupo_despesa for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
 
@@ -254,7 +247,6 @@ def cadastrar_processos_cpof(nome_base, df): # CPOF
                     "Cadastrado Por": st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S"),
                 }])
 
-                # TRATAR O VALOR (DE R$ 1.234,56 PARA 1234.56)
                 novo["Valor"] = novo["Valor"].apply(
                     lambda x: float(x.replace(".", "").replace(",", "."))
                 )
@@ -262,8 +254,7 @@ def cadastrar_processos_cpof(nome_base, df): # CPOF
                 nome_base = str(nome_base)
                 salvar_base(novo, nome_base)
 
-
-def cadastrar_processos_ted(nome_base, df): # CPOF
+def cadastrar_processos_ted(nome_base, df): 
     
     with st.container(border=True):
         titulos_pagina("Cadastro de Processos TED", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder"></i>' )
@@ -300,7 +291,6 @@ def cadastrar_processos_ted(nome_base, df): # CPOF
         if valor_input and valor_input.isnumeric():
             valor_input = formatar_valor_br(valor_input)
 
-
         nao_podem_estar_vazios = [
             situacao_ted,
             programa_trabalho,
@@ -321,22 +311,20 @@ def cadastrar_processos_ted(nome_base, df): # CPOF
         st.write('---')
         if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary", help='Clique para cadastrar o processo na base 📁'):
 
-            # ✅ Valida os campos
             erros, campos_sanitizados = validar_processamento_campos(
                 numero_processo,
                 valor_input,
                 data_recebimento,
                 data_publicacao,
                 objetivo,
-
             )
+
             if erros:
                 for erro in erros:
                     st.error(erro)
                     st.write(f'{erro}')
                 st.stop()
 
-            # objetivo_sanitizado = campos_sanitizados['objetivo']
             objetivo_sanitizado = campos_sanitizados.get('objetivo', objetivo)
 
             if numero_processo in df["Nº do Processo"].values:
@@ -345,10 +333,8 @@ def cadastrar_processos_ted(nome_base, df): # CPOF
                             nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
                 st.stop()
             else:
-                # Desempacotar listas e formatar como string separada por vírgula, com "e" antes do último elemento
                 fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
 
-                # Formatar listas de st_tags para string separada por vírgula, com "e" antes do último elemento
                 def formatar_lista_e(lista):
                     if isinstance(lista, list):
                         if len(lista) == 0:
@@ -363,7 +349,6 @@ def cadastrar_processos_ted(nome_base, df): # CPOF
 
                 programa_trabalho = formatar_lista_e(programa_trabalho)
                 natureza_despesa = formatar_lista_e(natureza_despesa)
-
                 fonte_recurso_str = formatar_lista(fonte_recurso)
 
                 agora = datetime.now()
@@ -387,7 +372,6 @@ def cadastrar_processos_ted(nome_base, df): # CPOF
                     "Cadastrado Por": st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S"),
                 }])
 
-                # TRATAR O VALOR (DE R$ 1.234,56 PARA 1234.56)
                 novo["Valor"] = novo["Valor"].apply(
                     lambda x: float(x.replace(".", "").replace(",", "."))
                 )
@@ -396,6 +380,70 @@ def cadastrar_processos_ted(nome_base, df): # CPOF
                 )
                 novo["Saldo"] = novo["Valor"] - novo["Valor Descentralizado"]
 
+                nome_base = str(nome_base)
+                salvar_base(novo, nome_base)
+
+def cadastrar_processos_sop_geral(nome_base, df):
+    
+    with st.container(border=True):
+        titulos_pagina("Cadastro de Processos SOP/GERAL", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder"></i>' )
+        col1, col2, col3, col4 = st.columns(4)
+        numero_processo = col1.text_input("Nº do Processo **(Obrigatório)**",placeholder=f"E:00000.0000000000/{ano_corrente}",help=f"Digite o número do processo no formato: E:00000.0000000000/{ano_corrente}")
+        numero_processo = str(numero_processo).strip()
+        orgao_uo = col2.selectbox("Órgão **(Obrigatório)**",opcoes_orgao_uo,index=None,help="Selecione o Órgão.", placeholder="Selecione o Órgão")
+        tipo_processo = col3.selectbox("Tipo de Processo **(Obrigatório)**",opcoes_tipo_processo,index=None,help="Selecione o Tipo de Processo.", placeholder="Selecione o Tipo de Processo")
+        situacao_sop = col4.selectbox("Situação SOP **(Obrigatório)**",opcoes_situacao_geral_sop,index=None,help="Selecione a situação do SOP.", placeholder="Selecione a situação do SOP")
+
+        objetivo = st.text_input("Objetivo **(Obrigatório)**", placeholder="Ex: Objetivos do Pedido do Processo", help="Objetivos do pedido do processo.")
+        data_recebimento = st.text_input("Data de recebimento **(Obrigatório)**", placeholder="DD/MM/AAAA", help="Digite a data de recebimento do processo no formato: DD/MM/AAAA")
+
+        nao_podem_estar_vazios = [
+            situacao_sop,
+            orgao_uo,
+            tipo_processo,
+            numero_processo,
+            data_recebimento, 
+            objetivo,
+        ]
+
+        if any(not campo for campo in nao_podem_estar_vazios):
+            st.info("⚠️ Preencha todos os campos obrigatórios.")
+            st.stop()
+
+        st.write('---')
+        if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary", help='Clique para cadastrar o processo na base 📁'):
+
+            erros, campos_sanitizados = validar_processamento_campos(
+                numero_processo,
+                data_recebimento,
+                objetivo,
+            )
+
+            if erros:
+                for erro in erros:
+                    st.error(erro)
+                    st.write(f'{erro}')
+                st.stop()
+
+            objetivo_sanitizado = campos_sanitizados.get('objetivo', objetivo)
+
+            if numero_processo in df["Nº do Processo"].values:
+                st.error("⚠️ Esse processo já foi cadastrado! Veja abaixo:")
+                mostrar_tabela(df[df["Nº do Processo"] == numero_processo],altura_max_linhas=99, 
+                            nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
+                st.stop()
+            else:
+
+                agora = datetime.now()
+                novo = pd.DataFrame([{
+                    "Situação TED": situacao_sop,
+                    "Nº do Processo": numero_processo,
+                    "Órgão (UO)": orgao_uo,	
+                    "Tipo de Processo": tipo_processo,
+                    "Objetivo": objetivo_sanitizado,
+                    "Data de Recebimento": data_recebimento,
+                    "Cadastrado Por": st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S"),
+                }])
 
                 nome_base = str(nome_base)
                 salvar_base(novo, nome_base)
@@ -407,3 +455,5 @@ def mostrar_cadastro_por_permissao(df, nome_base):
         cadastrar_processos_cpof(df, nome_base)
     elif nome_base == "Base TED":
         cadastrar_processos_ted(df, nome_base)
+    elif nome_base == "Base SOP/GERAL":
+        cadastrar_processos_sop_geral(df, nome_base)

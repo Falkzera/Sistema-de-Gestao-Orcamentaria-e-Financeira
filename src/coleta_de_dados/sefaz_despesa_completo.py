@@ -30,7 +30,7 @@ def funcao_sefaz_despesa_completo():
         print('Erro na atualização da DESPESA:')
         print(e)
 
-    df_drive = read_parquet_file_from_drive('sefaz_despesa.parquet')#
+    df_drive = read_parquet_file_from_drive('sefaz_despesa_completo.parquet')#
     df_drive['DATA'] = pd.to_datetime(df_drive['DATA'], format='%Y-%m')
     df_drive['ANO'] = df_drive['DATA'].dt.year
     df_drive = df_drive[df_drive['ANO'] != 2025]

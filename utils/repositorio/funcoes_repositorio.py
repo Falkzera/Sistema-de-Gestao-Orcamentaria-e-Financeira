@@ -7,10 +7,10 @@ from src.coleta_de_dados.ibge_leite_industrializado import funcao_ibge_leite_ind
 from src.coleta_de_dados.mdic_comercio_exterior import funcao_mdic_comercio_exterior
 from src.coleta_de_dados.anp_preco_combustivel import funcao_anp_preco_combustivel
 from src.coleta_de_dados.anp_producao_combustivel import funcao_anp_producao_combustivel
-from src.coleta_de_dados.sefaz_dotacao_completo import funcao_sefaz_dotacao
 from src.coleta_de_dados.sefaz_despesa_completo import funcao_sefaz_despesa_completo
 from src.coleta_de_dados.sefaz_despesa_ano_corrente import funcao_sefaz_despesa_ano_corrente
 from src.coleta_de_dados.sefaz_dotacao_ano_corrente import funcao_sefaz_dotacao_ano_corrente
+from src.coleta_de_dados.sefaz_receita_completo import funcao_sefaz_receita_completo
 from src.coleta_de_dados.rgf import funcao_rgf
 
 from src.google_drive_utils import read_pickle_file_from_drive, save_pickle_file_to_drive
@@ -28,7 +28,7 @@ bases = [
         "descricao": "Informações sobre a dotação orçamentária do exercício corrente.",
         "tags": ["Orçamento", "Siafe", "Exercício Corrente", "Alagoas"],
         "icone": "💰",
-        "tamanho": "12.5 MB"
+        "tamanho": "36.9 MB"
     },
     {
         "id": "despesas_ano_corrente",
@@ -37,7 +37,16 @@ bases = [
         "descricao": "Despesas detalhadas do exercício corrente com classificação por categoria.",
         "tags": ["Orçamento", "Siafe", "Exercício Corrente", "Alagoas"],
         "icone": "📊",
-        "tamanho": "6.8 MB"
+        "tamanho": "11.8 MB"
+    },
+    {
+        "id": "receita_completo",
+        "nome": "Receitas Orçamentárias",
+        "arquivo": "sefaz_receita_completo.parquet",
+        "descricao": "Receitas detalhadas do exercício corrente com classificação por categoria.",
+        "tags": ["Orçamento", "Siafe", "Série Histórica", "Alagoas"],
+        "icone": "📊",
+        "tamanho": "11.8 MB"
     },
     {
         "id": "leite",
@@ -173,10 +182,26 @@ bases = [
         "tags": ["Imposto", "Sefaz", "Série Histórica", "Alagoas"],
         "icone": "🚗",
         "tamanho": "13.9 KB"
+    },
+    {
+        "id": "irrf",
+        "nome": "IRRF",
+        "arquivo": "sefaz_irrf_completo.parquet",
+        "descricao": "Informações completas da arrecadação sobre o IRRF de Alagoas.",
+        "tags": ["Imposto", "Sefaz", "Série Histórica", "Alagoas"],
+        "icone": "📋",
+        "tamanho": "13.9 KB"
+    },
+    {
+        "id": "ipi",
+        "nome": "IPI",
+        "arquivo": "sefaz_ipi_completo.parquet",
+        "descricao": "Informações completas da arrecadação sobre o IPI de Alagoas.",
+        "tags": ["Imposto", "Sefaz", "Série Histórica", "Alagoas"],
+        "icone": "🏭",
+        "tamanho": "13.9 KB"
     }
 ]
-
-
 
 @st.cache_data
 def convert_to_excel(df):
@@ -197,14 +222,17 @@ try:
         "lgn": (funcao_anp_producao_combustivel, 24), # ok
         "petroleo": (funcao_anp_producao_combustivel, 24), # ok
         "rgf_completo": (funcao_rgf, 24), # ok
-        "dotacao_ano_corrente": (funcao_sefaz_dotacao_ano_corrente, 6), # ok
-        "despesas_ano_corrente": (funcao_sefaz_despesa_ano_corrente, 6), # ok
+        "dotacao_ano_corrente": (funcao_sefaz_dotacao_ano_corrente, 18), # ok
+        "despesas_ano_corrente": (funcao_sefaz_despesa_ano_corrente, 18), # ok
+        "receita_completo": (funcao_sefaz_receita_completo, 18), # ok
         "divida_consolidada": (funcao_rgf, 24), # ok
         "divida_liquida": (funcao_rgf, 24), # ok
         "despesa_pessoal": (funcao_rgf, 24), # ok
-        "itcmd": (funcao_rgf, 24), # não ok
-        "icms": (funcao_rgf, 24), # não ok
-        "ipva": (funcao_rgf, 24), # não ok
+        "itcmd": (funcao_sefaz_receita_completo, 24), # ok
+        "icms": (funcao_sefaz_receita_completo, 24), # ok
+        "ipva": (funcao_sefaz_receita_completo, 24), # ok
+        "irrf": (funcao_sefaz_receita_completo, 24), # ok
+        "ipi": (funcao_sefaz_receita_completo, 24), # ok
 
         # Adição de outras bases AQUI.
     }

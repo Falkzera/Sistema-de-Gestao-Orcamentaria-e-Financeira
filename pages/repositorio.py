@@ -203,7 +203,7 @@ st.caption("Ao clicar em Download, você receberá os dados mais recentes. O tem
 
 cols = st.columns(3)
 for idx, base in enumerate(bases_filtradas):
-    # Filtro de busca
+
     if search_term.strip():
         termo = search_term.strip().lower()
         if termo not in base['nome'].lower() and not any(termo in tag.lower() for tag in base['tags']):

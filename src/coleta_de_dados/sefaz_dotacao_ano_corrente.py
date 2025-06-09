@@ -1,6 +1,5 @@
 import pandas as pd
 from datetime import datetime, timedelta
-from unidecode import unidecode
 import requests
 from io import BytesIO
 from src.google_drive_utils import read_parquet_file_from_drive, update_base
@@ -26,16 +25,9 @@ def funcao_sefaz_dotacao_ano_corrente():
             response = requests.get(url, verify=False)
             df = pd.read_excel(BytesIO(response.content))
         
-
     except Exception as e:
         print('Erro na atualização da DOTAÇÃO:')
         print(e)
-
-
-    df_drive['DATA'] = pd.to_datetime(df_drive['DATA'], format='%Y-%m')
-    df_drive['ANO'] = df_drive['DATA'].dt.year
-    df_drive = df_drive[df_drive['ANO'] != 2025]
-    df_drive = df_drive.drop(columns=['ANO'])
 
     sigla = read_parquet_file_from_drive('sigla.parquet')
     sigla['UO'] = sigla['UO'].astype('object')
@@ -45,63 +37,48 @@ def funcao_sefaz_dotacao_ano_corrente():
     print('Depois da adição da coluna, o df tem:', df.shape)
     df['DATA'] = df['ANO'].astype(str) + '-' + df['MES'].astype(str)
     df['DATA'] = pd.to_datetime(df['DATA'], format='%Y-%m')
+    df['DATA'] = df['DATA'].dt.strftime('%m-%Y')
     df.drop(['ANO', 'MES'], axis=1, inplace=True)
 
-    df = df[['DATA','PODER', 'UO', 'SIGLA_UO', 'DESCRICAO_UO', 'UG', 'DESCRICAO_UG', 'FUNCAO',
+    df = df[['DATA', 'PODER', 'SIGLA_UO', 'UO', 'DESCRICAO_UO', 'UG', 'DESCRICAO_UG', 'FUNCAO',
         'DESCRICAO_FUNCAO', 'SUB_FUNCAO', 'DESCRICAO_SUB_FUNCAO', 'PROGRAMA',
         'PROGRAMA_DESCRICAO', 'PROJETO', 'PROJETO_DESCRICAO', 'PT',
         'PT_DESCRICAO', 'FONTE_MAE', 'DESCRICAO_FONTE_MAE', 'FONTE',
         'DESCRICAO_FONTE', 'NATUREZA1', 'DESCRICAO_NATUREZA1', 'NATUREZA2',
         'DESCRICAO_NATUREZA2', 'NATUREZA3', 'DESCRICAO_NATUREZA3', 'NATUREZA4',
         'DESCRICAO_NATUREZA4', 'NATUREZA5', 'DESCRICAO_NATUREZA5', 'NATUREZA6',
-        'DESCRICAO_NATUREZA6', 'NATUREZA', 'DESCRICAO_NATUREZA',
+        'DESCRICAO_NATUREZA6', 'NATUREZA', 'DESCRICAO_NATUREZA', 'PO',
+        'DESCRICAO_PO', 'CODIGO_EMENDA', 'TIT_EMENDA', 'AUTOR_EMENDA',
+        'CODIGO_FAVORECIDO', 'NOME_FAVORECIDO', 'COD_CONTA_CONTABIL',
+        'VALOR_DOTACAO_INICIAL', 'VALOR_CREDITO_ADICIONAL',
+        'VALOR_REMANEJAMENTO', 'VALOR_DESTAQUE_PROVISAO_RECEBIDO',
+        'VALOR_DESTAQUE_PROVISAO_CONCEDIDO', 'VALOR_CREDITO_INDISPONIVEL',
+        'VALOR_ATUALIZADO', 'VALOR_ATUALIZADO_COM_DESTAQUE_PROVISAO',
         'VALOR_EMPENHADO', 'VALOR_LIQUIDADO', 'VALOR_PAGO']]
 
-    df['SIGLA_UO'] = df['SIGLA_UO'].fillna(df['DESCRICAO_UO'])
-    df['PROJETO_DESCRICAO'] = df['PROJETO_DESCRICAO'].fillna('NÃO INFORMADO')
-    df['PT_DESCRICAO'] = df['PT_DESCRICAO'].fillna('NÃO INFORMADO')
-    df['DESCRICAO_FONTE'] = df['DESCRICAO_FONTE'].fillna('NÃO INFORMADO')
-    df['DESCRICAO_NATUREZA5'] = df['DESCRICAO_NATUREZA5'].fillna('NÃO INFORMADO')
-
-    convertendo_obj = ['PODER', 'UO', 'SIGLA_UO', 'DESCRICAO_UO', 'UG', 'DESCRICAO_UG', 'FUNCAO',
+    colunas_str = ['DATA', 'PODER', 'UO', 'DESCRICAO_UO', 'UG', 'DESCRICAO_UG', 'FUNCAO',
         'DESCRICAO_FUNCAO', 'SUB_FUNCAO', 'DESCRICAO_SUB_FUNCAO', 'PROGRAMA',
         'PROGRAMA_DESCRICAO', 'PROJETO', 'PROJETO_DESCRICAO', 'PT',
         'PT_DESCRICAO', 'FONTE_MAE', 'DESCRICAO_FONTE_MAE', 'FONTE',
         'DESCRICAO_FONTE', 'NATUREZA1', 'DESCRICAO_NATUREZA1', 'NATUREZA2',
         'DESCRICAO_NATUREZA2', 'NATUREZA3', 'DESCRICAO_NATUREZA3', 'NATUREZA4',
         'DESCRICAO_NATUREZA4', 'NATUREZA5', 'DESCRICAO_NATUREZA5', 'NATUREZA6',
-        'DESCRICAO_NATUREZA6', 'NATUREZA', 'DESCRICAO_NATUREZA']
-    for column in convertendo_obj:
-        df[column] = df[column].astype('object')
-        convertendo_obj = ['VALOR_EMPENHADO', 'VALOR_LIQUIDADO', 'VALOR_PAGO']
-    convertendo_obj = ['VALOR_EMPENHADO', 'VALOR_LIQUIDADO', 'VALOR_PAGO']
-    for column in convertendo_obj:
-        df[column] = df[column].astype(str).str.replace(',', '.').astype(float)
-    # ----------------------------------------------- #
+        'DESCRICAO_NATUREZA6', 'NATUREZA', 'DESCRICAO_NATUREZA', 'PO',
+        'DESCRICAO_PO', 'CODIGO_EMENDA', 'TIT_EMENDA', 'AUTOR_EMENDA',
+        'CODIGO_FAVORECIDO', 'NOME_FAVORECIDO', 'COD_CONTA_CONTABIL']
 
-    df['DESCRICAO_UO'] = df['DESCRICAO_UO'].astype(str)
-    df['DESCRICAO_UG'] = df['DESCRICAO_UG'].astype(str)
-    df['DESCRICAO_UG'] = df['DESCRICAO_UG'].str.upper().str.strip().apply(lambda x: unidecode(x))
-    df['DESCRICAO_UG'] = df['DESCRICAO_UG'].str.upper().str.strip()
+    for column in colunas_str:
+        df[column] = df[column].astype(str)
 
-    def unificar_descricao(df):
-
-        maiores_descricoes_ug = df.groupby('UG')['DESCRICAO_UG'].apply(lambda x: x.loc[x.str.len().idxmax()])
-        maiores_descricoes_uo = df.groupby('UO')['DESCRICAO_UO'].apply(lambda x: x.loc[x.str.len().idxmax()])
-        
-        df['DESCRICAO_UG'] = df['UG'].map(maiores_descricoes_ug)
-        df['DESCRICAO_UO'] = df['UO'].map(maiores_descricoes_uo)
-        
-        return df
-
-    df = unificar_descricao(df)
-
-    df_final = pd.concat([df, df_drive], ignore_index=True)
+    df = df.replace('nan', '')
+    df['PT'] = df['PT'].str[:13]
+    df['FONTE'] = df['FONTE'].str[:4]
+    df['CREDITO_DISPONIVEL'] = df['VALOR_ATUALIZADO'] - (df["VALOR_EMPENHADO"] + df['VALOR_CREDITO_INDISPONIVEL'])
 
     print('Subindo no DRIVE...')
 
     parquet_buffer = BytesIO()
-    df_final.to_parquet(parquet_buffer, index=False)
+    df.to_parquet(parquet_buffer, index=False)
     parquet_buffer.seek(0)  
     update_base(parquet_buffer, 'sefaz_dotacao_ano_corrente.parquet')
     print('Atualização concluída com sucesso!')

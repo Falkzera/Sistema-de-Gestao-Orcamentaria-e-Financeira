@@ -24,7 +24,6 @@ def funcao_sefaz_despesa_ano_corrente():
             url = f'https://extrator.sefaz.al.gov.br/DESPESAS/COMPARATIVO-DESPESAS/despesa_empenhado_liquidado_pago_2025_siafe_gerado_em_{data_atual}.xlsx'
             response = requests.get(url, verify=False)
             df = pd.read_excel(BytesIO(response.content))
-        
 
     except Exception as e:
         print('Erro na atualização da DESPESA:')
@@ -38,6 +37,7 @@ def funcao_sefaz_despesa_ano_corrente():
     print('Depois da adição da coluna, o df tem:', df.shape)
     df['DATA'] = df['ANO'].astype(str) + '-' + df['MES'].astype(str)
     df['DATA'] = pd.to_datetime(df['DATA'], format='%Y-%m')
+    df['DATA'] = df['DATA'].dt.strftime('%m-%Y')
     df.drop(['ANO', 'MES'], axis=1, inplace=True)
 
     df = df[['DATA','PODER', 'UO', 'SIGLA_UO', 'DESCRICAO_UO', 'UG', 'DESCRICAO_UG', 'FUNCAO',
@@ -47,47 +47,27 @@ def funcao_sefaz_despesa_ano_corrente():
         'DESCRICAO_FONTE', 'NATUREZA1', 'DESCRICAO_NATUREZA1', 'NATUREZA2',
         'DESCRICAO_NATUREZA2', 'NATUREZA3', 'DESCRICAO_NATUREZA3', 'NATUREZA4',
         'DESCRICAO_NATUREZA4', 'NATUREZA5', 'DESCRICAO_NATUREZA5', 'NATUREZA6',
-        'DESCRICAO_NATUREZA6', 'NATUREZA', 'DESCRICAO_NATUREZA',
+        'DESCRICAO_NATUREZA6', 'NATUREZA', 'DESCRICAO_NATUREZA', 'CODIGO_FAVORECIDO', 'NOME_FAVORECIDO', 'COD_CREDOR_RETENCAO', 'NOME_CREDOR_RETENCAO',
+        'COD_TIPO_LICITACAO', 'TIPO_LICITACAO', 
         'VALOR_EMPENHADO', 'VALOR_LIQUIDADO', 'VALOR_PAGO']]
 
     df['SIGLA_UO'] = df['SIGLA_UO'].fillna(df['DESCRICAO_UO'])
-    df['PROJETO_DESCRICAO'] = df['PROJETO_DESCRICAO'].fillna('NÃO INFORMADO')
-    df['PT_DESCRICAO'] = df['PT_DESCRICAO'].fillna('NÃO INFORMADO')
-    df['DESCRICAO_FONTE'] = df['DESCRICAO_FONTE'].fillna('NÃO INFORMADO')
-    df['DESCRICAO_NATUREZA5'] = df['DESCRICAO_NATUREZA5'].fillna('NÃO INFORMADO')
 
-    convertendo_obj = ['PODER', 'UO', 'SIGLA_UO', 'DESCRICAO_UO', 'UG', 'DESCRICAO_UG', 'FUNCAO',
-        'DESCRICAO_FUNCAO', 'SUB_FUNCAO', 'DESCRICAO_SUB_FUNCAO', 'PROGRAMA',
-        'PROGRAMA_DESCRICAO', 'PROJETO', 'PROJETO_DESCRICAO', 'PT',
-        'PT_DESCRICAO', 'FONTE_MAE', 'DESCRICAO_FONTE_MAE', 'FONTE',
-        'DESCRICAO_FONTE', 'NATUREZA1', 'DESCRICAO_NATUREZA1', 'NATUREZA2',
-        'DESCRICAO_NATUREZA2', 'NATUREZA3', 'DESCRICAO_NATUREZA3', 'NATUREZA4',
-        'DESCRICAO_NATUREZA4', 'NATUREZA5', 'DESCRICAO_NATUREZA5', 'NATUREZA6',
-        'DESCRICAO_NATUREZA6', 'NATUREZA', 'DESCRICAO_NATUREZA']
-    for column in convertendo_obj:
-        df[column] = df[column].astype('object')
-        convertendo_obj = ['VALOR_EMPENHADO', 'VALOR_LIQUIDADO', 'VALOR_PAGO']
-    convertendo_obj = ['VALOR_EMPENHADO', 'VALOR_LIQUIDADO', 'VALOR_PAGO']
-    for column in convertendo_obj:
-        df[column] = df[column].astype(str).str.replace(',', '.').astype(float)
-    # ----------------------------------------------- #
+    colunas_str = ['DATA','PODER', 'UO', 'SIGLA_UO', 'DESCRICAO_UO', 'UG', 'DESCRICAO_UG', 'FUNCAO',
+            'DESCRICAO_FUNCAO', 'SUB_FUNCAO', 'DESCRICAO_SUB_FUNCAO', 'PROGRAMA',
+            'PROGRAMA_DESCRICAO', 'PROJETO', 'PROJETO_DESCRICAO', 'PT',
+            'PT_DESCRICAO', 'FONTE_MAE', 'DESCRICAO_FONTE_MAE', 'FONTE',
+            'DESCRICAO_FONTE', 'NATUREZA1', 'DESCRICAO_NATUREZA1', 'NATUREZA2',
+            'DESCRICAO_NATUREZA2', 'NATUREZA3', 'DESCRICAO_NATUREZA3', 'NATUREZA4',
+            'DESCRICAO_NATUREZA4', 'NATUREZA5', 'DESCRICAO_NATUREZA5', 'NATUREZA6',
+            'DESCRICAO_NATUREZA6', 'NATUREZA', 'DESCRICAO_NATUREZA', 'CODIGO_FAVORECIDO', 'NOME_FAVORECIDO', 'COD_CREDOR_RETENCAO', 'NOME_CREDOR_RETENCAO',
+            'COD_TIPO_LICITACAO', 'TIPO_LICITACAO']
 
-    df['DESCRICAO_UO'] = df['DESCRICAO_UO'].astype(str)
-    df['DESCRICAO_UG'] = df['DESCRICAO_UG'].astype(str)
-    df['DESCRICAO_UG'] = df['DESCRICAO_UG'].str.upper().str.strip().apply(lambda x: unidecode(x))
-    df['DESCRICAO_UG'] = df['DESCRICAO_UG'].str.upper().str.strip()
+    for column in colunas_str:
+        df[column] = df[column].astype(str)
 
-    def unificar_descricao(df):
-
-        maiores_descricoes_ug = df.groupby('UG')['DESCRICAO_UG'].apply(lambda x: x.loc[x.str.len().idxmax()])
-        maiores_descricoes_uo = df.groupby('UO')['DESCRICAO_UO'].apply(lambda x: x.loc[x.str.len().idxmax()])
-        
-        df['DESCRICAO_UG'] = df['UG'].map(maiores_descricoes_ug)
-        df['DESCRICAO_UO'] = df['UO'].map(maiores_descricoes_uo)
-        
-        return df
-
-    df = unificar_descricao(df)
+    df = df.replace('nan', '')
+    df['PT'] = df['PT'].str[:13]
 
     print('Subindo no DRIVE...')
 

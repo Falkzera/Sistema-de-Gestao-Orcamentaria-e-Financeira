@@ -15,11 +15,13 @@ from src.coleta_de_dados.ibge_leite_industrializado import funcao_ibge_leite_ind
 from src.coleta_de_dados.mdic_comercio_exterior import funcao_mdic_comercio_exterior
 from src.coleta_de_dados.anp_preco_combustivel import funcao_anp_preco_combustivel
 from src.coleta_de_dados.anp_producao_combustivel import funcao_anp_producao_combustivel
-from src.coleta_de_dados.sefaz_dotacao_completo import funcao_sefaz_dotacao
+from src.coleta_de_dados.sefaz_dotacao_completo import funcao_sefaz_dotacao_completo
 from src.coleta_de_dados.sefaz_despesa_completo import funcao_sefaz_despesa_completo
 from src.coleta_de_dados.sefaz_despesa_ano_corrente import funcao_sefaz_despesa_ano_corrente
 from src.coleta_de_dados.sefaz_dotacao_ano_corrente import funcao_sefaz_dotacao_ano_corrente
+from src.coleta_de_dados.sefaz_receita_completo import funcao_sefaz_receita_completo
 from src.coleta_de_dados.rgf import funcao_rgf
+from src.coleta_de_dados.rreo import funcao_rreo
 
 # Botão de Gerar Relatório
 from utils.confeccoes.gerar_baixar_confeccao import botao_gerar_e_baixar_arquivo
@@ -38,45 +40,84 @@ from utils.confeccoes.relatorio.relatorio_sefaz_despesa import montar_relatorio_
 
 titulos_pagina("Relatórios", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-file-invoice"></i>' )
 
-with st.container(): # Código para o usuário SUDO e talvez ADMIN
+with st.container():
         
     st.session_state.setdefault("buffer_download", {})
 
     if (
         "username" in st.session_state
-        and "base_acess" in st.secrets
-        and st.session_state.username in st.secrets["base_acess"]
-        and len(st.secrets["base_acess"][st.session_state.username]) >= 7
+        and "base_access" in st.secrets
+        and st.session_state.username in st.secrets["base_access"]
+        and len(st.secrets["base_access"][st.session_state.username]) >= 7
     ):
-
-        with st.container():  # Atualização das Bases -> Será permitido apenas para o admin
-            col1, col2, col3, col4 = st.columns(4)
+        st.subheader("Atualização de Dados")
+        with st.container(): 
+            st.write("---")
+            st.write("Dados do Boletim Conjuntural Alagoano")
+            col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
-                if st.button("Atualizar Dados do Boletim", use_container_width=True, type="primary"):
-                    with st.spinner("Atualizando dados gerais..."):
-                        funcao_ibge_abate_animais()
-                        funcao_ibge_leite_industrializado()
-                        funcao_mdic_comercio_exterior()
-                        funcao_anp_preco_combustivel()
-                        funcao_anp_producao_combustivel()
-                        st.success("Dados atualizados com sucesso!")
+                if st.button("Abate de Animais (IBGE)", use_container_width=True, type="primary"):
+                    funcao_ibge_abate_animais()
+                    print("Dados atualizados com sucesso: Abate de Animais (IBGE)")
             with col2:
-                if st.button("Atualizar Dados do Relatório de Despesas", use_container_width=True, type="primary"):
-                    with st.spinner("Atualizando dados do relatório de desepsa..."):
-                        funcao_sefaz_despesa_completo()
-                        st.success("Dados atualizados com sucesso!")
+                if st.button("Leite (IBGE)", use_container_width=True, type="primary"):
+                    funcao_ibge_leite_industrializado()
+                    print("Dados atualizados com sucesso: Leite (IBGE)")
             with col3:
-                if st.button("Atualizar Dados Sefaz", use_container_width=True, type="primary"):
-                    with st.spinner("Atualizando dados do relatório de desepsa..."):
-                        funcao_sefaz_despesa_ano_corrente()
-                        # funcao_sefaz_dotacao_ano_corrente()
-                        st.success("Dados atualizados com sucesso!")
-            
+                if st.button("Comércio Exterior (MDIC)", use_container_width=True, type="primary"):
+                    funcao_mdic_comercio_exterior()
+                    print("Dados atualizados com sucesso: Comércio Exterior (MDIC)")
             with col4:
-                if st.button("Atualizar Dados RGF", use_container_width=True, type="primary"):
-                    with st.spinner("Atualizando dados do RGF..."):
-                        funcao_rgf()
-                        st.success("Dados atualizados com sucesso!")
+                if st.button("Preço Combustivel (ANP)", use_container_width=True, type="primary"):
+                    funcao_anp_preco_combustivel()
+                    print("Dados atualizados com sucesso: Preço Combustivel (ANP)")
+            with col5:
+                if st.button("Produção Combustivel (ANP)", use_container_width=True, type="primary"):
+                    funcao_anp_producao_combustivel()
+                    print("Dados atualizados com sucesso: Produção Combustivel (ANP)")
+            st.write("---")
+
+            st.write("Dados do Relatório de Despesas")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                if st.button("Despesa Completo (SEFAZ)", use_container_width=True, type="primary"):
+                    funcao_sefaz_despesa_completo()
+                    print("Dados atualizados com sucesso: Despesa Completo (SEFAZ)")
+            with col2:
+                if st.button("Dotação Completo (SEFAZ)", use_container_width=True, type="primary"):
+                    funcao_sefaz_dotacao_completo()
+                    print("Dados atualizados com sucesso: Dotação Completo (SEFAZ)")
+            with col3:
+                if st.button("Receita Completo (SEFAZ)", use_container_width=True, type="primary"):
+                    funcao_sefaz_receita_completo()
+                    print("Dados atualizados com sucesso: Receita Completo (SEFAZ)")
+            st.write("---")
+
+            st.write("Dados do Ano Corrente")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Despesa Ano Corrente (SEFAZ)", use_container_width=True, type="primary"):
+                        funcao_sefaz_despesa_ano_corrente()
+                        print("Dados atualizados com sucesso: Despesa Ano Corrente (SEFAZ)")
+
+            with col2:
+                if st.button("Dotação Ano Corrente (SEFAZ)", use_container_width=True, type="primary"):
+                        funcao_sefaz_dotacao_ano_corrente()
+                        print("Dados atualizados com sucesso: Dotação Ano Corrente (SEFAZ)")
+            st.write("---")
+
+            st.write("RGF e RREO")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("RGF", use_container_width=True, type="primary"):
+                    funcao_rgf()
+                    print("Dados atualizados com sucesso: RGF")
+
+            with col2:
+                if st.button("RREO", use_container_width=True, type="primary"):
+                    funcao_rreo()
+                    print("Dados atualizados com sucesso: RREO")
+            st.write("---")
     else:
         pass
 

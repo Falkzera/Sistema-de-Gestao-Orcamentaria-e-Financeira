@@ -10,7 +10,7 @@ data_ontem = data_atual - timedelta(days=1)
 data_atual = data_atual.date().strftime('%d-%m-%Y')
 data_ontem = data_ontem.date().strftime('%d-%m-%Y')
 
-def funcao_sefaz_dotacao():
+def funcao_sefaz_dotacao_completo():
     try:
         print(' ')
         print('Atualizando DOTAÇÃO...')
@@ -31,7 +31,7 @@ def funcao_sefaz_dotacao():
         print(e)
 
 
-    df_drive = read_parquet_file_from_drive('sefaz_dotacao.parquet')
+    df_drive = read_parquet_file_from_drive('sefaz_dotacao_completo.parquet')
     df_drive['DATA'] = pd.to_datetime(df_drive['DATA'], format='%Y-%m')
     df_drive['ANO'] = df_drive['DATA'].dt.year
     df_drive = df_drive[df_drive['ANO'] != 2025]

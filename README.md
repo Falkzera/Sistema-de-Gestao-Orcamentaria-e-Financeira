@@ -38,7 +38,7 @@
 
 ## 🎯 Sobre o Projeto
 
-O **SIGOF** (Sistema de Gestão Orçamentário e Financeiro) é uma aplicação web desenvolvida em Python com Streamlit para modernizar e centralizar a gestão orçamentária do Estado de Alagoas. O sistema substitui planilhas Excel dispersas por uma solução integrada, colaborativa e auditável.
+O **SIGOF** (Sistema de Gestão Orçamentário e Financeiro) é uma aplicação web desenvolvida em Python com Streamlit para modernizar e centralizar a gestão orçamentária do setor público e também do setor privado. O sistema substitui planilhas Excel dispersas por uma solução integrada, colaborativa e auditável.
 
 ### 🎯 Objetivos Principais
 
@@ -248,7 +248,7 @@ SEFAZ_API_URL
 
 ```python
 # Compartilhe a planilha com o email da service account
-# Exemplo: sigof-service@projeto-123456.iam.gserviceaccount.com
+# Exemplo: exemple@projeto.iam.gserviceaccount.com
 # Permissão: Editor
 ```
 
@@ -274,9 +274,9 @@ usuario1 = "senha_usuario1_hash"
 usuario2 = "senha_usuario2_hash"
 
 [permissions]
-admin = ["Base CPOF", "Base Crédito SOP/GEO"]
-usuario1 = ["Base CPOF"]
-usuario2 = ["Base Crédito SOP/GEO"]
+admin = ["Base de Dados 1"]
+usuario1 = ["Usuário 1"]
+usuario2 = ["Usuário 2"]
 
 [gcp_service_account]
 type = "exemple-service_account"

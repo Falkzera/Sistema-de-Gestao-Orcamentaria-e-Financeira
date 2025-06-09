@@ -21,6 +21,5 @@ with st.container(border=True):
         unsafe_allow_html=True
     )
 
-
 rodape_desenvolvedor()
 

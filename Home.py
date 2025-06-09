@@ -11,6 +11,12 @@ st.set_page_config(page_title="Página Inicial", page_icon="🏠", layout="wide"
 
 padrao_importacao_pagina()
 
+if "username" not in st.session_state or not st.session_state.username:
+    print("Usuário não está logado.")
+
+if "base_access" not in st.secrets or st.session_state.username not in st.secrets["base_access"]:
+    print("Usuário não tem acesso a nenhuma base de dados.")
+
 limite = calcular_limite_credito_atual()
 VALOR_UTILIZADO_LIMITE = limite["valor_utilizado"]
 VALOR_DO_LIMITE = limite["valor_limite"]
@@ -18,15 +24,14 @@ ORÇAMENTO_APROVADO_2025 = limite["orcamento_aprovado"]
 
 with st.container():
 
-    with st.container(): # VALOR DO LIMITE (CÁLCULO)
-            
+    with st.container():
+
         df = func_load_base_credito_sop_geo()
 
-        df['Valor'] = df['Valor'].astype(float) # FILTRAR DE ACORDO COM O FILTRO DE QUEM ENTRA!
+        df['Valor'] = df['Valor'].astype(float) 
 
-    with st.container():  # MÉTRICAS
+    with st.container():
 
-        # ---------- Cabeçalho ----------
         col1, col2 = st.columns([0.9, 0.1])
         with col1:
 
@@ -35,7 +40,6 @@ with st.container():
         with col2:
             mostrar_info = st.toggle("ℹ️", key="mostrar_tooltips")
 
-        # ---------- Dados ----------
         indicadores = {
             "Orçamento Aprovado - 2025": ORÇAMENTO_APROVADO_2025,
             "Limite de Execução (10%)": VALOR_DO_LIMITE,
@@ -50,7 +54,6 @@ with st.container():
 
         cores_financas = ["#095AA2"] * len(indicadores)
 
-        # ---------- Blocos ----------
         cols_kpi = st.columns(len(indicadores))
         for idx, (titulo, valor) in enumerate(indicadores.items()):
             with cols_kpi[idx]:
@@ -99,14 +102,11 @@ with st.container():
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # sessão em baixo coluna 1 e coluna 2
-    with st.container():  # MÉTRICAS
+    with st.container():
 
-        # Cálculos
         valor_orcamento_anual_e_executado = (VALOR_UTILIZADO_LIMITE / ORÇAMENTO_APROVADO_2025) * 100
         valor_limite_sobre_usado = (VALOR_UTILIZADO_LIMITE / VALOR_DO_LIMITE) * 100
 
-        # Dados
         indicadores = {
             "Percentual Executado do Total": valor_orcamento_anual_e_executado,
             "Percentual Executado do Limite": valor_limite_sobre_usado,
@@ -115,16 +115,15 @@ with st.container():
 
         cores_financas = ["#095AA2", "#095AA2", "#095AA2"]
 
-        # Layout mais equilibrado
-        col1, col2 = st.columns([1, 2])  # aumenta o espaço para os cards
+        col1, col2 = st.columns([1, 2])  
 
         with col1:
             st.markdown("<div style='display: flex; flex-wrap: wrap; gap: 20px;'>", unsafe_allow_html=True)
 
             for idx, (titulo, valor) in enumerate(indicadores.items()):
-                if idx < 2:  # Os dois primeiros índices são em porcentagem
+                if idx < 2:
                     valor_formatado = f"{formatar_valor2(valor)}"
-                else:  # O terceiro índice é um valor monetário
+                else: 
                     valor_formatado = formatar_valor(valor)
 
                 st.markdown(f"""
@@ -174,137 +173,59 @@ with st.container():
                 )
             
             fig.data[0].values = [valor_limite_sobre_usado, 100 - valor_limite_sobre_usado]
-            
-
             st.plotly_chart(fig, use_container_width=True)
 
 st.write('---')
-# titulos_pagina(" Indicadores Processuais", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
 
-st.caption('Acomapnhamento da Situação Processual')
+username = st.session_state.username
+base_access = st.secrets.get("base_access", {})
 
+if "Base Crédito SOP/GEO" in base_access.get(username, []):
+    st.caption('Acompanhamento da Situação Processual')
 
-# ---------- Dados ----------
+    situacao_counts = df['Situação'].value_counts()
+    situacao_counts = situacao_counts.reset_index()
+    situacao_counts.columns = ['Situação', 'Quantidade']
 
-# a quantidade de cada situacao
-situacao_counts = df['Situação'].value_counts()
-situacao_counts = situacao_counts.reset_index()
-situacao_counts.columns = ['Situação', 'Quantidade']
-# st.write(situacao_counts)
+    total_processos = situacao_counts['Quantidade'].sum()
+    qtd_processos_sem_cobertura = df[df['Origem de Recursos'].str.startswith('Sem Cobertura')].shape[0]
+    qtd_processos_com_cobertura = df[~df['Origem de Recursos'].str.startswith('Sem Cobertura')].shape[0]
 
-# total de processos
+    def escolhendo_indicador(situacao_counts, situacao):
+        return situacao_counts.set_index('Situação').get('Quantidade', {}).get(situacao, 0)
 
-total_processos = situacao_counts['Quantidade'].sum()
+    indicadores_situacao = {
+        "Total de Processos": total_processos,
+        "Processos com Cobertura": qtd_processos_com_cobertura,
+        "Processos sem Cobertura": qtd_processos_sem_cobertura,
+        "Publicado": escolhendo_indicador(situacao_counts, 'Publicado'),  
+        }
+    
+    azuis = ["#095aa2"]
 
-qtd_processos_sem_cobertura = df[df['Origem de Recursos'].str.startswith('Sem Cobertura')].shape[0]
+    cores_financas = [azuis[i % len(azuis)] for i in range(len(indicadores_situacao))]
 
-qtd_processos_com_cobertura = df[~df['Origem de Recursos'].str.startswith('Sem Cobertura')].shape[0]
-
-def escolhendo_indicador(situacao_counts, situacao):
-    return situacao_counts.set_index('Situação').get('Quantidade', {}).get(situacao, 0)
-
-# ---------- Indicadores ----------
-indicadores_situacao = {
-    "Total de Processos": total_processos,
-    "Processos com Cobertura": qtd_processos_com_cobertura,
-    "Processos sem Cobertura": qtd_processos_sem_cobertura,
-    "Publicado": escolhendo_indicador(situacao_counts, 'Publicado'),  
-
-    }
-
-# ---------- Cores ----------
-azuis = [
-    "#095aa2",
-    # "#226bab",
-    # "#3a7bb5",
-    # "#538cbe",
-    # "#6b9cc7",
-
-]
-
-cores_financas = [azuis[i % len(azuis)] for i in range(len(indicadores_situacao))]
-
-# cores_financas = [mapa_cores_situacao.get(situacao, "#095AA2") for situacao in indicadores_situacao.keys()]
-# ---------- Blocos ----------
-
-cols_kpi = st.columns(len(indicadores_situacao))
-for idx, (titulo, valor) in enumerate(indicadores_situacao.items()):
-    with cols_kpi[idx]:
-        st.markdown(f"""
-        <div style='background-color:{cores_financas[idx]};
-                    padding:20px;
-                    border-radius:20px;
-                    text-align:center;
-                    color:white;
-                    border:0px solid #b5cee3;
-                    animation: fadeIn 0.5s ease-in-out;'>
-            <b style='font-size:18px;'>{titulo}</b><br>
-            <span style='font-size:30px;font-weight:bold;'>{(valor)}</span>
-        </div>
-        <style>
-        @keyframes fadeIn {{
-            from {{ opacity: 0; }}
-            to {{ opacity: 1; }}
-        }}
-        </style>
-        """, unsafe_allow_html=True)
-
-# st.write("##")
-
-# with st.container():  # GRÁFICOS
-
-#     tabs1, tabs2 = st.tabs([" Distribuição por Órgão (UO)", "Evolução Temporal"])
-
-#     with tabs2:
-
-#         titulos_pagina(" Evolução dos créditos públicados", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
-
-
-#         df_linha = df[
-#             (df['Situação'] == 'Publicado') & (df['Contabilizar no Limite?'] == 'SIM')
-#         ].copy()
-
-#         # Garantir que a coluna Data de Recebimento está em formato datetime
-#         df_linha['Data de Recebimento'] = pd.to_datetime(df_linha['Data de Recebimento'], errors='coerce')
-
-#         df_linha_agrupado = df_linha.groupby('Data de Recebimento', as_index=False)['Valor'].sum()
-#         df_linha_agrupado = df_linha_agrupado.sort_values('Data de Recebimento')
-
-#         fig = go.Figure()
-#         fig.add_trace(go.Scatter(
-#             x=df_linha_agrupado['Data de Recebimento'],
-#             y=df_linha_agrupado['Valor'],
-#             mode='lines+markers',
-#             line=dict(color='#095aa2', width=2),
-#             marker=dict(size=5, color='#095aa2'),
-#             name='Valor'
-#         ))
-
-#         st.plotly_chart(fig)
-
-#     with tabs1:
-
-#         titulos_pagina(" Valor publicado por órgão", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-balance-scale"></i>' )
-            
-#         # Agrupar por 'Órgão (UO)' e somar os valores
-#         df_agrupado = df[
-#             (df['Situação'] == 'Publicado') & (df['Contabilizar no Limite?'] == 'SIM')
-#         ].groupby('Órgão (UO)', as_index=False)['Valor'].sum()
-
-#         df_agrupado = df_agrupado.sort_values(by='Valor', ascending=False)
-
-#         fig = gerar_grafico_barra(
-#             agrupar=True,
-#             qtd_agrupar=10,
-#             fonte="sans serif",
-#             x=df_agrupado['Órgão (UO)'],
-#             y=df_agrupado['Valor'],
-#             cores="#095aa2",
-#             texto_formatado=df_agrupado['Valor'].apply(formatar_valor_arredondado),  # texto correspondente ao valor do órgão UO
-#             linhas_horizontais=True,
-#             mostrar_na_tela=True
-#         )
-
+    cols_kpi = st.columns(len(indicadores_situacao))
+    for idx, (titulo, valor) in enumerate(indicadores_situacao.items()):
+        with cols_kpi[idx]:
+            st.markdown(f"""
+            <div style='background-color:{cores_financas[idx]};
+                        padding:20px;
+                        border-radius:20px;
+                        text-align:center;
+                        color:white;
+                        border:0px solid #b5cee3;
+                        animation: fadeIn 0.5s ease-in-out;'>
+                <b style='font-size:18px;'>{titulo}</b><br>
+                <span style='font-size:30px;font-weight:bold;'>{(valor)}</span>
+            </div>
+            <style>
+            @keyframes fadeIn {{
+                from {{ opacity: 0; }}
+                to {{ opacity: 1; }}
+            }}
+            </style>
+            """, unsafe_allow_html=True)
 
 from utils.confeccoes.email.email import rotina_envio_email_ted
 rotina_envio_email_ted()

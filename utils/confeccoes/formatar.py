@@ -29,6 +29,19 @@ def formatar_valor(valor, casas_decimais=2):
 
     return resultado
 
+def inverter_formatar_valor(valor_formatado):
+    """
+    Inverte o formato de valor monetário brasileiro (R$ 1.234,56) para float (1234.56).
+    
+    Args:
+        valor_formatado (str): Valor formatado em string.
+        
+    Returns:
+        float: Valor convertido para float.
+    """
+    valor_formatado = valor_formatado.replace("R$", "").strip()
+    valor_formatado = valor_formatado.replace(".", "").replace(",", ".")
+    return float(valor_formatado)
 
 def formatar_valor_arredondado(valor, casas_decimais=2):
     negativo = valor < 0  

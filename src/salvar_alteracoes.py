@@ -89,6 +89,9 @@ def inicializar_e_gerenciar_modificacoes(selected_row, escolha_coluna=None):
         elif "Situação TED" in selected_row:
             coluna_status = "Situação TED"
             print("Coluna Situação TED encontrada na tabela.")
+        elif "Situação SOP" in selected_row:
+            coluna_status = "Situação SOP"
+            print("Coluna Situação SOP encontrada na tabela.")
         else:
             st.warning("Não existe coluna 'Deliberação' nem 'Situação' na tabela. A ação não pode ser completada.")
             return False
@@ -107,22 +110,18 @@ def inicializar_e_gerenciar_modificacoes(selected_row, escolha_coluna=None):
 
         print(f"Coluna atual selecionada: {coluna_status}")
 
-        # Guarda o status inicial do processo, se ainda não estiver salvo
         if processo_id not in st.session_state.status_inicial:
             st.session_state.status_inicial[processo_id] = status_atual
 
         status_inicial = st.session_state.status_inicial[processo_id]
 
-        # Atualiza selected_row_fixo para o processo atual
         if st.session_state.selected_row_fixo is None or st.session_state.selected_row_fixo.get("Processo") != processo_id:
             st.session_state.selected_row_fixo = {
                 "Processo": processo_id,
                 coluna_status: status_atual
             }
 
-        # Verifica se houve modificação em relação ao status inicial
         if status_atual != status_inicial:
-            # Só adiciona à lista se não existir modificação igual
             if not any(
                 mod["Processo"] == processo_id and
                 mod[f"{coluna_status} Anterior"] == status_inicial and
@@ -135,13 +134,11 @@ def inicializar_e_gerenciar_modificacoes(selected_row, escolha_coluna=None):
                     f"{coluna_status} Atual": status_atual
                 })
         else:
-            # Se voltou ao status inicial, remove qualquer modificação desse processo
             st.session_state.modificacoes = [
                 mod for mod in st.session_state.modificacoes
                 if not (mod["Processo"] == processo_id)
             ]
 
-    # Exibe informações sobre processos pendentes
     if st.session_state.modificacoes:
         processos_pendentes = []
         for mod in st.session_state.modificacoes:
@@ -177,6 +174,8 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
             coluna_status = "Situação"
         elif "Situação TED Anterior" in exemplo_mod and "Situação TED Atual" in exemplo_mod:
             coluna_status = "Situação TED"
+        elif "Situação SOP Anterior" in exemplo_mod and "Situação SOP Atual" in exemplo_mod:
+            coluna_status = "Situação SOP"
         else:
             st.warning("Não foi possível identificar a coluna de status para salvar as modificações.")
         # return
@@ -206,15 +205,16 @@ def salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base_principal, 
         st.session_state.base_cpof = df_base
     elif nome_base_principal == "Base Crédito SOP/GEO":
         st.session_state.base_creditos_sop_geo = df_base
+    elif nome_base_principal == "Base TED":
+        st.session_state.base_ted = df_base
+    elif nome_base_principal == "Base SOP/GERAL":
+        st.session_state.base_sop_geral = df_base
     # ...adicione outros nomes de base se necessário...
 
-    # Salva as modificações em lote no histórico correto
     usuario = st.session_state.username.title()
     salvar_modificacoes_em_lote(processos_modificados, usuario, nome_base_historica)
-    # Salva o DataFrame atualizado na base principal correta
     salvar_base(df_base, nome_base_principal)
 
-    # Limpa a lista de modificações
     st.session_state.modificacoes = []
     st.session_state.selected_row_fixo = None
     st.session_state.status_inicial = {}

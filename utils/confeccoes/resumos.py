@@ -3,7 +3,7 @@ import io
 import re
 
 from utils.limite.limite_credito import calcular_limite_credito_atual
-from utils.confeccoes.formatar import formatar_valor
+from utils.confeccoes.formatar import formatar_valor, inverter_formatar_valor
 from utils.confeccoes.formatar import por_extenso
 from utils.confeccoes.gerar_baixar_confeccao import botao_gerar_e_baixar_arquivo
 from utils.confeccoes.confeccao_ata import montar_ata
@@ -124,7 +124,7 @@ def resumo_publicados_geo(df):
                         descricao += f"*{row[coluna]}*"
                     if coluna == 'Nº do decreto':
                         numero = ''.join(filter(str.isdigit, str(row[coluna])))
-                        valor_formatado = f"{numero[:3]}.{numero[3:-1]}"
+                        valor_formatado = f"{numero[:3]}.{numero[3:]}"
                         descricao += f" - Decreto Nº *{valor_formatado}*"
                     if coluna == 'Fonte de Recursos':
                         descricao += f" - Fonte *{row[coluna]}*"
@@ -134,7 +134,9 @@ def resumo_publicados_geo(df):
 
             descricao_texto += "\n"
             
-            descricao_texto += f"Total publicado no dia (somando os processos especiais e de poderes que não contam para o limite): *{(df_resumo_publicado['Valor'].sum())}*. Portanto, *atualizando o limite para {limite['percentual_executado_total']:.2f}%*, representando um *valor utilizado de {formatar_valor(limite['valor_utilizado'])}* do total autorizado ({formatar_valor(limite['valor_limite'])}) totalizando um saldo de *{formatar_valor(limite['valor_disponivel'])}*. \n\n"
+            soma_valores = df_resumo_publicado['Valor'].apply(inverter_formatar_valor).sum()
+
+            descricao_texto += f"Total publicado no dia (somando os processos especiais e de poderes que não contam para o limite): *{formatar_valor(soma_valores)}*. Portanto, *atualizando o limite para {limite['percentual_executado_total']:.2f}%*, representando um *valor utilizado de {formatar_valor(limite['valor_utilizado'])}* do total autorizado ({formatar_valor(limite['valor_limite'])}) totalizando um saldo de *{formatar_valor(limite['valor_disponivel'])}*. \n\n"
 
             output = io.BytesIO()
             output.write(descricao_texto.encode("utf-8"))
@@ -146,7 +148,6 @@ def resumo_geral_geo(df):
     with st.expander("📋 **Gerador Automático de Resumos** 📋", expanded=False):
         df['Valor'] = df['Valor'].apply(formatar_valor)
         titulos_pagina("Gerador de Resumos", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-clipboard-list"></i>')
-        # st.caption("Os resumos aparecem conforme os filtros aplicados na tabela.")
 
         def formatar_linha(numero):
             linha = df[df["Nº do Processo"] == numero].iloc[0]

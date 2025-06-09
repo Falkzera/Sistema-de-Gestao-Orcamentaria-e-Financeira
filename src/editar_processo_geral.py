@@ -13,6 +13,7 @@ from utils.opcoes_coluna.orgao_uo import opcoes_orgao_uo
 from utils.opcoes_coluna.fonte_recurso import opcoes_fonte_recurso
 from utils.opcoes_coluna.grupo_despesa import opcoes_grupo_despesa
 from utils.opcoes_coluna.tipo_credito import opcoes_tipo_credito
+from utils.opcoes_coluna.tipo_processo import opcoes_tipo_processo
 from utils.opcoes_coluna.contabilizar_limite import opcoes_contabilizar_limite
 from utils.opcoes_coluna.origem_recurso import opcoes_origem_recursos
 from utils.confeccoes.formatar import formatar_valor_sem_cifrao
@@ -247,11 +248,11 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
 
     with st.form("form_edicao"): 
 
-        def editar_select(label, opcoes, coluna): # Função para Construção dos Campos de selectbox.
+        def editar_select(label, opcoes, coluna):
             valor_atual = processo[coluna]
             return st.selectbox(f"{label} **(Editar)**", opcoes, index=opcoes.index(valor_atual))
 
-        def editar_texto(label, coluna, tipo="input"): # Função para Construção dos Campos de texto.
+        def editar_texto(label, coluna, tipo="input"):
             if tipo == "area":
                 return st.text_area(f"{label} **(Editar)**", value=processo[coluna])
             return st.text_input(f"{label} **(Editar)**", value=processo[coluna])
@@ -381,6 +382,12 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             "nome": "Natureza de Despesa",
             "tipo": "tags",
             "label": "Natureza de Despesa"
+            },
+            {
+            "nome": "Tipo de Processo",
+            "tipo": "select",
+            "opcoes": opcoes_tipo_processo,
+            "label": "Tipo de Processo"
             },
         ]
 

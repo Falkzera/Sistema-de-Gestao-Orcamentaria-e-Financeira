@@ -6,7 +6,9 @@ from src.base import (
     func_load_base_credito_sop_geo,
     func_load_historico_credito_sop_geo,
     func_load_base_ted,
-    func_load_historico_ted
+    func_load_historico_ted,
+    func_load_base_sop_geral,
+    func_load_historico_sop_geral,
 )
 
 def controle_sessao():
@@ -60,8 +62,6 @@ def verificar_permissao():
         st.error("🚫 Você não tem permissão para acessar esta página.")
         st.switch_page("pages/Home.py")
         st.stop()
-# Construir um mapeamento de usuários e suas permissões
-
 
 def carregar_base_por_usuario(
     titulo_selectbox="Selecione a base de dados:",
@@ -74,23 +74,29 @@ def carregar_base_por_usuario(
     Permite forçar recarregamento do Google Sheets.
     Retorna o DataFrame já armazenado em session_state pelo base.py.
     """
-
-
-    # Mapeamento do nome da base para a função de carregamento e chave do session_state
     bases = {
         "Base CPOF": {"func": func_load_base_cpof, "session_key": "base_cpof"},
         "Histórico CPOF": {"func": func_load_historico_cpof, "session_key": "historico_cpof"},
         "Base Crédito SOP/GEO": {"func": func_load_base_credito_sop_geo, "session_key": "base_creditos_sop_geo"},
         "Histórico Crédito SOP/GEO": {"func": func_load_historico_credito_sop_geo, "session_key": "historico_credito_sop_geo"},
         "Base TED": {"func": func_load_base_ted, "session_key": "base_ted"},
-        "Histórico TED": {"func": func_load_historico_ted, "session_key": "historico_ted"}
+        "Histórico TED": {"func": func_load_historico_ted, "session_key": "historico_ted"},
+        "Base SOP/GERAL": {"func": func_load_base_sop_geral, "session_key": "base_sop_geral"},
+        "Histórico SOP/GERAL": {"func": func_load_historico_sop_geral, "session_key": "historico_sop_geral"},
     }
+    # historico_map = { ## ALTERAÇÃO REALIZADA AQUI <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    #     "Base CPOF": "Histórico CPOF",
+    #     "Base Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
+    #     "Histórico CPOF": "Histórico CPOF",
+    #     "Histórico Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
+    #     "Base TED": "Histórico TED",
+    # }
+
     historico_map = {
         "Base CPOF": "Histórico CPOF",
         "Base Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
-        "Histórico CPOF": "Histórico CPOF",
-        "Histórico Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
         "Base TED": "Histórico TED",
+        "Base SOP/GERAL": "Histórico SOP/GERAL",
     }
 
     if "username" not in st.session_state or not st.session_state.username:
@@ -106,16 +112,15 @@ def carregar_base_por_usuario(
         return None, "Nenhuma base carregada", None
     
     if apenas_base:
-        # Permitir apenas as bases principais (não históricas) na seleção
         bases_historicas = [
             "Histórico CPOF",
             "Histórico Crédito SOP/GEO",
             "Histórico TED"
+            "Histórico SOP/GERAL"
         ]
         bases_permitidas = [base for base in bases_permitidas if base not in bases_historicas]
 
     else:
-        # Permitir apenas bases que existem no mapeamento 'bases'
         bases_permitidas = [base for base in bases_permitidas if base in bases]
 
     if len(bases_permitidas) >= 2:
@@ -127,16 +132,12 @@ def carregar_base_por_usuario(
     else:
         nome_base_selecionada = bases_permitidas[0]
 
-    # Busca a função e a chave do session_state correspondente
     base_info = bases.get(nome_base_selecionada)
     if base_info is None:
         st.error(f"Função de carregamento não encontrada para a base '{nome_base_selecionada}'.")
         return None, nome_base_selecionada, None
 
-    # Chama a função de carregamento (ela já gerencia o session_state internamente)
     base_info["func"](forcar_recarregar=forcar_recarregar)
-
-    # Retorna o DataFrame diretamente do session_state, conforme definido em base.py
     base_dados = st.session_state.get(base_info["session_key"], None).copy()
 
     if base_dados is None:

@@ -12,7 +12,8 @@ opcoes_tipo_processo = sorted([
 "Férias e Alterações",
 "Outros",
 "Precatórios",
-"Contratos"
+"Contratos",
+"Emendas Impositivas"
 ])
 
 

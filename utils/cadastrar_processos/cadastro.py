@@ -415,9 +415,14 @@ def cadastrar_processos_sop_geral(nome_base, df):
 
             erros, campos_sanitizados = validar_processamento_campos(
                 numero_processo,
-                data_recebimento,
-                objetivo,
-            )
+                valor_input=None,
+                data_recebimento=data_recebimento, 
+                data_publicacao=None,
+                numero_decreto=None,
+                objetivo=objetivo,
+                observacao=None, 
+                obs_sop=None
+        )
 
             if erros:
                 for erro in erros:
@@ -436,7 +441,7 @@ def cadastrar_processos_sop_geral(nome_base, df):
 
                 agora = datetime.now()
                 novo = pd.DataFrame([{
-                    "Situação TED": situacao_sop,
+                    "Situação SOP": situacao_sop,
                     "Nº do Processo": numero_processo,
                     "Órgão (UO)": orgao_uo,	
                     "Tipo de Processo": tipo_processo,

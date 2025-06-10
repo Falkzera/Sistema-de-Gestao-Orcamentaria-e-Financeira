@@ -4,7 +4,7 @@ from .data import validar_data_recebimento, validar_data_publicacao
 from .validar_campos_livres import validar_sanitizar_campos_livres
 from datetime import datetime
 
-def validar_processamento_campos(numero_processo, valor_input, data_recebimento, data_publicacao, numero_decreto=None, objetivo=None, observacao=None, obs_sop=None):
+def validar_processamento_campos(numero_processo, valor_input=None, data_recebimento=None, data_publicacao=None, numero_decreto=None, objetivo=None, observacao=None, obs_sop=None):
 
     """
     Valida e sanitiza os campos de entrada relacionados ao processamento de um processo administrativo.
@@ -38,8 +38,9 @@ def validar_processamento_campos(numero_processo, valor_input, data_recebimento,
         
         erros.append(f"❌ Número do processo inválido. Use o formato: E:00000.0000000000/{ano_corrente}")
 
-    if valor_input and not validar_valor(valor_input):
-        erros.append("❌ VALOR inválido. Use o formato: 1.000,00 (vírgula para centavos, ponto para milhar)")
+    if valor_input is not None:
+        if valor_input and not validar_valor(valor_input):
+            erros.append("❌ VALOR inválido. Use o formato: 1.000,00 (vírgula para centavos, ponto para milhar)")
 
     if not validar_data_recebimento(data_recebimento):
         erros.append(f"❌ DATA de recebimento inválida. NÃO é possível cadastrar um processo com o ano de recebimento diferente do ano corrente ({ano_corrente}), ceritfique-se também de utilizar o formato correto: DD/MM/AAAA")

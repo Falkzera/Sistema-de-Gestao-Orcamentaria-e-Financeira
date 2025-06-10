@@ -37,7 +37,7 @@ with st.container(): # Exibição da Tabela
 
     if tem_modificacoes:
         
-        if st.button("Salvar ✅", type="primary"):
+        if st.button("Clique para Salvar", type="primary", help="Clique aqui para salvar as modificações feitas na tabela atual."):
             salvar_modificacoes_selectbox_mae(nome_base_historica, nome_base, df)
             st.session_state["forcar_recarregar"] = True
             del st.session_state["forcar_recarregar"]

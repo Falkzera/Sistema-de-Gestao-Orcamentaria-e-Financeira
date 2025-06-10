@@ -145,7 +145,7 @@ def inicializar_e_gerenciar_modificacoes(selected_row, escolha_coluna=None):
             if mod["Processo"] not in processos_pendentes:
                 processos_pendentes.append(mod["Processo"])
         processos_str = "; ".join(str(proc) for proc in processos_pendentes)
-        st.caption(f"Processo(s) pendente(s): {processos_str}")
+        st.caption(f"⬇️ Processo(s) pendente(s): {processos_str}")
         
         return True
 

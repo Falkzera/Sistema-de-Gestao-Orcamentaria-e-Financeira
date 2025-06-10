@@ -1,11 +1,13 @@
 import smtplib
+import io
 import streamlit as st
 import pandas as pd
 from datetime import datetime
 from src.google_drive_utils import save_pickle_file_to_drive, read_pickle_file_from_drive
-from src.base import func_load_base_ted
+from src.base import func_load_base_ted, func_load_base_credito_sop_geo
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 
 EMAIL_CACHE_FILENAME = "cache_email_ted.pkl"
 
@@ -19,12 +21,7 @@ def marcar_email_enviado_hoje(cache):
     save_pickle_file_to_drive(EMAIL_CACHE_FILENAME, cache)
 
 def criar_html_ted_vencimentos(df):
-    """
-    Gera HTML apenas com processos que possuem Data de Encerramento,
-    mostrando Nº do Processo, Objetivo, Data de Encerramento e Dias Restantes,
-    ordenados do que está mais próximo de vencer para o mais distante.
-    """
-    # Filtrar apenas linhas com Data de Encerramento não nula
+
     df_venc = df[df["Data de Encerramento"].notnull()].copy()
     if df_venc.empty:
         return """
@@ -137,13 +134,11 @@ def criar_html_ted_vencimentos(df):
     return html
 
 def enviar_email_ted(df):
-    """Envia email com os processos TED próximos do vencimento"""
     try:
         smtp_server = st.secrets["EMAIL"]["SMTP_SERVER"]
         smtp_port = int(st.secrets["EMAIL"]["SMTP_PORT"])
         email_sender = st.secrets["EMAIL"]["EMAIL_SENDER"]
         email_password = st.secrets["EMAIL"]["EMAIL_PASSWORD"]
-        # Destinatários agora vêm do secrets.toml
         destinatarios = st.secrets["EMAIL"].get("DESTINATARIOS", "").split(",")
         destinatarios = [d.strip() for d in destinatarios if d.strip()]
 
@@ -168,6 +163,66 @@ def enviar_email_ted(df):
     except Exception as e:
         return False, f"❌ Erro ao enviar email: {str(e)}"
 
+def criar_html_backup():
+
+    hoje = datetime.now().strftime('%d/%m/%Y')
+    html = f"""
+    <html>
+    <body>
+        <h2>📊 Backup da Base de Dados Completa</h2>
+        <p>Segue em anexo a base de dados completa exportada em {hoje}.</p>
+    </body>
+    </html>
+    """
+    return html
+
+def enviar_email_backup(df_ted, df_credito):
+    try:
+        smtp_server = st.secrets["EMAIL"]["SMTP_SERVER"]
+        smtp_port = int(st.secrets["EMAIL"]["SMTP_PORT"])
+        email_sender = st.secrets["EMAIL"]["EMAIL_SENDER"]
+        email_password = st.secrets["EMAIL"]["EMAIL_PASSWORD"]
+        destinatarios = st.secrets["EMAIL"].get("DESTINATARIOS", "").split(",")
+        destinatarios = [d.strip() for d in destinatarios if d.strip()]
+
+        html_content = criar_html_backup()
+        excel_buffer_ted = io.BytesIO()
+        excel_buffer_credito = io.BytesIO()
+
+        df_ted.to_excel(excel_buffer_ted, index=False)
+        df_credito.to_excel(excel_buffer_credito, index=False)
+
+        excel_buffer_ted.seek(0)
+        excel_buffer_credito.seek(0)
+        excel_data_ted = excel_buffer_ted.read()
+        excel_data_credito = excel_buffer_credito.read()
+
+        msg = MIMEMultipart('mixed')
+        msg['From'] = email_sender
+        msg['To'] = ", ".join(destinatarios)
+        msg['Subject'] = f"📊 Backup da Base de Dados Completa ({datetime.now().strftime('%d/%m/%Y')})"
+
+        html_part = MIMEText(html_content, 'html', 'utf-8')
+        msg.attach(html_part)
+
+        attachment_ted = MIMEApplication(excel_data_ted, _subtype='vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        attachment_credito = MIMEApplication(excel_data_credito, _subtype='vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        attachment_ted.add_header('Content-Disposition', 'attachment', filename="backup_base_ted.xlsx")
+        attachment_credito.add_header('Content-Disposition', 'attachment', filename="backup_base_credito.xlsx")
+        
+        msg.attach(attachment_ted)
+        msg.attach(attachment_credito)
+
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(email_sender, email_password)
+        for destinatario in destinatarios:
+            server.sendmail(email_sender, destinatario, msg.as_string())
+        server.quit()
+        return True, f"✅ Email de backup enviado para {len(destinatarios)} destinatário(s)"
+    except Exception as e:
+        return False, f"❌ Erro ao enviar email de backup: {str(e)}"
+
 def rotina_envio_email_ted():
     try:
         try:
@@ -182,8 +237,11 @@ def rotina_envio_email_ted():
             return
 
         try:
-            df = func_load_base_ted(forcar_recarregar=True)
-            sucesso, msg = enviar_email_ted(df)
+            df_ted = func_load_base_ted(forcar_recarregar=True)
+            df_credito = func_load_base_credito_sop_geo(forcar_recarregar=True)
+            sucesso, msg = enviar_email_ted(df_ted)
+            sucesso, msg = enviar_email_backup(df_ted, df_credito)
+
             if sucesso:
                 marcar_email_enviado_hoje(cache)
             else:

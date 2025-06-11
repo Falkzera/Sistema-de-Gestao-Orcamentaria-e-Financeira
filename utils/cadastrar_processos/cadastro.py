@@ -375,10 +375,15 @@ def cadastrar_processos_ted(nome_base, df):
                 novo["Valor"] = novo["Valor"].apply(
                     lambda x: float(x.replace(".", "").replace(",", "."))
                 )
-                novo["Valor Descentralizado"] = novo["Valor Descentralizado"].apply(
-                    lambda x: float(x.replace(".", "").replace(",", "."))
-                )
-                novo["Saldo"] = novo["Valor"] - novo["Valor Descentralizado"]
+                # se for none, vazio, ou '', nao executar
+                try:
+                    novo["Valor Descentralizado"] = novo["Valor Descentralizado"].apply(
+                        lambda x: float(x.replace(".", "").replace(",", "."))
+                    )
+                    novo["Saldo"] = novo["Valor"] - novo["Valor Descentralizado"]
+                except (ValueError, TypeError):
+                    print("Valor Descentralizado provavelmente não foi preenchido ou está vazio, então essa linha não terá o calculo automatico do saldo.")
+                    pass
 
                 nome_base = str(nome_base)
                 salvar_base(novo, nome_base)

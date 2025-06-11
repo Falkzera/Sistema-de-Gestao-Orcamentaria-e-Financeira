@@ -265,8 +265,8 @@ def cadastrar_processos_ted(nome_base, df):
         uo_concedente = col3.selectbox("Órgão Concedente **(Obrigatório)**",opcoes_orgao_uo,index=None,help="Selecione o Órgão Concedente.", placeholder="Selecione o Órgão Concedente")
 
         col1, col2, col3 = st.columns(3)
-        numero_ted = col1.text_input("Nº do TED **(Obrigatório)**", placeholder="Digite o número do TED", help="Digite o número do TED")
-        termo_aditivo = col2.text_input("Termo Aditivo **(Obrigatório)**",  placeholder="Digite o Termo Aditivo", help="Digite o Termo Aditivo.")
+        numero_ted = col1.text_input("Nº do TED", placeholder="Digite o número do TED", help="Digite o número do TED")
+        termo_aditivo = col2.text_input("Termo Aditivo",  placeholder="Digite o Termo Aditivo", help="Digite o Termo Aditivo.")
         uo_executante = col3.selectbox("Órgão Executante **(Obrigatório)**",opcoes_orgao_uo,index=None,help="Selecione o Órgão Executante.", placeholder="Selecione o Órgão Executante")
         from streamlit_tags import st_tags
 
@@ -279,7 +279,7 @@ def cadastrar_processos_ted(nome_base, df):
         col1, col2, col3 = st.columns(3)
         fonte_recurso = col1.multiselect("Fonte de Recursos **(Obrigatório)**", opcoes_fonte_recurso, help="Selecione a Fonte de Recursos.", placeholder="Selecione a Fonte de Recursos")
         valor_input = col2.text_input("Valor **(Obrigatório)**", placeholder="Ex: 1.234,56", help="Digite o valor do processo no formato: 1.234,56")
-        valor_descentralizado = col3.text_input("Valor Descentralizado **(Obrigatório)**", placeholder="Ex: 1.234,56", help="Digite o valor descentralizado do processo no formato: 1.234,56")
+        valor_descentralizado = col3.text_input("Valor Descentralizado", placeholder="Ex: 1.234,56", help="Digite o valor descentralizado do processo no formato: 1.234,56")
 
         objetivo = st.text_input("Objetivo **(Obrigatório)**", placeholder="Ex: Objetivos do Pedido do Processo.", help="Objetivos do pedido do processo.")
 

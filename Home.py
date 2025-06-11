@@ -227,7 +227,14 @@ if "Base Crédito SOP/GEO" in base_access.get(username, []):
             </style>
             """, unsafe_allow_html=True)
 
-from utils.confeccoes.email.email import rotina_envio_email_ted
+from utils.confeccoes.email.email import rotina_envio_email_ted # <<<<<<<< QUALQUER USUÁRIO DEVE ATIVAR ISSO????? ACHO QUE NÃO, NÉ? --> Visualizar o que a Gabi gostaria de ver aqui e imnplementar essa atualziacao em conjunto
+# Pois provavelmente também terá e-mail autoamtico dela.
+# --> Realizar e-mail automatico, do mesmo escopo de Backup com o resumo do dia anterior -> Processos que Houberam Modificações e processos cadastrados.
+# Em cima um resumo de: Quantos processos foram cadastrados, e quantos foram modificados. 
+# E embaixo um essas informações mais detalhadas.
+
+
+
 rotina_envio_email_ted()
 
 rodape_desenvolvedor()

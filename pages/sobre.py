@@ -26,12 +26,17 @@ with st.container(border=False):
             Messias Junior Caffeu Ritir<br><br>
             <b>ASSESSORIA DE ORÇAMENTO PÚBLICO</b><br>
             Rebeca De Cássia Soares Da Silva Melo<br><br>
-            <h5 style='color:#3064AD;'>Gerência de Orçamento</h5>
-            <b>GERENTE DE ORÇAMENTO</b><br>
-            Marcos Henrique Agra Costa Malta<br>
+            <h5 style='color:#3064AD;'>Gerência de Estudos e Projeções</h5>
+            <b>GERENTE DE ESTUDOS E PROJEÇÕES</b><br>
+            Cayo Luca Gomes Santana<br>
             <b></b><br>
-            <b>SUPERVISÃO DE PROGRAMAÇÃO ORÇAMENTÁRIA</b><br>
-            Arthur Ferreira Da Silva Pitanga<br><br>
+            <b>SUPERVISÃO DE MONITORAMENTO DAS AÇÕES ORÇAMENTÁRIAS</b><br>
+            Adélia Cristina Silva De Lima<br>
+            <b></b><br>
+            <b>ESTAGIÁRIA</b><br>
+            Priscila Luciane Leite Do Nascimento
+            <b></b><br>
+            <b></b><br>
             <h5 style='color:#3064AD;'>Gerência de Execução Orçamentária</h5>
             <b>GERENTE DE EXECUÇÃO ORÇAMENTÁRIA</b><br>
             Felliphy Rammon Queiroz Ferreira<br>
@@ -44,15 +49,13 @@ with st.container(border=False):
             <b></b><br>
             <b>ASSESSORIA DE EMENDAS PARLAMENTARES</b><br>
             Isadora Mendes Costa<br><br>
-            <h5 style='color:#3064AD;'>Gerência de Estudos e Projeções</h5>
-            <b>GERENTE DE ESTUDOS E PROJEÇÕES</b><br>
-            Cayo Luca Gomes Santana<br>
+            <h5 style='color:#3064AD;'>Gerência de Orçamento</h5>
+            <b>GERENTE DE ORÇAMENTO</b><br>
+            Marcos Henrique Agra Costa Malta<br>
             <b></b><br>
-            <b>SUPERVISÃO DE MONITORAMENTO DAS AÇÕES ORÇAMENTÁRIAS</b><br>
-            Adélia Cristina Silva De Lima<br>
-            <b></b><br>
-            <b>ESTAGIÁRIA</b><br>
-            Priscila Luciane Leite Do Nascimento
+            <b>SUPERVISÃO DE PROGRAMAÇÃO ORÇAMENTÁRIA</b><br>
+            Arthur Ferreira Da Silva Pitanga<br><br>
+
         </div>
         """,
         unsafe_allow_html=True

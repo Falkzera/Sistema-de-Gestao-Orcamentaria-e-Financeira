@@ -159,6 +159,7 @@ def enviar_email_ted(df):
         for destinatario in destinatarios:
             server.sendmail(email_sender, destinatario, msg.as_string())
         server.quit()
+        print("Email TED enviado com sucesso!")
         return True, f"✅ Email enviado para {len(destinatarios)} destinatário(s)"
     except Exception as e:
         return False, f"❌ Erro ao enviar email: {str(e)}"
@@ -239,11 +240,13 @@ def rotina_envio_email_ted():
         try:
             df_ted = func_load_base_ted(forcar_recarregar=True)
             df_credito = func_load_base_credito_sop_geo(forcar_recarregar=True)
+            print("Preparando Email TED e BACKUP...")
             sucesso, msg = enviar_email_ted(df_ted)
             sucesso, msg = enviar_email_backup(df_ted, df_credito)
 
             if sucesso:
                 marcar_email_enviado_hoje(cache)
+                print("Email Enviado...")
             else:
                 print(f"Erro ao enviar email: {msg}")
         except Exception as e:

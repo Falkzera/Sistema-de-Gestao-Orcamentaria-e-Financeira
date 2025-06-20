@@ -144,6 +144,41 @@ def build_grid_options(
                 }
             """)
         )
+    
+    if "Valor Descentralizado" in columns:
+        gb.configure_column(
+            "Valor Descentralizado",
+            type=["numericColumn"],      # habilita tratamento numérico
+            aggFunc="sum",               # usa soma como agregação padrão
+            valueFormatter=JsCode("""
+                function(params) {
+                    if (params.value == null) return '';
+                    // toLocaleString no pt-BR com 2 dígitos
+                    return 'R$ ' + params.value.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            """)
+        )
+
+    if "Saldo" in columns:
+        gb.configure_column(
+            "Saldo",
+            type=["numericColumn"],      # habilita tratamento numérico
+            aggFunc="sum",               # usa soma como agregação padrão
+            valueFormatter=JsCode("""
+                function(params) {
+                    if (params.value == null) return '';
+                    // toLocaleString no pt-BR com 2 dígitos
+                    return 'R$ ' + params.value.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            """)
+        )
+
 
     # Seleção de linha e callback de duplo clique
     if enable_click:

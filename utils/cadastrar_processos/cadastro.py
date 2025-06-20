@@ -212,7 +212,6 @@ def cadastrar_processos_cpof(nome_base, df):
             if erros:
                 for erro in erros:
                     st.error(erro)
-                    st.write(f'{erro}')
                 st.stop()
 
             objetivo_sanitizado = campos_sanitizados['objetivo']
@@ -259,7 +258,7 @@ def cadastrar_processos_ted(nome_base, df):
     with st.container(border=True):
         titulos_pagina("Cadastro de Processos TED", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder"></i>' )
         col1, col2, col3 = st.columns(3)
-        numero_processo = col1.text_input("Nº do Processo **(Obrigatório)**",placeholder=f"E:00000.0000000000/{ano_corrente}",help=f"Digite o número do processo no formato: E:00000.0000000000/{ano_corrente}")
+        numero_processo = col1.text_input("Nº do Processo **(Obrigatório)**",placeholder=f"Digite aqui o número do processo",help=f"Digite o número do processo")
         numero_processo = str(numero_processo).strip() 
         situacao_ted = col2.selectbox("Situação TED **(Obrigatório)**",opcoes_situacao_ted,index=None,help="Selecione a situação do TED.", placeholder="Selecione a situação do TED")
         uo_concedente = col3.selectbox("Órgão Concedente **(Obrigatório)**",opcoes_orgao_uo,index=None,help="Selecione o Órgão Concedente.", placeholder="Selecione o Órgão Concedente")
@@ -312,17 +311,17 @@ def cadastrar_processos_ted(nome_base, df):
         if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary", help='Clique para cadastrar o processo na base 📁'):
 
             erros, campos_sanitizados = validar_processamento_campos(
-                numero_processo,
-                valor_input,
-                data_recebimento,
-                data_publicacao,
-                objetivo,
+                numero_processo=numero_processo,
+                valor_input=valor_input,
+                data_recebimento=data_recebimento,
+                data_publicacao=data_publicacao,
+                objetivo=objetivo,
+                flexibilizar_numero_processo=True,  # Permite o cadastro sem validação estrita do número do processo
             )
 
             if erros:
                 for erro in erros:
                     st.error(erro)
-                    st.write(f'{erro}')
                 st.stop()
 
             objetivo_sanitizado = campos_sanitizados.get('objetivo', objetivo)
@@ -385,6 +384,10 @@ def cadastrar_processos_ted(nome_base, df):
                     print("Valor Descentralizado provavelmente não foi preenchido ou está vazio, então essa linha não terá o calculo automatico do saldo.")
                     pass
 
+                novo["Data de Recebimento"] = pd.to_datetime(novo["Data de Recebimento"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+                novo["Data de Publicação"] = pd.to_datetime(novo["Data de Publicação"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+                novo["Data de Encerramento"] = pd.to_datetime(novo["Data de Encerramento"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+
                 nome_base = str(nome_base)
                 salvar_base(novo, nome_base)
 
@@ -432,7 +435,6 @@ def cadastrar_processos_sop_geral(nome_base, df):
             if erros:
                 for erro in erros:
                     st.error(erro)
-                    st.write(f'{erro}')
                 st.stop()
 
             objetivo_sanitizado = campos_sanitizados.get('objetivo', objetivo)

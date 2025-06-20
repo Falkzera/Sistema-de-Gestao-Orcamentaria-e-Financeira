@@ -68,6 +68,14 @@ def func_load_base_ted(forcar_recarregar=False):
         conn = st.connection("gsheets", type=GSheetsConnection)
         base = conn.read(worksheet="Base TED", ttl=300)
         base["Fonte de Recursos"] = base["Fonte de Recursos"].astype(str)
+        print("Realizando cálculo do Saldo...")
+        try:
+            base["Valor Descentralizado"] = base["Valor Descentralizado"].astype(float)
+            base["Valor"] = base["Valor"].astype(float)
+            
+            base["Saldo"] = base["Valor"] - base["Valor Descentralizado"]
+        except ValueError:
+            print("Erro ao converter 'Valor Descentralizado' para float. Verifique os dados.")
 
         st.session_state.base_ted = base
 

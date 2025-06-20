@@ -503,9 +503,10 @@ def formulario_edicao_processo(nome_base, df, nome_base_historica):
             erros = []
 
             # Validações dinâmicas conforme os campos presentes
-            if "Nº do Processo" in valores_editados:
-                if not validar_numero_processo(valores_editados["Nº do Processo"]):
-                    erros.append("Número do processo inválido.")
+            if nome_base != "Base TED":
+                if "Nº do Processo" in valores_editados:
+                    if not validar_numero_processo(valores_editados["Nº do Processo"]):
+                        erros.append("Número do processo inválido.")
             if "Valor" in valores_editados:
                 if not validar_valor(valores_editados["Valor"]):
                     erros.append("Valor inválido.")

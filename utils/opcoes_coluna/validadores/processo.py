@@ -4,7 +4,7 @@ from .data import validar_data_recebimento, validar_data_publicacao
 from .validar_campos_livres import validar_sanitizar_campos_livres
 from datetime import datetime
 
-def validar_processamento_campos(numero_processo, valor_input=None, data_recebimento=None, data_publicacao=None, numero_decreto=None, objetivo=None, observacao=None, obs_sop=None):
+def validar_processamento_campos(numero_processo, valor_input=None, data_recebimento=None, data_publicacao=None, numero_decreto=None, objetivo=None, observacao=None, obs_sop=None, flexibilizar_numero_processo=False):
 
     """
     Valida e sanitiza os campos de entrada relacionados ao processamento de um processo administrativo.
@@ -34,9 +34,9 @@ def validar_processamento_campos(numero_processo, valor_input=None, data_recebim
 
     if not numero_processo:
         erros.append("Por favor, insira o número do processo.")
-    elif not validar_numero_processo(numero_processo):
-        
-        erros.append(f"❌ Número do processo inválido. Use o formato: E:00000.0000000000/{ano_corrente}")
+    elif flexibilizar_numero_processo is False:
+        if not validar_numero_processo(numero_processo):
+            erros.append(f"❌ Número do processo inválido. Use o formato: E:00000.0000000000/{ano_corrente}")
 
     if valor_input is not None:
         if valor_input and not validar_valor(valor_input):

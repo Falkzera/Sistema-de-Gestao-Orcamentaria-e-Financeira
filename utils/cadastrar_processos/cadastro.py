@@ -326,12 +326,13 @@ def cadastrar_processos_ted(nome_base, df):
 
             objetivo_sanitizado = campos_sanitizados.get('objetivo', objetivo)
 
-            if numero_processo in df["Nº do Processo"].values:
-                st.error("⚠️ Esse processo já foi cadastrado! Veja abaixo:")
-                mostrar_tabela(df[df["Nº do Processo"] == numero_processo],altura_max_linhas=99, 
-                            nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
-                st.stop()
-            else:
+            # if numero_processo in df["Nº do Processo"].values:
+            #     st.error("⚠️ Esse processo já foi cadastrado! Veja abaixo:")
+            #     mostrar_tabela(df[df["Nº do Processo"] == numero_processo],altura_max_linhas=99, 
+            #                 nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
+            #     st.stop()
+            # else:
+            with st.spinner("Cadastrando o processo..."):
                 fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
 
                 def formatar_lista_e(lista):

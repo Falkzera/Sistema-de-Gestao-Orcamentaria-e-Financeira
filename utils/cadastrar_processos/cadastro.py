@@ -325,72 +325,147 @@ def cadastrar_processos_ted(nome_base, df):
                 st.stop()
 
             objetivo_sanitizado = campos_sanitizados.get('objetivo', objetivo)
+            st.session_state['objetivo_sanitizado'] = campos_sanitizados.get('objetivo', objetivo)
+            # outras flags ou dados que precisar salvar
+            st.session_state['mostrar_continuar'] = True
 
-            # if numero_processo in df["Nº do Processo"].values:
-            #     st.error("⚠️ Esse processo já foi cadastrado! Veja abaixo:")
-            #     mostrar_tabela(df[df["Nº do Processo"] == numero_processo],altura_max_linhas=99, 
-            #                 nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
-            #     st.stop()
-            # else:
-            with st.spinner("Cadastrando o processo..."):
-                fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
+            if numero_processo in df["Nº do Processo"].values:
+                st.info("⚠️ Esse processo já foi cadastrado! Veja abaixo: (Caso deseje continuar o cadastro, clique no botão 'Continuar Cadastro' abaixo...)")
+                mostrar_tabela(df[df["Nº do Processo"] == numero_processo],altura_max_linhas=99, nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
+                st.session_state['mostrar_continuar'] = True
+            else:  # PRIMEIRA REPETIÇÃO DE SALVAMENTO DE TED!
+                with st.spinner("Cadastrando o processo..."):
+                    st.session_state['mostrar_continuar'] = False
+                    fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
+                    def formatar_lista_e(lista):
+                        if isinstance(lista, list):
+                            if len(lista) == 0:
+                                return ""
+                            elif len(lista) == 1:
+                                return str(lista[0])
+                            elif len(lista) == 2:
+                                return f"{lista[0]} e {lista[1]}"
+                            else:
+                                return f"{', '.join(map(str, lista[:-1]))} e {lista[-1]}"
+                        return lista
 
-                def formatar_lista_e(lista):
-                    if isinstance(lista, list):
-                        if len(lista) == 0:
-                            return ""
-                        elif len(lista) == 1:
-                            return str(lista[0])
-                        elif len(lista) == 2:
-                            return f"{lista[0]} e {lista[1]}"
-                        else:
-                            return f"{', '.join(map(str, lista[:-1]))} e {lista[-1]}"
-                    return lista
+                    programa_trabalho = formatar_lista_e(programa_trabalho)
+                    natureza_despesa = formatar_lista_e(natureza_despesa)
+                    fonte_recurso_str = formatar_lista(fonte_recurso)
 
-                programa_trabalho = formatar_lista_e(programa_trabalho)
-                natureza_despesa = formatar_lista_e(natureza_despesa)
-                fonte_recurso_str = formatar_lista(fonte_recurso)
+                    objetivo_sanitizado = st.session_state.get('objetivo_sanitizado', objetivo)
 
-                agora = datetime.now()
-                novo = pd.DataFrame([{
-                    "Situação TED": situacao_ted,
-                    "Nº do Processo": numero_processo,
-                    "UO Concedente": uo_concedente,
-                    "UO Executante": uo_executante,
-                    "Nº do TED": numero_ted,
-                    "Termo Aditivo": termo_aditivo,
-                    "Programa de Trabalho": programa_trabalho,
-                    "Fonte de Recursos": fonte_recurso_str,
-                    "Natureza de Despesa": natureza_despesa,
-                    "Objetivo": objetivo_sanitizado,
-                    "Valor": valor_input,
-                    "Valor Descentralizado": valor_descentralizado,
-                    "Saldo": '',
-                    "Data de Publicação": data_publicacao,
-                    "Data de Encerramento": data_encerramento,
-                    "Data de Recebimento": data_recebimento,
-                    "Cadastrado Por": st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S"),
-                }])
+                    agora = datetime.now()
+                    novo = pd.DataFrame([{
+                        "Situação TED": situacao_ted,
+                        "Nº do Processo": numero_processo,
+                        "UO Concedente": uo_concedente,
+                        "UO Executante": uo_executante,
+                        "Nº do TED": numero_ted,
+                        "Termo Aditivo": termo_aditivo,
+                        "Programa de Trabalho": programa_trabalho,
+                        "Fonte de Recursos": fonte_recurso_str,
+                        "Natureza de Despesa": natureza_despesa,
+                        "Objetivo": objetivo_sanitizado,
+                        "Valor": valor_input,
+                        "Valor Descentralizado": valor_descentralizado,
+                        "Saldo": '',
+                        "Data de Publicação": data_publicacao,
+                        "Data de Encerramento": data_encerramento,
+                        "Data de Recebimento": data_recebimento,
+                        "Cadastrado Por": st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S"),
+                    }])
 
-                novo["Valor"] = novo["Valor"].apply(
-                    lambda x: float(x.replace(".", "").replace(",", "."))
-                )
-                # se for none, vazio, ou '', nao executar
-                try:
-                    novo["Valor Descentralizado"] = novo["Valor Descentralizado"].apply(
+                    novo["Valor"] = novo["Valor"].apply(
                         lambda x: float(x.replace(".", "").replace(",", "."))
                     )
-                    novo["Saldo"] = novo["Valor"] - novo["Valor Descentralizado"]
-                except (ValueError, TypeError):
-                    print("Valor Descentralizado provavelmente não foi preenchido ou está vazio, então essa linha não terá o calculo automatico do saldo.")
-                    pass
+                    # se for none, vazio, ou '', nao executar
+                    try:
+                        novo["Valor Descentralizado"] = novo["Valor Descentralizado"].apply(
+                            lambda x: float(x.replace(".", "").replace(",", "."))
+                        )
+                        novo["Saldo"] = novo["Valor"] - novo["Valor Descentralizado"]
+                    except (ValueError, TypeError):
+                        print("Valor Descentralizado provavelmente não foi preenchido ou está vazio, então essa linha não terá o calculo automatico do saldo.")
+                        pass
 
-                novo["Data de Recebimento"] = pd.to_datetime(novo["Data de Recebimento"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
-                novo["Data de Publicação"] = pd.to_datetime(novo["Data de Publicação"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
-                novo["Data de Encerramento"] = pd.to_datetime(novo["Data de Encerramento"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+                    novo["Data de Recebimento"] = pd.to_datetime(novo["Data de Recebimento"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+                    novo["Data de Publicação"] = pd.to_datetime(novo["Data de Publicação"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+                    novo["Data de Encerramento"] = pd.to_datetime(novo["Data de Encerramento"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
 
-                nome_base = str(nome_base)
-                salvar_base(novo, nome_base)
+                    nome_base = str(nome_base)
+                    salvar_base(novo, nome_base, cadastro_ted_permitir_repetidos=True)
+                    del st.session_state['mostrar_continuar']
+                    del st.session_state['objetivo_sanitizado']
+                    st.rerun()
+            
+        if st.session_state.get('mostrar_continuar', False):
+            if st.button("Continuar Cadastro", use_container_width=True, type="primary", help='Clique para continuar o cadastro mesmo assim.'):
+
+                with st.spinner("Cadastrando o processo..."):
+                    st.session_state['mostrar_continuar'] = False
+                    fonte_recurso = [item for sublist in fonte_recurso for item in (sublist.split(" e ") if isinstance(sublist, str) and " e " in sublist else [sublist])]
+                    def formatar_lista_e(lista):
+                        if isinstance(lista, list):
+                            if len(lista) == 0:
+                                return ""
+                            elif len(lista) == 1:
+                                return str(lista[0])
+                            elif len(lista) == 2:
+                                return f"{lista[0]} e {lista[1]}"
+                            else:
+                                return f"{', '.join(map(str, lista[:-1]))} e {lista[-1]}"
+                        return lista
+
+                    programa_trabalho = formatar_lista_e(programa_trabalho)
+                    natureza_despesa = formatar_lista_e(natureza_despesa)
+                    fonte_recurso_str = formatar_lista(fonte_recurso)
+
+                    objetivo_sanitizado = st.session_state.get('objetivo_sanitizado', objetivo)
+
+                    agora = datetime.now()
+                    novo = pd.DataFrame([{
+                        "Situação TED": situacao_ted,
+                        "Nº do Processo": numero_processo,
+                        "UO Concedente": uo_concedente,
+                        "UO Executante": uo_executante,
+                        "Nº do TED": numero_ted,
+                        "Termo Aditivo": termo_aditivo,
+                        "Programa de Trabalho": programa_trabalho,
+                        "Fonte de Recursos": fonte_recurso_str,
+                        "Natureza de Despesa": natureza_despesa,
+                        "Objetivo": objetivo_sanitizado,
+                        "Valor": valor_input,
+                        "Valor Descentralizado": valor_descentralizado,
+                        "Saldo": '',
+                        "Data de Publicação": data_publicacao,
+                        "Data de Encerramento": data_encerramento,
+                        "Data de Recebimento": data_recebimento,
+                        "Cadastrado Por": st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S"),
+                    }])
+
+                    novo["Valor"] = novo["Valor"].apply(
+                        lambda x: float(x.replace(".", "").replace(",", "."))
+                    )
+                    # se for none, vazio, ou '', nao executar
+                    try:
+                        novo["Valor Descentralizado"] = novo["Valor Descentralizado"].apply(
+                            lambda x: float(x.replace(".", "").replace(",", "."))
+                        )
+                        novo["Saldo"] = novo["Valor"] - novo["Valor Descentralizado"]
+                    except (ValueError, TypeError):
+                        print("Valor Descentralizado provavelmente não foi preenchido ou está vazio, então essa linha não terá o calculo automatico do saldo.")
+                        pass
+
+                    novo["Data de Recebimento"] = pd.to_datetime(novo["Data de Recebimento"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+                    novo["Data de Publicação"] = pd.to_datetime(novo["Data de Publicação"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+                    novo["Data de Encerramento"] = pd.to_datetime(novo["Data de Encerramento"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+
+                    nome_base = str(nome_base)
+                    salvar_base(novo, nome_base, cadastro_ted_permitir_repetidos=True)
+                    del st.session_state['mostrar_continuar']
+                    del st.session_state['objetivo_sanitizado']
+                    st.rerun()
 
 def cadastrar_processos_sop_geral(nome_base, df):
     

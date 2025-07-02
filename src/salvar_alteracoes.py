@@ -7,7 +7,7 @@ from streamlit_gsheets import GSheetsConnection
 
 from src.salvar_historico import salvar_modificacoes_em_lote, salvar_modificacao
 
-def salvar_base(df, nome_base):
+def salvar_base(df, nome_base, cadastro_ted_permitir_repetidos=False):
     """
     Salva as alterações de um DataFrame em uma worksheet do Google Sheets, atualizando ou inserindo linhas conforme o 'Nº do Processo'.
     Parâmetros:
@@ -32,14 +32,18 @@ def salvar_base(df, nome_base):
     base = pd.DataFrame(base)  
 
     # Atualiza ou substitui a linha com o mesmo 'Nº do Processo'
-    if 'Nº do Processo' in base.columns and 'Nº do Processo' in df.columns:
-        for _, row in df.iterrows():
-            processo_id = row['Nº do Processo']
-            idx = base[base['Nº do Processo'] == processo_id].index
-            if not idx.empty:
-                base.loc[idx[0]] = row  # Atualiza a linha existente
-            else:
-                base = pd.concat([base, pd.DataFrame([row])], ignore_index=True)  # Adiciona nova linha se não existir
+    
+    if cadastro_ted_permitir_repetidos is False:
+
+        if 'Nº do Processo' in base.columns and 'Nº do Processo' in df.columns:
+            for _, row in df.iterrows():
+                processo_id = row['Nº do Processo']
+                idx = base[base['Nº do Processo'] == processo_id].index
+                if not idx.empty:
+                    base.loc[idx[0]] = row  # Atualiza a linha existente
+                else:
+                    base = pd.concat([base, pd.DataFrame([row])], ignore_index=True)  # Adiciona nova linha se não existir
+    
     else:
         base = pd.concat([base, df], ignore_index=True)
 

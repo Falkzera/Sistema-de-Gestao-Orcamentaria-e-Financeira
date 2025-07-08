@@ -18,7 +18,6 @@ titulos_pagina("Visualizador de Processos", font_size="1.9em", text_color="#3064
 
 with st.container(): # Carregamento da base PRECISA VER UMA FORMA DE EVITAR O RECARREGAMENTO DA BASE CONSTANTEMENTE!
     df, nome_base, nome_base_historica = carregar_base_por_usuario(apenas_base=True) # Tempo de execução está obivamente atrlado a essa função aqui, depurar ela mais tarde
-        
     df = filtros_de_busca(df)
 
 with st.container(): # Exibição da Tabela
@@ -55,3 +54,4 @@ with st.container():
 
 
 rodape_desenvolvedor()
+

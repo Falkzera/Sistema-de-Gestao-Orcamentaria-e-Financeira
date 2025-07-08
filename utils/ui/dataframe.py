@@ -179,6 +179,13 @@ def build_grid_options(
             """)
         )
 
+    if "Data de Recebimento" in columns: # Implementação do filtro
+        gb.configure_column(
+            "Data de Recebimento",
+            type=["dateColumnFilter"],
+            custom_format_string='yyyy-MM-dd'
+        )
+
 
     # Seleção de linha e callback de duplo clique
     if enable_click:

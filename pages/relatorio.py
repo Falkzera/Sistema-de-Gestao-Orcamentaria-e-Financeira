@@ -1,9 +1,8 @@
 import streamlit as st
 
-st.set_page_config(page_title="Relatório", page_icon="📄", layout="wide")
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor, img_pag_icon
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
-from utils.confeccoes.formatar import mes_por_extenso
+st.set_page_config(page_title="SIGOF", page_icon=img_pag_icon(), layout="wide")
 
 padrao_importacao_pagina() # Está colocado em cima, para que seja carregado mais rápido
 

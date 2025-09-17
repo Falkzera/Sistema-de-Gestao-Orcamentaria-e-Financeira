@@ -1,8 +1,7 @@
 import streamlit as st
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor, img_pag_icon
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
-
-st.set_page_config(page_title="Dashboards", page_icon="📊", layout="wide")
+st.set_page_config(page_title="SIGOF", page_icon=img_pag_icon(), layout="wide")
 
 padrao_importacao_pagina()
 

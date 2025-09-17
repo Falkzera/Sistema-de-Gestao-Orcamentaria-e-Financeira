@@ -1,8 +1,8 @@
 import streamlit as st
 
-st.set_page_config(page_title="Visualizar Processos", page_icon="🔍", layout="wide")
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor, img_pag_icon
+st.set_page_config(page_title="Visualizar Processos", page_icon=img_pag_icon(), layout="wide")
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
 from utils.ui.dataframe import mostrar_tabela
 from utils.auth.auth import carregar_base_por_usuario
 from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes
@@ -12,8 +12,8 @@ from utils.confeccoes.resumos import mostrar_resumos_por_permissao, formatar_val
 
 import streamlit_nested_layout # NÃO PODE SER EXCLUÍDO, CASO CONTRÁRIO OCORRE ERRO DE IMPORTAÇÃO
 
-padrao_importacao_pagina()
 
+padrao_importacao_pagina()
 titulos_pagina("Visualizador de Processos", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder-open"></i>' )
 
 with st.container(): # Carregamento da base PRECISA VER UMA FORMA DE EVITAR O RECARREGAMENTO DA BASE CONSTANTEMENTE!

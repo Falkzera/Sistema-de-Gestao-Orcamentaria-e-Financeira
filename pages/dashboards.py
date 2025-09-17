@@ -1,12 +1,11 @@
 import streamlit as st
 
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor, img_pag_icon
 from utils.confeccoes.dashboards.rgf_dashboard import render_rgf_dashboard
 from utils.confeccoes.dashboards.mdic_comercio_exterior_dashboard import render_mdic_comercio_exterior_dashboard
-
 from utils.confeccoes.dashboards.paines_externos import observatorio_orcamento, preco_combustivel
 
-st.set_page_config(page_title="Dashboards", page_icon="📊", layout="wide")
+st.set_page_config(page_title="SIGOF", page_icon=img_pag_icon(), layout="wide")
 
 padrao_importacao_pagina()
 

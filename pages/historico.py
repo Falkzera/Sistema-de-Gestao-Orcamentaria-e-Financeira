@@ -1,10 +1,10 @@
 import streamlit as st
 
 from src.base import func_load_base_cpof, func_load_base_credito_sop_geo, func_load_base_ted, func_load_base_sop_geral
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor, img_pag_icon
 from src.salvar_historico import exibir_historico
 
-st.set_page_config(page_title="Histórico de Modificações", page_icon="📜", layout="wide")
+st.set_page_config(page_title="SIGOF", page_icon=img_pag_icon(), layout="wide")
 
 padrao_importacao_pagina()
 

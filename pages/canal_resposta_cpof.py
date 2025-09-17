@@ -2,11 +2,11 @@ import streamlit as st
 import numpy as np
 
 from src.base import func_load_base_cpof
-from utils.ui.display import padrao_importacao_pagina, rodape_desenvolvedor
-from utils.ui.display import titulos_pagina
+from utils.ui.display import padrao_importacao_pagina, rodape_desenvolvedor, titulos_pagina, img_pag_icon
 from utils.ui.dataframe import mostrar_tabela
 from src.salvar_alteracoes import salvar_modificacoes_selectbox_mae, inicializar_e_gerenciar_modificacoes
 
+st.set_page_config(page_title="SIGOF", page_icon=img_pag_icon(), layout="wide")
 padrao_importacao_pagina()
 
 titulos_pagina("Canal de Manifestação Técnica", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-edit"></i>')

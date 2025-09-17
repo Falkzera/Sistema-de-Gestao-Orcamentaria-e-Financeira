@@ -1,12 +1,10 @@
-import streamlit as st
-
 import base64
-from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor
+import streamlit as st
+from utils.ui.display import padrao_importacao_pagina, titulos_pagina, rodape_desenvolvedor, img_pag_icon
 from utils.repositorio.funcoes_repositorio import restringir_usuario_externo_base
-
 from utils.repositorio.funcoes_repositorio import processar_download
 
-st.set_page_config(page_title="Repositório de Dados", page_icon="📂", layout="wide")
+st.set_page_config(page_title="SIGOF", page_icon=img_pag_icon(), layout="wide")
 
 padrao_importacao_pagina()
 

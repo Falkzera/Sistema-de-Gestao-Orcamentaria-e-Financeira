@@ -1,12 +1,12 @@
 import streamlit as st
 
 from utils.auth.auth import login
-from utils.ui.display import customizar_sidebar, titulos_pagina, desenvolvido
+from utils.ui.display import customizar_sidebar, titulos_pagina, desenvolvido, img_pag_icon
 
-st.set_page_config(page_title="Sistema de Login", page_icon="🔐", layout="centered")
+st.set_page_config(page_title="SIGOF", page_icon=img_pag_icon(), layout="centered")
 
 customizar_sidebar()
-st.sidebar.image("image/sigof.png")
+st.sidebar.image("assets/image/sigof.png")
 desenvolvido()
 
 

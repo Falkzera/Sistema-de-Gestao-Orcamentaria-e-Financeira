@@ -1,12 +1,10 @@
 import streamlit as st
 
-from utils.ui.display import padrao_importacao_pagina, rodape_desenvolvedor
-from utils.ui.display import titulos_pagina
+from utils.ui.display import padrao_importacao_pagina, rodape_desenvolvedor, img_pag_icon, titulos_pagina
 from utils.auth.auth import carregar_base_por_usuario
 from utils.cadastrar_processos.cadastro import cadastrar_processos_credito_geo, cadastrar_processos_cpof, cadastrar_processos_ted, cadastrar_processos_sop_geral
 
-st.set_page_config(page_title="Cadastrar Processos", page_icon="📂", layout="wide")
-
+st.set_page_config(page_title="SIGOF", page_icon=img_pag_icon(), layout="wide")
 padrao_importacao_pagina()
 
 titulos_pagina("Cadastro de Processos", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-folder"></i>' )

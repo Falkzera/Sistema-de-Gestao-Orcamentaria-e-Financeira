@@ -7,3 +7,5 @@ libxml2
 libxslt1.1
 chromium
 chromium-driver
+locales
+locales-all

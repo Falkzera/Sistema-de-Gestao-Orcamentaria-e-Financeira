@@ -5,3 +5,5 @@ libgdk-pixbuf2.0-0
 libffi-dev
 libxml2
 libxslt1.1
+chromium-browser
+chromium-chromedriver

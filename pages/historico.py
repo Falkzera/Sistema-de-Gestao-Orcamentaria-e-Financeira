@@ -10,32 +10,25 @@ padrao_importacao_pagina()
 
 titulos_pagina("Histórico Processual", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-history"></i>' )
 
-base_opcoes = ["Histórico CPOF", "Histórico Crédito SOP/GEO", "Histórico TED", "Histórico SOP/GERAL"]
+# Obter bases permitidas da sessão (carregadas durante o login)
+bases_permitidas = st.session_state.get("user_bases", [])
 
-historico_map = {
-    "Base CPOF": "Histórico CPOF",
-    "Base Crédito SOP/GEO": "Histórico Crédito SOP/GEO",
-    "Base TED": "Histórico TED",
-    "Base SOP/GERAL": "Histórico SOP/GERAL"
-}
+# Filtrar apenas os históricos das bases permitidas
+historicos_disponiveis = []
+for base in bases_permitidas:
+    if "Histórico" in base:
+        historicos_disponiveis.append(base)
 
-usuario = st.session_state.get("username", None)
-bases_disponiveis = []
-if usuario and "base_access" in st.secrets and usuario in st.secrets["base_access"]:
-    for base in base_opcoes:
-        if base in st.secrets["base_access"][usuario]:
-            bases_disponiveis.append(base)
-
-if not bases_disponiveis:
+if not historicos_disponiveis:
     st.warning("Você não tem acesso a nenhum histórico de processos.")
     st.stop()
 
-if len(bases_disponiveis) == 1:
-    base_escolhida = bases_disponiveis[0]
+if len(historicos_disponiveis) == 1:
+    base_escolhida = historicos_disponiveis[0]
 else:
-    base_escolhida = st.selectbox("Escolha o tipo de histórico:", bases_disponiveis)
+    base_escolhida = st.selectbox("Escolha o tipo de histórico:", historicos_disponiveis)
 
-nome_base = historico_map.get(base_escolhida, base_escolhida)
+nome_base = base_escolhida
 
 if nome_base == "Histórico CPOF":
     df = func_load_base_cpof()

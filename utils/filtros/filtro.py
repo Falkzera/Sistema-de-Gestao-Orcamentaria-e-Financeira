@@ -45,6 +45,19 @@ def filtro_ano_mes(df: pd.DataFrame, exibir_na_tela=True, key_prefix="filtro"):
     return ano, mes, df_filtrado, df_mes_anterior
 
 def filtros_de_busca(df_filtrado):
+    
+    # Verificar se o DataFrame é válido
+    if df_filtrado is None:
+        st.error("❌ Erro: Dados não carregados. Verifique sua conexão e permissões.")
+        return pd.DataFrame()
+    
+    if not isinstance(df_filtrado, pd.DataFrame):
+        st.error("❌ Erro: Formato de dados inválido.")
+        return pd.DataFrame()
+    
+    if df_filtrado.empty:
+        st.warning("⚠️ Nenhum dado disponível para filtrar.")
+        return df_filtrado
 
     if 'palavras_chave' not in st.session_state:
         st.session_state.palavras_chave = [] 

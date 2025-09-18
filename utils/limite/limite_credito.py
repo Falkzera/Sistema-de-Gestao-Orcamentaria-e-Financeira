@@ -3,7 +3,7 @@ import streamlit as st
 from src.base import func_load_base_credito_sop_geo
 
 ORÇAMENTO_APROVADO_2025 = 18544820466.00
-VALOR_DO_LIMITE = ORÇAMENTO_APROVADO_2025 * 0.1
+VALOR_DO_LIMITE = ORÇAMENTO_APROVADO_2025 * 0.15
 
 def calcular_limite_credito_atual():
 
@@ -22,5 +22,4 @@ def calcular_limite_credito_atual():
         "orcamento_aprovado": ORÇAMENTO_APROVADO_2025,
         "percentual_executado_limite": (valor_utilizado / VALOR_DO_LIMITE) * 100,
         "percentual_executado_total": (valor_utilizado / ORÇAMENTO_APROVADO_2025) * 100
-        
     }

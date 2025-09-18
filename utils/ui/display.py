@@ -31,15 +31,16 @@ def exibir_menu_navegacao():
     """
     Exibe o menu de navegação na barra lateral com base nas permissões do usuário.
     """
-    # Mapeamento de páginas com nomes padronizados (iguais ao secrets.toml)
+    # Mapeamento de páginas com nomes que correspondem aos da planilha Google Sheets
     paginas = {
         "repositorio": {"nome_exibicao": "Repositório de Dados", "caminho": "pages/repositorio.py", "icone": ""},
         "canal_resposta_cpof": {"nome_exibicao": "Manifestação Técnica", "caminho": "pages/canal_resposta_cpof.py", "icone": ""},
         "dashboards": {"nome_exibicao": "Dashboards", "caminho": "pages/dashboards.py", "icone": ""},
         "relatorio": {"nome_exibicao": "Relatório", "caminho": "pages/relatorio.py", "icone": ""},
         "historico": {"nome_exibicao": "Histórico", "caminho": "pages/historico.py", "icone": ""},
-        "visualizar_processos": {"nome_exibicao": "Visualizar Processos", "caminho": "pages/visualizar.py", "icone": ""},
-        "cadastrar_processo": {"nome_exibicao": "Cadastrar Processo", "caminho": "pages/cadastro.py", "icone": ""},
+        "visualizar": {"nome_exibicao": "Visualizar Processos", "caminho": "pages/visualizar.py", "icone": ""},
+        "cadastro": {"nome_exibicao": "Cadastrar Processo", "caminho": "pages/cadastro.py", "icone": ""},
+        "manutencao": {"nome_exibicao": "Manutenção", "caminho": "pages/manutencao.py", "icone": "🔧"},
         "home": {"nome_exibicao": "Home", "caminho": "Home.py", "icone": ""},
     }
 
@@ -49,11 +50,13 @@ def exibir_menu_navegacao():
         criar_botao_navegacao("Login", "pages/login.py", "🔐", "primary")
         return
 
-    page_access = st.session_state.get("page_access", [])
+    # Usar user_paginas em vez de page_access (conforme configurado no auth.py)
+    user_paginas = st.session_state.get("user_paginas", [])
+    print(f"🔍 DEBUG - Páginas do usuário: {user_paginas}")
 
     for chave_pagina, info in paginas.items():
         # Permite acesso se a página está na lista de permissões do usuário
-        if chave_pagina in page_access:
+        if chave_pagina in user_paginas:
             criar_botao_navegacao(info["nome_exibicao"], info["caminho"], info["icone"], "primary")
         # Home é sempre acessível para usuários logados
         elif chave_pagina == "home":

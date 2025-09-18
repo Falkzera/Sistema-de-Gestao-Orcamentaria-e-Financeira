@@ -1,5 +1,6 @@
 import streamlit as st
-
+import streamlit as st
+from src.auth_sei import SEILogin
 from utils.auth.auth import login
 from utils.ui.display import customizar_sidebar, titulos_pagina, desenvolvido, img_pag_icon
 
@@ -9,35 +10,78 @@ customizar_sidebar()
 st.sidebar.image("assets/image/sigof.png")
 desenvolvido()
 
-
 st.markdown(
 '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />',
 unsafe_allow_html=True
 )
 
-with st.container(border=True):
+if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+
+BASE_URL = st.secrets["BASE_URL"]
+
+def fazer_login(usuario, senha):
+    """
+    Função que realiza o login do usuário
+    """
+    print(f"🔐 Iniciando processo de login para usuário: {usuario}")
     
-    titulos_pagina("Sistema de Login", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-lock"></i>' )
-
-    username = st.text_input("Usuário")
-    password = st.text_input("Senha", type="password")
-
-    if st.button("CONTINUAR", help="Clique para fazer login", use_container_width=True, type='primary'):
-        page_access = login(username, password)
-
-        if page_access:
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.session_state.page_access = page_access
-
-            st.switch_page("Home.py") 
-
+    try:
+        # Chamar a função de login do auth.py
+        sucesso, mensagem = login(usuario, senha)
+        print(f"📋 Resultado do login: sucesso={sucesso}, mensagem={mensagem}")
+        
+        if sucesso:
+            print(f"✅ Login bem-sucedido para {usuario}")
+            print(f"📋 Dados da sessão:")
+            print(f"   - Username: {st.session_state.get('username', 'N/A')}")
+            print(f"   - CPF: {st.session_state.get('user_cpf', 'N/A')}")
+            print(f"   - Páginas: {st.session_state.get('user_paginas', 'N/A')}")
+            print(f"   - Bases: {st.session_state.get('user_bases', 'N/A')}")
+            return True
         else:
-            st.error("Usuário ou senha incorretos.")
+            print(f"❌ Falha no login: {mensagem}")
+            st.error(mensagem)
+            return False
+            
+    except Exception as e:
+        print(f"❌ Erro durante o processo de login: {str(e)}")
+        st.error(f"Erro interno: {str(e)}")
+        return False
+
+# Se não estiver logado mostra tela de login
+if not st.session_state.logged_in:
     
-    # Construir um botão de outra cor, com o nome "Acesso Externo", onde irá colocar como st.session_state.username, o nome "externo"
-    if st.button("Acesso Externo", help="Clique para acessar como externo", use_container_width=True, type='secondary'):
-        st.session_state.logged_in = True
-        st.session_state.username = "externo"
-        st.session_state.page_access = st.secrets["page_access"]["externo"]
-        st.switch_page("Home.py")
+    with st.form("login_form", border=True):
+        
+        titulos_pagina("Sistema de Login", font_size="1.9em", text_color="#3064AD", icon='<i class="fas fa-lock"></i>' )
+        
+        usuario = st.text_input(
+            "CPF",
+            help="Informe seu CPF cadastrado no sistema"
+        )
+    
+        senha = st.text_input(
+            "Senha",
+            type="password",
+            help="Informe sua senha do sistema SEI"
+        )
+    
+        submitted = st.form_submit_button(
+            "ACESSAR",
+            use_container_width=True,
+            type="primary"
+        )
+
+        if submitted:
+            if usuario and senha:
+                fazer_login(usuario, senha)
+                if st.session_state.logged_in:
+                    st.switch_page("Home.py")
+            else:
+                st.error("⚠️ Por favor, preencha todos os campos!")
+    st.stop()
+
+if st.session_state.logged_in:
+    st.switch_page("Home.py")
+

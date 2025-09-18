@@ -46,6 +46,6 @@ validators==0.34.0
 Unidecode==1.4.0
 python-decouple==3.8
 python-dotenv==1.1.1
-
+num2words
 # Projeto próprio
 siconfipy @ git+https://github.com/pedrocastroo/siconfipy.git@c1b1de8a1c765741261591f7a8c7e3448a77a925

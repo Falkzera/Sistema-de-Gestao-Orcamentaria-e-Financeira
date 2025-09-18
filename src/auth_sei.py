@@ -91,15 +91,37 @@ def get_chrome_version():
                 print("🔧 [DEBUG] winreg não disponível")
                 
         else:
-            # Linux/Cloud (Chromium)
+            # Linux/Cloud (Chromium) - prioriza o caminho específico do Streamlit Cloud
             commands = [
-                ["/usr/bin/chromium", "--version"],
+                ["/usr/bin/chromium", "--version"],  # Caminho específico do Streamlit Cloud
                 ["/usr/bin/chromium-browser", "--version"],
                 ["chromium", "--version"],
                 ["chromium-browser", "--version"],
                 ["google-chrome", "--version"],
                 ["google-chrome-stable", "--version"],
             ]
+            
+            # Estratégia adicional: verifica se existe o binário no caminho específico
+            if os.path.exists("/usr/bin/chromium"):
+                print("🔧 [DEBUG] Chromium encontrado em /usr/bin/chromium (Streamlit Cloud)")
+                try:
+                    # Força detecção no caminho específico do Streamlit Cloud
+                    result = subprocess.run(["/usr/bin/chromium", "--version"], 
+                                          capture_output=True, text=True, timeout=10)
+                    if result.returncode == 0:
+                        version_output = result.stdout.strip()
+                        print(f"🔧 [DEBUG] Versão do Chromium no Cloud: {version_output}")
+                        
+                        # Extrai versão específica para Chromium 120.x
+                        version_match = re.search(r'(\d+)\.(\d+)\.(\d+)\.(\d+)', version_output)
+                        if version_match:
+                            version = version_match.group(0)
+                            major_version = version_match.group(1)
+                            print(f"✅ [DEBUG] Versão Chromium Cloud detectada: {version} (major: {major_version})")
+                            return version, major_version
+                except Exception as e:
+                    print(f"⚠️ [DEBUG] Erro ao detectar Chromium no Cloud: {str(e)}")
+                    pass
         
         # Tenta executar comandos
         for cmd in commands:
@@ -269,20 +291,43 @@ def chrome():
         if not local_env:
             # Configuração específica para Streamlit Cloud
             print("☁️ [DEBUG] Configurando para Streamlit Cloud...")
+            print(f"🔧 [DEBUG] Chromium detectado: versão {chrome_version if chrome_version else 'não detectada'}")
             
-            # Estratégia 1: Tenta versão automática mais recente
+            # Estratégia 1: Força versão específica compatível com Chromium 120
             try:
-                print("🔧 [DEBUG] Tentando versão automática mais recente...")
-                driver_path = ChromeDriverManager().install()
+                if chrome_major and int(chrome_major) >= 120:
+                    # Para Chromium 120+, força versão específica do ChromeDriver
+                    target_version = "120.0.6099.109"  # Versão compatível com Chromium 120
+                    print(f"🔧 [DEBUG] Forçando ChromeDriver versão {target_version} para Chromium {chrome_major}")
+                    driver_path = ChromeDriverManager(version=target_version).install()
+                else:
+                    # Fallback para versão automática se não conseguir detectar
+                    print("🔧 [DEBUG] Usando versão automática como fallback...")
+                    driver_path = ChromeDriverManager().install()
+                
                 service = Service(driver_path)
                 driver = webdriver.Chrome(service=service, options=options)
-                print("✅ [DEBUG] ChromeDriver automático configurado com sucesso!")
+                print("✅ [DEBUG] ChromeDriver específico configurado com sucesso!")
                 return driver
                 
             except Exception as e:
-                print(f"⚠️ [DEBUG] Falha com versão automática: {str(e)}")
+                print(f"⚠️ [DEBUG] Falha com versão específica: {str(e)}")
                 
-                # Estratégia 2: Configuração de emergência
+                # Estratégia 2: Tenta versões conhecidas compatíveis
+                compatible_versions = ["120.0.6099.109", "119.0.6045.105", "118.0.5993.70"]
+                for version in compatible_versions:
+                    try:
+                        print(f"🔧 [DEBUG] Tentando ChromeDriver versão {version}...")
+                        driver_path = ChromeDriverManager(version=version).install()
+                        service = Service(driver_path)
+                        driver = webdriver.Chrome(service=service, options=options)
+                        print(f"✅ [DEBUG] ChromeDriver versão {version} funcionou!")
+                        return driver
+                    except Exception as ve:
+                        print(f"⚠️ [DEBUG] Versão {version} falhou: {str(ve)}")
+                        continue
+                
+                # Estratégia 3: Configuração de emergência
                 print("🆘 [DEBUG] Tentando configuração de emergência...")
                 options.add_argument("--disable-extensions")
                 options.add_argument("--disable-plugins")

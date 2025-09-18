@@ -1,5 +1,7 @@
 import time
 import os
+import subprocess
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -29,6 +31,157 @@ def is_local():
         
     except Exception:
         return False
+
+def get_chrome_version():
+    """
+    Detecta a versão do Chrome/Chromium instalada no sistema
+    """
+    print("🔧 [DEBUG] Detectando versão do Chrome...")
+    
+    try:
+        # Detecta o sistema operacional
+        import platform
+        system = platform.system().lower()
+        print(f"🔧 [DEBUG] Sistema operacional: {system}")
+        
+        commands = []
+        
+        if system == "windows":
+            # Windows - tenta diferentes localizações do Chrome
+            chrome_paths = [
+                r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                r"C:\Users\{}\AppData\Local\Google\Chrome\Application\chrome.exe".format(os.getenv('USERNAME', '')),
+                "chrome.exe"  # Se estiver no PATH
+            ]
+            
+            for path in chrome_paths:
+                 if os.path.exists(path) or path == "chrome.exe":
+                     commands.append([path, "--version"])
+                    
+            # Também tenta via registro do Windows
+            try:
+                import winreg
+                print("🔧 [DEBUG] Tentando detectar via registro do Windows...")
+                
+                # Tenta diferentes chaves do registro
+                registry_paths = [
+                    (winreg.HKEY_CURRENT_USER, r"Software\Google\Chrome\BLBeacon"),
+                    (winreg.HKEY_LOCAL_MACHINE, r"Software\Google\Chrome\BLBeacon"),
+                    (winreg.HKEY_LOCAL_MACHINE, r"Software\Wow6432Node\Google\Chrome\BLBeacon"),
+                ]
+                
+                for hkey, subkey in registry_paths:
+                    try:
+                        with winreg.OpenKey(hkey, subkey) as key:
+                            version, _ = winreg.QueryValueEx(key, "version")
+                            print(f"✅ [DEBUG] Versão encontrada no registro: {version}")
+                            
+                            # Extrai versão major
+                            version_match = re.search(r'(\d+)\.(\d+)\.(\d+)\.(\d+)', version)
+                            if version_match:
+                                major_version = version_match.group(1)
+                                print(f"✅ [DEBUG] Versão detectada via registro: {version} (major: {major_version})")
+                                return version, major_version
+                                
+                    except (FileNotFoundError, OSError, winreg.error):
+                        continue
+                        
+            except ImportError:
+                print("🔧 [DEBUG] winreg não disponível")
+                
+        else:
+            # Linux/Cloud (Chromium)
+            commands = [
+                ["/usr/bin/chromium", "--version"],
+                ["/usr/bin/chromium-browser", "--version"],
+                ["chromium", "--version"],
+                ["chromium-browser", "--version"],
+                ["google-chrome", "--version"],
+                ["google-chrome-stable", "--version"],
+            ]
+        
+        # Tenta executar comandos
+        for cmd in commands:
+            try:
+                print(f"🔧 [DEBUG] Tentando comando: {' '.join(cmd)}")
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                if result.returncode == 0:
+                    version_output = result.stdout.strip()
+                    print(f"🔧 [DEBUG] Saída do comando: {version_output}")
+                    
+                    # Extrai o número da versão usando regex
+                    version_match = re.search(r'(\d+)\.(\d+)\.(\d+)\.(\d+)', version_output)
+                    if version_match:
+                        version = version_match.group(0)
+                        major_version = version_match.group(1)
+                        print(f"✅ [DEBUG] Versão detectada: {version} (major: {major_version})")
+                        return version, major_version
+                        
+            except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError) as e:
+                print(f"🔧 [DEBUG] Comando {cmd[0]} falhou: {str(e)}")
+                continue
+        
+        print("⚠️ [DEBUG] Não foi possível detectar a versão do Chrome")
+        return None, None
+        
+    except Exception as e:
+        print(f"❌ [DEBUG] Erro ao detectar versão do Chrome: {str(e)}")
+        return None, None
+
+def get_compatible_chromedriver_version(chrome_version):
+    """
+    Retorna a versão compatível do ChromeDriver baseada na versão do Chrome
+    """
+    if not chrome_version:
+        return None
+    
+    try:
+        major_version = int(chrome_version.split('.')[0])
+        print(f"🔧 [DEBUG] Versão major do Chrome: {major_version}")
+        
+        # Mapeamento de versões compatíveis (baseado na documentação oficial)
+        version_mapping = {
+            140: "140.0.7339.128",  # Versão mais recente
+            139: "139.0.7302.122",
+            138: "138.0.7262.94",
+            137: "137.0.7225.93",
+            136: "136.0.7188.102",
+            135: "135.0.7151.116",
+            134: "134.0.7114.102",
+            133: "133.0.7077.126",
+            132: "132.0.7040.122",
+            131: "131.0.7003.120",
+            130: "130.0.6966.116",
+            129: "129.0.6929.110",
+            128: "128.0.6892.102",
+            127: "127.0.6855.122",
+            126: "126.0.6818.119",
+            125: "125.0.6781.107",
+            124: "124.0.6744.117",
+            123: "123.0.6707.116",
+            122: "122.0.6670.129",
+            121: "121.0.6633.119",
+            120: "120.0.6099.109",
+            119: "119.0.6045.105", 
+            118: "118.0.5993.70",
+            117: "117.0.5938.92",
+            116: "116.0.5845.96",
+            115: "115.0.5790.102",
+            114: "114.0.5735.90",
+        }
+        
+        compatible_version = version_mapping.get(major_version)
+        if compatible_version:
+            print(f"✅ [DEBUG] Versão compatível do ChromeDriver: {compatible_version}")
+            return compatible_version
+        else:
+            print(f"⚠️ [DEBUG] Versão {major_version} não mapeada, usando automática")
+            return None
+            
+    except Exception as e:
+        print(f"❌ [DEBUG] Erro ao determinar versão compatível: {str(e)}")
+        return None
 
 # def chrome():
 #     """Configura e retorna uma instância do Chrome WebDriver otimizada"""
@@ -89,45 +242,100 @@ def is_local():
 
 def chrome():
     """Configura e retorna uma instância do Chrome WebDriver otimizada"""
-    print("🔧 [DEBUG] Iniciando configuração do Chrome...")
+    print("🚀 [DEBUG] Iniciando configuração do Chrome WebDriver...")
     
+    # Configurações de opções do Chrome
     options = Options()
-    options.add_argument("--headless=new")  # novo headless
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-plugins")
-    options.add_argument("--disable-images")
-    options.add_argument("--disable-background-timer-throttling")
-    options.add_argument("--disable-backgrounding-occluded-windows")
-    options.add_argument("--disable-renderer-backgrounding")
-    options.add_argument("--disable-features=TranslateUI")
-    options.add_argument("--disable-ipc-flooding-protection")
-    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    options.add_argument("--disable-web-security")
+    options.add_argument("--disable-features=VizDisplayCompositor")
+    options.add_argument("--remote-debugging-port=9222")
+    options.add_argument("--window-size=1920,1080")
     
-    # Força uso do Chromium pré-instalado no Cloud
-    options.binary_location = "/usr/bin/chromium"
-
-    print("🔧 [DEBUG] Configurando serviço do ChromeDriver com webdriver-manager...")
+    # Detecta se está no ambiente local ou cloud
+    local_env = is_local()
+    print(f"🔧 [DEBUG] Ambiente detectado: {'Local' if local_env else 'Streamlit Cloud'}")
+    
+    # Detecta versão do Chrome instalada
+    chrome_version, chrome_major = get_chrome_version()
+    compatible_driver_version = get_compatible_chromedriver_version(chrome_version)
+    
+    driver = None
+    
     try:
-        driver_path = ChromeDriverManager().install()
-        print(f"✅ [DEBUG] ChromeDriver encontrado/baixado: {driver_path}")
-        service = Service(driver_path)
+        if not local_env:
+            # Configuração específica para Streamlit Cloud
+            print("☁️ [DEBUG] Configurando para Streamlit Cloud...")
+            
+            # Estratégia 1: Tenta versão automática mais recente
+            try:
+                print("🔧 [DEBUG] Tentando versão automática mais recente...")
+                driver_path = ChromeDriverManager().install()
+                service = Service(driver_path)
+                driver = webdriver.Chrome(service=service, options=options)
+                print("✅ [DEBUG] ChromeDriver automático configurado com sucesso!")
+                return driver
+                
+            except Exception as e:
+                print(f"⚠️ [DEBUG] Falha com versão automática: {str(e)}")
+                
+                # Estratégia 2: Configuração de emergência
+                print("🆘 [DEBUG] Tentando configuração de emergência...")
+                options.add_argument("--disable-extensions")
+                options.add_argument("--disable-plugins")
+                options.add_argument("--disable-images")
+                options.add_argument("--disable-javascript")
+                
+                try:
+                    driver = webdriver.Chrome(options=options)
+                    print("✅ [DEBUG] Configuração de emergência funcionou!")
+                    return driver
+                except Exception as e4:
+                    print(f"❌ [DEBUG] Configuração de emergência falhou: {str(e4)}")
+                    raise e4
+        
+        else:
+            # Configuração para ambiente local
+            print("🏠 [DEBUG] Configurando para ambiente local...")
+            
+            # Estratégia 1: Detecta versão mas usa ChromeDriverManager automático
+            if compatible_driver_version:
+                print(f"🔧 [DEBUG] Versão detectada: {compatible_driver_version}, usando ChromeDriverManager automático...")
+            
+            # Estratégia 2: Tenta usar driver local primeiro
+            if os.path.exists("chromedriver.exe"):
+                try:
+                    print("🔧 [DEBUG] Usando ChromeDriver local...")
+                    service = Service("chromedriver.exe")
+                    driver = webdriver.Chrome(service=service, options=options)
+                    print("✅ [DEBUG] ChromeDriver local configurado com sucesso!")
+                    return driver
+                except Exception as e:
+                    print(f"⚠️ [DEBUG] Falha com driver local: {str(e)}")
+            
+            # Estratégia 3: Usa ChromeDriverManager para ambiente local
+            try:
+                print("🔧 [DEBUG] Baixando ChromeDriver via ChromeDriverManager...")
+                driver_path = ChromeDriverManager().install()
+                service = Service(driver_path)
+                driver = webdriver.Chrome(service=service, options=options)
+                print("✅ [DEBUG] ChromeDriver baixado e configurado com sucesso!")
+                return driver
+            except Exception as e:
+                print(f"❌ [DEBUG] Falha com ChromeDriverManager: {str(e)}")
+                raise e
+                
     except Exception as e:
-        print(f"⚠️ [DEBUG] webdriver-manager falhou: {str(e)}")
-        service = Service("/usr/bin/chromedriver")  # fallback pro driver do sistema
-    
-    print("✅ [DEBUG] Serviço configurado")
-    
-    driver = webdriver.Chrome(service=service, options=options)
-    print("✅ [DEBUG] WebDriver criado com sucesso")
-    
-    driver.set_page_load_timeout(30)
-    driver.implicitly_wait(10)
-    print("✅ [DEBUG] Configurações aplicadas")
-    
-    return driver
+        print(f"❌ [DEBUG] Erro crítico na configuração do Chrome: {str(e)}")
+        if driver:
+            try:
+                driver.quit()
+            except:
+                pass
+        raise e
 
     # except Exception as e:
     #     print(f"❌ [DEBUG] ERRO na configuração do Chrome: {str(e)}")

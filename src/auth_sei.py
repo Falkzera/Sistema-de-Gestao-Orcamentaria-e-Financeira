@@ -30,66 +30,108 @@ def is_local():
     except Exception:
         return False
 
+# def chrome():
+#     """Configura e retorna uma instância do Chrome WebDriver otimizada"""
+#     print("🔧 [DEBUG] Iniciando configuração do Chrome...")
+    
+#     try:
+#         # Configurações do Chrome
+#         print("🔧 [DEBUG] Configurando opções do Chrome...")
+#         options = Options()
+#         options.add_argument("--headless")  # Modo headless ativado
+#         options.add_argument("--no-sandbox")
+#         options.add_argument("--disable-dev-shm-usage")
+#         options.add_argument("--disable-gpu")
+#         options.add_argument("--disable-extensions")
+#         options.add_argument("--disable-plugins")
+#         options.add_argument("--disable-images")
+#         options.add_argument("--disable-background-timer-throttling")
+#         options.add_argument("--disable-backgrounding-occluded-windows")
+#         options.add_argument("--disable-renderer-backgrounding")
+#         options.add_argument("--disable-features=TranslateUI")
+#         options.add_argument("--disable-ipc-flooding-protection")
+#         options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+#         print("✅ [DEBUG] Opções do Chrome configuradas")
+        
+#         # Configuração do serviço usando webdriver-manager
+#         print("🔧 [DEBUG] Configurando serviço do ChromeDriver com webdriver-manager...")
+#         try:
+#             # Usa o webdriver-manager para baixar automaticamente a versão correta
+#             print("🔧 [DEBUG] Baixando/verificando ChromeDriver compatível...")
+#             driver_path = ChromeDriverManager().install()
+#             print(f"✅ [DEBUG] ChromeDriver encontrado/baixado: {driver_path}")
+#             service = Service(driver_path)
+#         except Exception as e:
+#             print(f"⚠️ [DEBUG] Erro com webdriver-manager: {str(e)}")
+#             # Fallback para chromedriver local se existir
+#             chromedriver_path = os.path.join(os.getcwd(), "chromedriver.exe")
+#             if os.path.exists(chromedriver_path):
+#                 print(f"🔧 [DEBUG] Usando ChromeDriver local como fallback: {chromedriver_path}")
+#                 service = Service(chromedriver_path)
+#             else:
+#                 print("⚠️ [DEBUG] Usando serviço padrão como último recurso")
+#                 service = Service()
+        
+#         print("✅ [DEBUG] Serviço configurado")
+        
+#         # Cria o driver
+#         print("🔧 [DEBUG] Criando instância do WebDriver...")
+#         driver = webdriver.Chrome(service=service, options=options)
+#         print("✅ [DEBUG] WebDriver criado com sucesso")
+        
+#         # Configurações adicionais
+#         print("🔧 [DEBUG] Aplicando configurações adicionais...")
+#         driver.set_page_load_timeout(30)
+#         driver.implicitly_wait(10)
+#         print("✅ [DEBUG] Configurações aplicadas")
+        
+#         return driver
+
 def chrome():
     """Configura e retorna uma instância do Chrome WebDriver otimizada"""
     print("🔧 [DEBUG] Iniciando configuração do Chrome...")
     
+    options = Options()
+    options.add_argument("--headless=new")  # novo headless
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-plugins")
+    options.add_argument("--disable-images")
+    options.add_argument("--disable-background-timer-throttling")
+    options.add_argument("--disable-backgrounding-occluded-windows")
+    options.add_argument("--disable-renderer-backgrounding")
+    options.add_argument("--disable-features=TranslateUI")
+    options.add_argument("--disable-ipc-flooding-protection")
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    
+    # Força uso do Chromium pré-instalado no Cloud
+    options.binary_location = "/usr/bin/chromium"
+
+    print("🔧 [DEBUG] Configurando serviço do ChromeDriver com webdriver-manager...")
     try:
-        # Configurações do Chrome
-        print("🔧 [DEBUG] Configurando opções do Chrome...")
-        options = Options()
-        options.add_argument("--headless")  # Modo headless ativado
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--disable-plugins")
-        options.add_argument("--disable-images")
-        options.add_argument("--disable-background-timer-throttling")
-        options.add_argument("--disable-backgrounding-occluded-windows")
-        options.add_argument("--disable-renderer-backgrounding")
-        options.add_argument("--disable-features=TranslateUI")
-        options.add_argument("--disable-ipc-flooding-protection")
-        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-        print("✅ [DEBUG] Opções do Chrome configuradas")
-        
-        # Configuração do serviço usando webdriver-manager
-        print("🔧 [DEBUG] Configurando serviço do ChromeDriver com webdriver-manager...")
-        try:
-            # Usa o webdriver-manager para baixar automaticamente a versão correta
-            print("🔧 [DEBUG] Baixando/verificando ChromeDriver compatível...")
-            driver_path = ChromeDriverManager().install()
-            print(f"✅ [DEBUG] ChromeDriver encontrado/baixado: {driver_path}")
-            service = Service(driver_path)
-        except Exception as e:
-            print(f"⚠️ [DEBUG] Erro com webdriver-manager: {str(e)}")
-            # Fallback para chromedriver local se existir
-            chromedriver_path = os.path.join(os.getcwd(), "chromedriver.exe")
-            if os.path.exists(chromedriver_path):
-                print(f"🔧 [DEBUG] Usando ChromeDriver local como fallback: {chromedriver_path}")
-                service = Service(chromedriver_path)
-            else:
-                print("⚠️ [DEBUG] Usando serviço padrão como último recurso")
-                service = Service()
-        
-        print("✅ [DEBUG] Serviço configurado")
-        
-        # Cria o driver
-        print("🔧 [DEBUG] Criando instância do WebDriver...")
-        driver = webdriver.Chrome(service=service, options=options)
-        print("✅ [DEBUG] WebDriver criado com sucesso")
-        
-        # Configurações adicionais
-        print("🔧 [DEBUG] Aplicando configurações adicionais...")
-        driver.set_page_load_timeout(30)
-        driver.implicitly_wait(10)
-        print("✅ [DEBUG] Configurações aplicadas")
-        
-        return driver
-        
+        driver_path = ChromeDriverManager().install()
+        print(f"✅ [DEBUG] ChromeDriver encontrado/baixado: {driver_path}")
+        service = Service(driver_path)
     except Exception as e:
-        print(f"❌ [DEBUG] ERRO na configuração do Chrome: {str(e)}")
-        raise e
+        print(f"⚠️ [DEBUG] webdriver-manager falhou: {str(e)}")
+        service = Service("/usr/bin/chromedriver")  # fallback pro driver do sistema
+    
+    print("✅ [DEBUG] Serviço configurado")
+    
+    driver = webdriver.Chrome(service=service, options=options)
+    print("✅ [DEBUG] WebDriver criado com sucesso")
+    
+    driver.set_page_load_timeout(30)
+    driver.implicitly_wait(10)
+    print("✅ [DEBUG] Configurações aplicadas")
+    
+    return driver
+
+    # except Exception as e:
+    #     print(f"❌ [DEBUG] ERRO na configuração do Chrome: {str(e)}")
+    #     raise e
 
 class SEILogin:
     def __init__(self, base_url="https://sei.al.gov.br"):
